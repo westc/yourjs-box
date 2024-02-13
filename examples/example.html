@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div style="position: fixed; inset: 0;">
+      <script src="../dist/main.full.js" data-hide-prefix="HIDE" data-divider-orient="vertical">
+        // HIDE: \\
+        // Definition of the sleep function \\
+        async function sleep(msToWait) {
+          return new Promise(resolve => setTimeout(resolve, msToWait));
+        }
+
+        // Try the different logging functions. \\
+        console.log('Paso 1');
+        console.warn(1);
+        console.error(2);
+        console.info(3, new Date());
+        console.debug(4);
+
+        // Call log() once every second for 10 seconds. \\
+        (async() => {
+          const startTime = Date.now();
+          for (let attempt = 0; attempt < 10; attempt++) {
+            await sleep(1e3);
+            const elapsed = Date.now();
+            console.log(`After ${elapsed}ms\u2026`);
+          }
+        })();
+      </script>
+    </div>
+  </body>
+</html>

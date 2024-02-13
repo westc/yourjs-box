@@ -1,0 +1,50 @@
+<div id="vueApp">
+  <div id="main" ref="main" :class="mainElemClassNames" :style="mainElemStyles" @mousedown="onMainElemMouseDown">
+    <div id="displays">
+      <div>
+        <template v-for="display in displays">
+          <div v-if="display.type === 'prism'" @click="this.jsCode = display.value">
+            <div v-if="display.header" class="prism-header">{{ display.header }}</div>
+            <prism language="javascript" :code="display.value" is-dark match-braces></prism>
+          </div>
+          <template v-if="display.type === 'log'">
+            <div :class="display.classNames">
+              <div class="type no-select">{{ display.name }}</div>
+              <div>
+                <js-value v-for="value in display.values" :value="value"></js-value>
+              </div>
+            </div>
+          </template>
+          <template v-if="display.type === 'error'">
+            <div class="error-display">
+              <div><icon name="error"></icon></div>
+              <div>{{ display.message }}</div>
+            </div>
+          </template>
+        </template>
+      </div>
+    </div>
+    <div class="divider" ref="mainDivider"></div>
+    <div id="editor">
+      <ace-editor
+        v-model="jsCode"
+        language="javascript"
+        theme="dark"
+        @key-combo="onEditorKeyCombo"
+        height="100%">
+      </ace-editor>
+    </div>
+  </div>
+  <div id="bottomNav">
+    <div>
+      <span id="logo">JSBox</span>
+    </div>
+    <div class="buttons">
+      <template v-for="bottomButton in bottomButtons">
+        <button @click="bottomButton.callback.call(this, $event)" :title="bottomButton.title" :disabled="bottomButton.disableIf &amp;&amp; bottomButton.disableIf.call(this)">
+          <icon :name="bottomButton.iconName"></icon>
+        </button>
+      </template>
+    </div>
+  </div>
+</div>
