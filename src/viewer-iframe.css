@@ -142,9 +142,18 @@ button:disabled {
 .d-inline-block {
   display: inline-block!important;
 }
+.d-block {
+  display: block!important;
+}
+.d-flex {
+  display: flex!important;
+}
+.d-inline-flex {
+  display: inline-flex!important;
+}
 .error-display {
-  background-color: #F99;
-  box-shadow: inset 0 1px 1px 1px #FFF;
+  background-color: #FCC;
+  box-shadow: inset 0 1px 1px -1px #F00;
   color: #600;
   padding: 0.5em;
   text-wrap: wrap;
@@ -187,10 +196,16 @@ button:disabled {
 }
 .js-value.function {
   color: hsl(300deg, 100%, 25%);
+  font-style: italic;
 }
 .js-value.array-like,
 .js-value.object {
   display: block;
+}
+.js-value .expansion {
+  box-shadow: -0.5em 0 0.25em -0.5em;
+  margin: 0 0 0 -0.875em;
+  padding: 0 0 0 0.5em;
 }
 .log {
   background-color: #EEE;

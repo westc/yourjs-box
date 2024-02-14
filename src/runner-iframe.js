@@ -1,4 +1,52 @@
-function init(jsCode, dataset) {
+const logArgsById = {};
+const OLD_CONSOLE = Object.assign({}, console);
+
+function init() {
+  // Overrides for console functions: log, warn, debug, info
+  for (const [key, value] of Object.entries(console)) {
+    if ('function' === typeof value && /^(debug|error|info|log|warn)$/.test(key)) {
+      console[key] = function() {
+        // Gets a unique logId.
+        let logId = '' + Date.now();
+        for (; logArgsById.hasOwnProperty(logId); logId += '.' + Math.random());
+
+        // Keep track of the args.
+        logArgsById[logId] = Array.prototype.map.call(
+          arguments,
+          value => ({...summarize(value), value})
+        );
+  
+        // Sends the initial log data back to the parent to then relay it back to
+        // the viewer.
+        messageParent({
+          target: 'viewer',
+          func: 'appendLog',
+          args: [{
+            type: 'log',
+            logId,
+            key,
+            descriptions: logArgsById[logId].map(without(['value']))
+          }]
+        });
+  
+        // Calls and returns the original console function.
+        return value.apply(this, arguments);
+      };
+    }
+  }
+
+  addEventListener('error', evt => {
+    messageParent({
+      target: 'viewer',
+      func: 'appendError',
+      args: [{
+        type: 'error',
+        message: evt.error?.stack ?? evt.message ?? evt.error?.message ?? `${evt.error}`,
+        line: evt.lineno,
+        column: evt.colno,
+      }]
+    });
+  });
 }
 
 /**
@@ -84,16 +132,18 @@ function summarize(value) {
     string = '' + value;
   }
   else if (typeName === 'Date') {
-    string = new Intl.DateTimeFormat(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      weekday: 'short',
-      hour: 'numeric',
-      minute: '2-digit',
-      second: '2-digit',
-      fractionalSecondDigits: 3,
-    }).format(value);
+    string = 'Date('
+      + new Intl.DateTimeFormat(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          weekday: 'short',
+          hour: 'numeric',
+          minute: '2-digit',
+          second: '2-digit',
+          fractionalSecondDigits: 3,
+        }).format(value)
+      + ')';
   }
   else if (typeName === 'string') string = value;
   else if (typeName === 'function') string = `ƒ ${value.name}(\u2026)`;
@@ -111,42 +161,101 @@ function summarize(value) {
 function describe(value) {
   const {typeName, string, isPrimitive} = summarize(value);
   const entries = [];
+  const $entries = [];
   const protoEntries = [];
+  const $protoEntries = [];
 
   if (!isPrimitive) {
     // Map
     if (typeName === 'Map') {
       for (const [k, v] of [...value]) {
-        entries.push([summarize(k).string, summarize(v).string]);
+        entries.push([summarize(k).string, summarize(v)]);
+        $entries.push({value: v});
       }
     }
     // other iterable (eg. Int8Array, Set)
-    else if ('function' === typeof value[Symbol.iterator]) {
+    else if (typeName !== 'Array' && 'function' === typeof value[Symbol.iterator]) {
       let index = 0;
       for (const v of value) {
-        entries.push(['' + index, summarize(v).string]);
+        entries.push(['' + index, summarize(v)]);
+        $entries.push({value: v});
         ++index;
       }
     }
     // Array, Object, etc.
     else {
-      for (const [k, v] of Object.entries(value)) {
-        entries.push([k, summarize(v).string]);
+      for (const k of Object.keys(value)) {
+        try {
+          const v = value[k];
+          entries.push([k, summarize(v)]);
+          $entries.push({value: v});
+      } catch(e) {}
       }
     }
 
-    // Add all proto entries.
-    for (const k of Object.getOwnPropertyNames(Object.getPrototypeOf(value))) {
-      const v = value[k];
-      protoEntries.push([k, v]);
-      jsonProtoEntries.push([k, describe(v, true).string]);
-    }
+    // Add all proto entries but do in a try-catch just `value` is `__proto__`
+    // of an object.
+    try {
+      for (const k of Object.getOwnPropertyNames(Object.getPrototypeOf(value))) {
+        const v = value[k];
+        protoEntries.push([k, summarize(v)]);
+        $protoEntries.push({value: v});
+      }
+    } catch(e){}
   }
+
+  return {
+    entries,
+    isPrimitive,
+    protoEntries,
+    string,
+    typeName,
+    $entries,
+    $protoEntries
+  };
 }
 
-function describeForMessaging(value) {
-  const {typeName, string, jsonEntries, jsonProtoEntries, isPrimitive} = describe(value);
-  return {typeName, string, jsonEntries, jsonProtoEntries, isPrimitive};
+// ['123', 0, 'entries', 0]
+// ['123', 0, 'entries', 0]
+// LOGS = {
+//   '123': [
+//     {
+//       value: {a: 4},
+//       $entries: [{value: 4}]
+//     }
+//   ]
+// }
+
+function sendDescriptionFor(path) {
+  // OLD_CONSOLE.log('sendDescriptionFor', {logArgsById, path});
+  // Get the description of the desired value.
+  let level = logArgsById;
+  let pathPartIndex = 0;
+  for (let pathPart of path) {
+    if (pathPartIndex && pathPartIndex % 2 === 0) {
+      pathPart = '$' + pathPart;
+    }
+    level = level[pathPart];
+    pathPartIndex++;
+  }
+  const description = describe(level.value);
+
+  // Change the summary to an actual description at the level found.
+  Object.assign(level, description);
+
+  // Send the description without values back to the viewer.
+  messageParent({
+    target: 'viewer',
+    func: 'updateDescriptionFor',
+    args: [path, without(['$entries', '$protoEntries'], description)],
+  });
+}
+
+function without(props, obj) {
+  if (!obj) return obj => without(props, obj);
+  const ret = {...obj};
+  for (const prop of props) delete ret[prop];
+  return ret;
 }
 
 /**
@@ -165,28 +274,4 @@ function runCode(jsCode) {
       },
     })
   );
-}
-
-// Overrides for console functions: log, warn, debug, info
-const logArgsById = {};
-for (const [key, value] of Object.entries(console)) {
-  if ('function' === typeof value && /^(debug|error|info|log|warn)$/.test(key)) {
-    console[key] = function() {
-      // Gets a unique logId.
-      let logId = '' + Date.now();
-      for (; logArgsById.hasOwnProperty(logId); logId += Math.random());
-
-      // Sends the initial log data back to the parent to then relay it back to
-      // the viewer.
-      messageParent({
-        action: 'log',
-        logId,
-        type: key,
-        args: Array.prototype.map.call(arguments, summarize)
-      });
-
-      // Calls and returns the original console function.
-      return value.apply(this, arguments);
-    };
-  }
 }

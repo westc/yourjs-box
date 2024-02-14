@@ -85,18 +85,7 @@ function init(jsCode, dataset) {
           // Clear the editor's code.
           this.jsCode = jsCodeGroups.slice(1).map(g => g.allLines).join('\n');
 
-          // Run the code by adding it to a new script tag.
-          document.head.appendChild(
-            Object.assign(document.createElement('script'), {
-              src: url,
-              onload() {
-                URL.revokeObjectURL(url);
-                document.head.removeChild(this);
-              },
-            })
-          );
-
-          messageParent({action: 'runCode', args: [jsCodeGroup0.lines]});
+          messageParent({target: 'runner', func: 'runCode', args: [jsCodeGroup0.lines]});
         },
         getEditorPct(evt) {    
           const rect = this.$refs.main.getBoundingClientRect();
@@ -144,21 +133,6 @@ function init(jsCode, dataset) {
         addEventListener('mousemove', this.onWindowMouseMove);
         addEventListener('mouseup', this.onWindowMouseUp);
         addEventListener('error', this.onWindowError);
-
-        const vueApp = this;
-        for (const [key, value] of Object.entries(console)) {
-          if ('function' === typeof value) {
-            console[key] = function() {
-              vueApp.displays.push({
-                type: 'log',
-                classNames: ['log', key],
-                name: `console.${key}`,
-                values: [...arguments],
-              });
-              return value.apply(this, arguments);
-            };
-          }
-        }
       }
     })
     .component('ace-editor', getAceComponentProps())
@@ -378,7 +352,7 @@ function getIconComponentProps() {
 
 function getJSValueComponentProps() {
   return {
-    props: ['value'],
+    props: ['description', 'path'],
     data() {
       return {
         isExpanded: false,
@@ -393,90 +367,76 @@ function getJSValueComponentProps() {
       }
     },
     computed: {
-      type() {
-        const {value} = this;
-        if (value === null) return 'null';
-        const typeName = typeof value;
-        if (typeName === 'object') {
-          const typeName2 = Object.prototype.toString.call(value).slice(8, -1);
-          return typeName2 !== 'Date'
-            ? (value[Symbol.iterator] && 'number' === typeof value.length)
-              ? 'array-like'
-              : typeName2 === 'Promise'
-                ? 'promise'
-                : typeName
-            : 'date';
-        }
-        return typeName;
+      isPartialDescription() {
+        return this.description.entries === undefined;
+      },
+      isExpandable() {
+        return !this.description.isPrimitive;
       },
       isMultiline() {
-        const {type} = this;
-        return type === 'function'
-          || type === 'array-like'
-          || type === 'object'
-          || (type === 'string' && /[\r\n]/.test(this.value));
+        const {isPrimitive, string, typeName} = this.description;
+        return !isPrimitive
+          || (typeName === 'string' && /[\r\n]/.test(string));
       },
-      string() {
-        const {value, type} = this;
-        if (type === 'date') {
-          return new Intl.DateTimeFormat(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            weekday: 'short',
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric',
-            fractionalSecondDigits: 3,
-            timeZoneName: 'long'
-          }).format(value);
+      classNames() {
+        const {isPrimitive, string, typeName} = this.description;
+        const isBlockElem = (!isPrimitive && this.isExpanded)
+          || (typeName === 'string' && /[\r\n]/.test(string));
+        return [
+          'js-value',
+          typeName,
+          isBlockElem ? 'd-flex' : 'd-inline-flex'
+        ];
+      },
+      arrowClassNames() {
+        const classNames = ['d-inline-block'];
+        if (this.isExpanded) classNames.push('rotated-90deg');
+        return classNames;
+      },
+      entryGroups() {
+        return [
+          { key: 'entries', label: '[[Prototype]]', },
+          { key: 'protoEntries' },
+        ];
+      }
+    },
+    methods: {
+      toggleExpanded() {
+        this.isExpanded = !this.isExpanded;
+        if (this.isExpanded && this.isPartialDescription) {
+          messageParent({target: 'runner', func: 'sendDescriptionFor', args: [this.path]});
         }
-        return value?.toString() ?? `${value}`;
       }
     },
     template: `
-      <div v-if="isMultiline">
-        <div v-if="type === 'function'" class="js-value function">{{ string }}</div>
-        <div v-if="type === 'array-like'" class="js-value array-like">
-          <span @click="isExpanded = !isExpanded" :class="'d-inline-block ' + (isExpanded ? 'rotated-90deg' : '')">
+      <div :class="classNames">
+        <div>
+          <span v-if="isExpandable" @click="toggleExpanded" :class="arrowClassNames">
             <icon name="play"></icon>
           </span>
-          <template v-if="Array.isArray(value)">Array({{ value.length }})</template>
-          <template v-if="!Array.isArray(value)">Iterable({{ value.length }})</template>
-          <table v-if="hasBeenExpanded" v-show="isExpanded">
-            <tr v-for="(item, index) in value">
-              <td class="align-top">{{ index }}</td>
-              <td><js-value :value="item"></js-value></td>
-            </tr>
-          </table>
         </div>
-        <div v-if="type === 'object'" class="js-value object">
-          <span @click="isExpanded = !isExpanded" :class="'d-inline-block ' + (isExpanded ? 'rotated-90deg' : '')">
-            <icon name="play"></icon>
-          </span>
-          <template v-if="true">Object({{ Object.keys(value).length }})</template>
-          <table v-if="hasBeenExpanded" v-show="isExpanded">
-            <tr v-for="keyValue in Object.entries(value)">
-              <td class="align-top">{{ keyValue[0] }}</td>
-              <td><js-value :value="keyValue[1]"></js-value></td>
-            </tr>
-          </table>
+        <div style="flex-grow: 1; padding-left: 0.5em;">
+          <div>{{ description.string }}</div>
+          <div v-if="hasBeenExpanded" v-show="isExpanded" class="expansion">
+            <div v-if="isPartialDescription">Loading&hellip;</div>
+            <template v-else>
+              <template v-for="group in entryGroups">
+                <div v-for="(entry, entryIndex) in description[group.key]" style="display: flex;">
+                  <div>{{ entry[0] }}</div>
+                  <div style="flex-grow: 1;">
+                    <js-value
+                      :description="entry[1]"
+                      :path="path.concat([group.key, entryIndex])">
+                    </js-value>
+                  </div>
+                </div>
+              </template>
+            </template>
+          </div>
         </div>
-        <div v-if="type === 'string'" class="js-value string">{{ string }}</div>
       </div>
-      <template v-else>
-        <div v-if="type === 'bigint'" class="js-value bigint">{{ string }}</div>
-        <div v-if="type === 'boolean'" class="js-value boolean">{{ string }}</div>
-        <div v-if="type === 'date'" class="js-value date">{{ string }}</div>
-        <div v-if="type === 'null'" class="js-value null">{{ string }}</div>
-        <div v-if="type === 'number'" class="js-value number">{{ string }}</div>
-        <div v-if="type === 'promise'" class="js-value promise">{{ string }}</div>
-        <div v-if="type === 'string'" class="js-value string">{{ string }}</div>
-        <div v-if="type === 'symbol'" class="js-value symbol">{{ string }}</div>
-        <div v-if="type === 'undefined'" class="js-value undefined">{{ string }}</div>
-      </template>
     `
-  }
+  };
 }
 
 /**
@@ -560,4 +520,62 @@ function unindentMin(text, opt_options) {
     );
   }
   return trim ? text.replace(/^(\s*[\r\n]+)+|\s+$/g, '') : text;
+}
+
+/**
+ * NOTE:  Called via main by the runner.
+ * @param {object} options
+ * @param {string} options.type
+ * @param {string} options.logId
+ * @param {string} options.key
+ * @param {any[][]} options.descriptions
+ */
+function appendLog({type, logId, key, descriptions}) {
+  mountedApp.displays.push({
+    type,
+    classNames: ['log', key],
+    name: `console.${key}`,
+    descriptions,
+    logId,
+  });
+}
+
+/**
+ * NOTE:  Called via main by the runner.
+ * @param {object} options
+ * @param {string} options.type
+ * @param {string} options.message
+ * @param {number} options.line
+ * @param {number} options.column
+ */
+function appendError({type, message, line, column}) {
+  mountedApp.displays.push({
+    type,
+    message,
+    line,
+    column,
+  });
+}
+
+async function updateDescriptionFor(path, description) {
+  const logId = path.shift();
+  const display = mountedApp.displays.find(d => d.logId === logId);
+  const foundDescr = display.descriptions[path.shift()];
+
+  let level = foundDescr;
+  let pathPartIndex = 0;
+  for (const pathPart of path) {
+    level = level[pathPart];
+    if (pathPartIndex % 2) level = level[1];
+    pathPartIndex++;
+  }
+
+  // console.log('updateDescriptionFor', {
+  //   path,
+  //   description,
+  //   display: JSON.parse(JSON.stringify(display)),
+  //   foundDescr: JSON.parse(JSON.stringify(foundDescr)),
+  //   level: JSON.parse(JSON.stringify(level)),
+  // });
+  Object.assign(level, description);
 }

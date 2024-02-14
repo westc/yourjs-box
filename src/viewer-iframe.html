@@ -11,7 +11,11 @@
             <div :class="display.classNames">
               <div class="type no-select">{{ display.name }}</div>
               <div>
-                <js-value v-for="value in display.values" :value="value"></js-value>
+                <js-value
+                  v-for="(description, index) in display.descriptions"
+                  :description="description"
+                  :path="[display.logId, index]">
+                </js-value>
               </div>
             </div>
           </template>

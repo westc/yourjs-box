@@ -3,12 +3,12 @@
    * Viewer IFRAME's CSS code
    * @type {string}
    */
-  const VIEWER_IFRAME_CSS = "@import url(https://fonts.googleapis.com/css2?family=Raleway:wght@100;400;700;900&display=swap);[v-cloak]{display:none}#vueApp{display:flex;flex-direction:column;font-family:Raleway,sans-serif;inset:0;position:fixed}#main{flex-grow:1;display:grid;gap:0;position:relative}#main.col-orient.is-moving-divider{cursor:col-resize}#main.row-orient.is-moving-divider{cursor:row-resize}#main.is-moving-divider::after{display:block;content:'';position:absolute;background-image:repeating-linear-gradient(45deg,hsl(0deg,100%,50%,75%),hsl(60deg,100%,50%,75%),hsl(120deg,100%,50%,75%),hsl(180deg,100%,50%,75%),hsl(240deg,100%,50%,75%),hsl(300deg,100%,50%,75%),hsl(360deg,100%,50%,75%) 100px);box-shadow:inset 0 0 0 1px #fff;z-index:99}#main.col-orient.is-moving-divider::after{width:var(--divider-size);left:calc(100% - var(--temp-editor-pct) - var(--divider-size) + var(--divider-size)/ 2);top:0;bottom:0}#main.row-orient.is-moving-divider::after{height:var(--divider-size);top:calc(100% - var(--temp-editor-pct) - var(--divider-size) + var(--divider-size)/ 2);left:0;right:0}#main.col-orient{grid-template-columns:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2);grid-template-rows:1fr}#main.row-orient{grid-template-columns:1fr;grid-template-rows:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2)}#main.col-orient .divider{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.2),rgba(0,0,0,0),rgba(255,255,255,.2) 10px),linear-gradient(90deg,#ccc,#000,#000,#ccc);cursor:col-resize}#main.row-orient .divider{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.2),rgba(0,0,0,0),rgba(255,255,255,.2) 10px),linear-gradient(0deg,#ccc,#000,#000,#ccc);cursor:row-resize}#displays{position:relative}#displays>div{position:absolute;inset:0;overflow:auto}#bottomNav{flex-grow:0;display:flex;flex-direction:row;background-image:linear-gradient(to bottom,hsl(55deg,100%,60%),hsl(55deg,100%,50%) 50%,hsl(50deg,100%,50%) 50%,hsl(55deg,100%,45%));align-items:center;-webkit-user-select:none;user-select:none}#bottomNav>:first-child{flex-grow:1;padding:0 .5em}#bottomNav>.buttons{flex-grow:0}#bottomNav>.buttons>button{border:0!important;background-color:rgba(255,255,255,.2);box-shadow:-.1em 0 .1em -.1em #000,.1em 0 .1em -.1em #000;padding:0 .5em}button{cursor:pointer}button:disabled{cursor:not-allowed}#bottomNav>.buttons>button.active,#bottomNav>.buttons>button:hover{background-color:rgba(0,0,0,.2)}#logo{font-size:1.2em;font-weight:900;filter:drop-shadow(0 0 1px #FFF) drop-shadow(0 0 1px #FFF) drop-shadow(0 0 1px #FFF) drop-shadow(0 0 1px #FFF) drop-shadow(0 0 1px #000)}.rotated-90deg{transform:rotate(90deg)}.align-top{vertical-align:top!important}.d-inline-block{display:inline-block!important}.error-display{background-color:#f99;box-shadow:inset 0 1px 1px 1px #fff;color:#600;padding:.5em;text-wrap:wrap;white-space-collapse:preserve;display:flex;flex-direction:row;font-family:'Courier New',Courier,monospace;font-size:.9em}.error-display>:last-child{flex-grow:1;margin-left:.25em}.js-value{display:inline;margin-right:.75em;text-wrap:wrap;white-space-collapse:preserve}.js-value.promise{color:hsl(30deg,100%,25%)}.js-value.string{color:hsl(60deg,100%,25%)}.js-value.number{color:hsl(120deg,100%,25%)}.js-value.bigint{color:hsl(180deg,100%,25%)}.js-value.symbol{color:hsl(210deg,100%,25%)}.js-value.boolean{color:hsl(240deg,100%,25%)}.js-value.date{color:hsl(270deg,100%,25%)}.js-value.function{color:hsl(300deg,100%,25%)}.js-value.array-like,.js-value.object{display:block}.log{background-color:#eee;font-family:'Courier New',Courier,monospace;font-size:.9em;padding:.125em .25em}.log.warn{background-color:#ff9;color:#660}.log.error{background-color:#fdd;color:#600}.log.info{background-color:#def;color:#006}.log.debug{background-color:#dff;color:#006}.log>.type{box-shadow:0 .5em .5em -.5em;color:#0009;font-size:.8em;margin:0 0 .5em;background-image:linear-gradient(90deg,#0000,#0002 80%,#0001);text-align:left}.no-select{-webkit-user-select:none;user-select:none}.prism-header{background-image:linear-gradient(0deg,#0008,#2228 80%,#1118),linear-gradient(90deg,#000,#222 80%,#111);color:#eee;font-size:.8em;padding:.2em .5em;text-align:left;text-wrap:wrap;white-space-collapse:preserve}";
+  const VIEWER_IFRAME_CSS = "@import url(https://fonts.googleapis.com/css2?family=Raleway:wght@100;400;700;900&display=swap);[v-cloak]{display:none}#vueApp{display:flex;flex-direction:column;font-family:Raleway,sans-serif;inset:0;position:fixed}#main{flex-grow:1;display:grid;gap:0;position:relative}#main.col-orient.is-moving-divider{cursor:col-resize}#main.row-orient.is-moving-divider{cursor:row-resize}#main.is-moving-divider::after{display:block;content:'';position:absolute;background-image:repeating-linear-gradient(45deg,hsl(0deg,100%,50%,75%),hsl(60deg,100%,50%,75%),hsl(120deg,100%,50%,75%),hsl(180deg,100%,50%,75%),hsl(240deg,100%,50%,75%),hsl(300deg,100%,50%,75%),hsl(360deg,100%,50%,75%) 100px);box-shadow:inset 0 0 0 1px #fff;z-index:99}#main.col-orient.is-moving-divider::after{width:var(--divider-size);left:calc(100% - var(--temp-editor-pct) - var(--divider-size) + var(--divider-size)/ 2);top:0;bottom:0}#main.row-orient.is-moving-divider::after{height:var(--divider-size);top:calc(100% - var(--temp-editor-pct) - var(--divider-size) + var(--divider-size)/ 2);left:0;right:0}#main.col-orient{grid-template-columns:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2);grid-template-rows:1fr}#main.row-orient{grid-template-columns:1fr;grid-template-rows:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2)}#main.col-orient .divider{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.2),rgba(0,0,0,0),rgba(255,255,255,.2) 10px),linear-gradient(90deg,#ccc,#000,#000,#ccc);cursor:col-resize}#main.row-orient .divider{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.2),rgba(0,0,0,0),rgba(255,255,255,.2) 10px),linear-gradient(0deg,#ccc,#000,#000,#ccc);cursor:row-resize}#displays{position:relative}#displays>div{position:absolute;inset:0;overflow:auto}#bottomNav{flex-grow:0;display:flex;flex-direction:row;background-image:linear-gradient(to bottom,hsl(55deg,100%,60%),hsl(55deg,100%,50%) 50%,hsl(50deg,100%,50%) 50%,hsl(55deg,100%,45%));align-items:center;-webkit-user-select:none;user-select:none}#bottomNav>:first-child{flex-grow:1;padding:0 .5em}#bottomNav>.buttons{flex-grow:0}#bottomNav>.buttons>button{border:0!important;background-color:rgba(255,255,255,.2);box-shadow:-.1em 0 .1em -.1em #000,.1em 0 .1em -.1em #000;padding:0 .5em}button{cursor:pointer}button:disabled{cursor:not-allowed}#bottomNav>.buttons>button.active,#bottomNav>.buttons>button:hover{background-color:rgba(0,0,0,.2)}#logo{font-size:1.2em;font-weight:900;filter:drop-shadow(0 0 1px #FFF) drop-shadow(0 0 1px #FFF) drop-shadow(0 0 1px #FFF) drop-shadow(0 0 1px #FFF) drop-shadow(0 0 1px #000)}.rotated-90deg{transform:rotate(90deg)}.align-top{vertical-align:top!important}.d-inline-block{display:inline-block!important}.d-block{display:block!important}.d-flex{display:flex!important}.d-inline-flex{display:inline-flex!important}.error-display{background-color:#fcc;box-shadow:inset 0 1px 1px -1px red;color:#600;padding:.5em;text-wrap:wrap;white-space-collapse:preserve;display:flex;flex-direction:row;font-family:'Courier New',Courier,monospace;font-size:.9em}.error-display>:last-child{flex-grow:1;margin-left:.25em}.js-value{display:inline;margin-right:.75em;text-wrap:wrap;white-space-collapse:preserve}.js-value.promise{color:hsl(30deg,100%,25%)}.js-value.string{color:hsl(60deg,100%,25%)}.js-value.number{color:hsl(120deg,100%,25%)}.js-value.bigint{color:hsl(180deg,100%,25%)}.js-value.symbol{color:hsl(210deg,100%,25%)}.js-value.boolean{color:hsl(240deg,100%,25%)}.js-value.date{color:hsl(270deg,100%,25%)}.js-value.function{color:hsl(300deg,100%,25%);font-style:italic}.js-value.array-like,.js-value.object{display:block}.js-value .expansion{box-shadow:-.5em 0 .25em -.5em;margin:0 0 0 -.875em;padding:0 0 0 .5em}.log{background-color:#eee;font-family:'Courier New',Courier,monospace;font-size:.9em;padding:.125em .25em}.log.warn{background-color:#ff9;color:#660}.log.error{background-color:#fdd;color:#600}.log.info{background-color:#def;color:#006}.log.debug{background-color:#dff;color:#006}.log>.type{box-shadow:0 .5em .5em -.5em;color:#0009;font-size:.8em;margin:0 0 .5em;background-image:linear-gradient(90deg,#0000,#0002 80%,#0001);text-align:left}.no-select{-webkit-user-select:none;user-select:none}.prism-header{background-image:linear-gradient(0deg,#0008,#2228 80%,#1118),linear-gradient(90deg,#000,#222 80%,#111);color:#eee;font-size:.8em;padding:.2em .5em;text-align:left;text-wrap:wrap;white-space-collapse:preserve}";
   /**
    * Viewer IFRAME's HTML code
    * @type {string}
    */
-  const VIEWER_IFRAME_HTML = "<div id=\"vueApp\"><div id=\"main\" ref=\"main\" :class=\"mainElemClassNames\" :style=\"mainElemStyles\" @mousedown=\"onMainElemMouseDown\"><div id=\"displays\"><div><template v-for=\"display in displays\"><div v-if=\"display.type === 'prism'\" @click=\"this.jsCode = display.value\"><div v-if=\"display.header\" class=\"prism-header\">{{ display.header }}</div><prism language=\"javascript\" :code=\"display.value\" is-dark match-braces></prism></div><template v-if=\"display.type === 'log'\"><div :class=\"display.classNames\"><div class=\"type no-select\">{{ display.name }}</div><div><js-value v-for=\"value in display.values\" :value=\"value\"></js-value></div></div></template><template v-if=\"display.type === 'error'\"><div class=\"error-display\"><div><icon name=\"error\"></icon></div><div>{{ display.message }}</div></div></template></template></div></div><div class=\"divider\" ref=\"mainDivider\"></div><div id=\"editor\"><ace-editor v-model=\"jsCode\" language=\"javascript\" theme=\"dark\" @key-combo=\"onEditorKeyCombo\" height=\"100%\"></ace-editor></div></div><div id=\"bottomNav\"><div><span id=\"logo\">JSBox</span></div><div class=\"buttons\"><template v-for=\"bottomButton in bottomButtons\"><button @click=\"bottomButton.callback.call(this, $event)\" :title=\"bottomButton.title\" :disabled=\"bottomButton.disableIf &amp;&amp; bottomButton.disableIf.call(this)\"><icon :name=\"bottomButton.iconName\"></icon></button></template></div></div></div>";
+  const VIEWER_IFRAME_HTML = "<div id=\"vueApp\"><div id=\"main\" ref=\"main\" :class=\"mainElemClassNames\" :style=\"mainElemStyles\" @mousedown=\"onMainElemMouseDown\"><div id=\"displays\"><div><template v-for=\"display in displays\"><div v-if=\"display.type === 'prism'\" @click=\"this.jsCode = display.value\"><div v-if=\"display.header\" class=\"prism-header\">{{ display.header }}</div><prism language=\"javascript\" :code=\"display.value\" is-dark match-braces></prism></div><template v-if=\"display.type === 'log'\"><div :class=\"display.classNames\"><div class=\"type no-select\">{{ display.name }}</div><div><js-value v-for=\"(description, index) in display.descriptions\" :description=\"description\" :path=\"[display.logId, index]\"></js-value></div></div></template><template v-if=\"display.type === 'error'\"><div class=\"error-display\"><div><icon name=\"error\"></icon></div><div>{{ display.message }}</div></div></template></template></div></div><div class=\"divider\" ref=\"mainDivider\"></div><div id=\"editor\"><ace-editor v-model=\"jsCode\" language=\"javascript\" theme=\"dark\" @key-combo=\"onEditorKeyCombo\" height=\"100%\"></ace-editor></div></div><div id=\"bottomNav\"><div><span id=\"logo\">JSBox</span></div><div class=\"buttons\"><template v-for=\"bottomButton in bottomButtons\"><button @click=\"bottomButton.callback.call(this, $event)\" :title=\"bottomButton.title\" :disabled=\"bottomButton.disableIf &amp;&amp; bottomButton.disableIf.call(this)\"><icon :name=\"bottomButton.iconName\"></icon></button></template></div></div></div>";
   /**
    * Indicates if you can use a blob.  This will be false if testing in local
    * file system.
@@ -34,7 +34,55 @@
 
     const callableRunnerFrame = createCallableFrame({
       jsCode() {
-        function init(jsCode, dataset) {
+        const logArgsById = {};
+        const OLD_CONSOLE = Object.assign({}, console);
+        
+        function init() {
+          // Overrides for console functions: log, warn, debug, info
+          for (const [key, value] of Object.entries(console)) {
+            if ('function' === typeof value && /^(debug|error|info|log|warn)$/.test(key)) {
+              console[key] = function() {
+                // Gets a unique logId.
+                let logId = '' + Date.now();
+                for (; logArgsById.hasOwnProperty(logId); logId += '.' + Math.random());
+        
+                // Keep track of the args.
+                logArgsById[logId] = Array.prototype.map.call(
+                  arguments,
+                  value => ({...summarize(value), value})
+                );
+          
+                // Sends the initial log data back to the parent to then relay it back to
+                // the viewer.
+                messageParent({
+                  target: 'viewer',
+                  func: 'appendLog',
+                  args: [{
+                    type: 'log',
+                    logId,
+                    key,
+                    descriptions: logArgsById[logId].map(without(['value']))
+                  }]
+                });
+          
+                // Calls and returns the original console function.
+                return value.apply(this, arguments);
+              };
+            }
+          }
+        
+          addEventListener('error', evt => {
+            messageParent({
+              target: 'viewer',
+              func: 'appendError',
+              args: [{
+                type: 'error',
+                message: evt.error?.stack ?? evt.message ?? evt.error?.message ?? `${evt.error}`,
+                line: evt.lineno,
+                column: evt.colno,
+              }]
+            });
+          });
         }
         
         /**
@@ -107,104 +155,6 @@
         }
         
         /**
-         * Describes any value so that in part it can be sent to another frame.
-         */
-        function describe(value, summarize=false) {
-          const typeName = getTypeName(value);
-          const isPrimitive = typeName === typeName.toLowerCase();
-          /** @type {[*,*][]=} */
-          let protoEntries;
-          /** @type {[string,*][]=} */
-          let entries;
-          /** @type {[*,*][]=} */
-          let jsonProtoEntries;
-          /** @type {[string,*][]=} */
-          let jsonEntries;
-          /** @type {string} */
-          let string;
-        
-          // symbol
-          if (typeName === 'symbol') {
-            string = value.toString();
-          }
-          // bigint, boolean or number
-          else if (typeName === 'bigint' || typeName === 'boolean' || typeName === 'number' || typeName === 'Date' || typeName === 'RegExp') {
-            string = `${typeName}(${value})`;
-          }
-          // string
-          else if (typeName === 'string') {
-            string = (summarize ? '' : `string(${value.length}) `)
-              + JSON.stringify(value).replace(/"([^]{14})[^]+([^]{14})"/, '"$1\u2026$2"');
-          }
-          // function
-          else if (typeName === 'function') {
-            string = `ƒ ${value.name}(\u2026)`;
-          }
-        
-          // Iterable or object
-          if (!isPrimitive && !summarize) {
-            protoEntries = [];
-            entries = [];
-            jsonProtoEntries = [];
-            jsonEntries = [];
-            // map or weakmap
-            if (typeName === 'Map' || typeName === 'WeakMap') {
-              for (const entry of Object.entries(value)) {
-                protoEntries.push(entry);
-                jsonProtoEntries.push([
-                  describe(entry[0], true).string,
-                  describe(entry[1], true).string
-                ]);
-              }
-            }
-            // set or weakset
-            else if (/^(?:Weak)?(?:Set)$/.test(typeName)) {
-              let index = 0;
-              for (const v of value) {
-                entries.push([index, v]);
-                jsonEntries.push([index, describe(v, true).string]);
-                index++;
-              }
-            }
-            // Other object
-            else {
-              string ??= typeName;
-            }
-            string ??= `${typeName}(${value.size ?? value.length})`;
-        
-            // Add all proto entries.
-            for (const k of Object.getOwnPropertyNames(Object.getPrototypeOf(value))) {
-              const v = value[k];
-              protoEntries.push([k, v]);
-              jsonProtoEntries.push([k, describe(v, true).string]);
-            }
-        
-            // Add any remaining normal entries.
-            for (const k of Object.keys(value)) {
-              const v = value[k];
-              entries.push([k, v]);
-              jsonEntries.push([k, describe(v, true).string]);
-            }
-          }
-          // null or undefined
-          else if (!string) {
-            string = '' + value;
-          }
-        
-          return {
-            typeName,
-            string,
-            value,
-            entries,
-            protoEntries,
-            jsonEntries,
-            jsonProtoEntries,
-            isPrimitive
-          };
-        }
-        
-        /**
-         * 
          * @param {*} value 
          * @returns {{typeName: string, string: string, isPrimitive: boolean}}
          */
@@ -218,16 +168,18 @@
             string = '' + value;
           }
           else if (typeName === 'Date') {
-            string = new Intl.DateTimeFormat(undefined, {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              weekday: 'short',
-              hour: 'numeric',
-              minute: '2-digit',
-              second: '2-digit',
-              fractionalSecondDigits: 3,
-            }).format(value);
+            string = 'Date('
+              + new Intl.DateTimeFormat(undefined, {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                  weekday: 'short',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  fractionalSecondDigits: 3,
+                }).format(value)
+              + ')';
           }
           else if (typeName === 'string') string = value;
           else if (typeName === 'function') string = `ƒ ${value.name}(\u2026)`;
@@ -242,9 +194,104 @@
           return {typeName, string, isPrimitive};
         }
         
-        function describeForMessaging(value) {
-          const {typeName, string, jsonEntries, jsonProtoEntries, isPrimitive} = describe(value);
-          return {typeName, string, jsonEntries, jsonProtoEntries, isPrimitive};
+        function describe(value) {
+          const {typeName, string, isPrimitive} = summarize(value);
+          const entries = [];
+          const $entries = [];
+          const protoEntries = [];
+          const $protoEntries = [];
+        
+          if (!isPrimitive) {
+            // Map
+            if (typeName === 'Map') {
+              for (const [k, v] of [...value]) {
+                entries.push([summarize(k).string, summarize(v)]);
+                $entries.push({value: v});
+              }
+            }
+            // other iterable (eg. Int8Array, Set)
+            else if (typeName !== 'Array' && 'function' === typeof value[Symbol.iterator]) {
+              let index = 0;
+              for (const v of value) {
+                entries.push(['' + index, summarize(v)]);
+                $entries.push({value: v});
+                ++index;
+              }
+            }
+            // Array, Object, etc.
+            else {
+              for (const k of Object.keys(value)) {
+                try {
+                  const v = value[k];
+                  entries.push([k, summarize(v)]);
+                  $entries.push({value: v});
+              } catch(e) {}
+              }
+            }
+        
+            // Add all proto entries but do in a try-catch just `value` is `__proto__`
+            // of an object.
+            try {
+              for (const k of Object.getOwnPropertyNames(Object.getPrototypeOf(value))) {
+                const v = value[k];
+                protoEntries.push([k, summarize(v)]);
+                $protoEntries.push({value: v});
+              }
+            } catch(e){}
+          }
+        
+          return {
+            entries,
+            isPrimitive,
+            protoEntries,
+            string,
+            typeName,
+            $entries,
+            $protoEntries
+          };
+        }
+        
+        // ['123', 0, 'entries', 0]
+        // ['123', 0, 'entries', 0]
+        // LOGS = {
+        //   '123': [
+        //     {
+        //       value: {a: 4},
+        //       $entries: [{value: 4}]
+        //     }
+        //   ]
+        // }
+        
+        function sendDescriptionFor(path) {
+          // OLD_CONSOLE.log('sendDescriptionFor', {logArgsById, path});
+          // Get the description of the desired value.
+          let level = logArgsById;
+          let pathPartIndex = 0;
+          for (let pathPart of path) {
+            if (pathPartIndex && pathPartIndex % 2 === 0) {
+              pathPart = '$' + pathPart;
+            }
+            level = level[pathPart];
+            pathPartIndex++;
+          }
+          const description = describe(level.value);
+        
+          // Change the summary to an actual description at the level found.
+          Object.assign(level, description);
+        
+          // Send the description without values back to the viewer.
+          messageParent({
+            target: 'viewer',
+            func: 'updateDescriptionFor',
+            args: [path, without(['$entries', '$protoEntries'], description)],
+          });
+        }
+        
+        function without(props, obj) {
+          if (!obj) return obj => without(props, obj);
+          const ret = {...obj};
+          for (const prop of props) delete ret[prop];
+          return ret;
         }
         
         /**
@@ -265,38 +312,17 @@
           );
         }
         
-        // Overrides for console functions: log, warn, debug, info
-        const logArgsById = {};
-        for (const [key, value] of Object.entries(console)) {
-          if ('function' === typeof value && /^(debug|error|info|log|warn)$/.test(key)) {
-            console[key] = function() {
-              // Gets a unique logId.
-              let logId = '' + Date.now();
-              for (; logArgsById.hasOwnProperty(logId); logId += Math.random());
-        
-              // Sends the initial log data back to the parent to then relay it back to
-              // the viewer.
-              messageParent({
-                action: 'log',
-                logId,
-                type: key,
-                args: Array.prototype.map.call(arguments, summarize)
-              });
-        
-              // Calls and returns the original console function.
-              return value.apply(this, arguments);
-            };
-          }
-        }
-        
       },
       functions: {
       },
       onMessage(message) {
-        console.log('callableViewerFrame.onMessage', message);
+        const {target, func, args} = message.data;
+        if (target === 'viewer') callableViewerFrame.apply(func, args);
+        else console.error('Unhandled message sent to main handler:', message);
       },
       async onReady() {
         callableViewerFrame = createViewerFrame(script, this);
+        this.call('init');
       },
       body: '',
       style: {width: 0, height: 0, border: 0},
@@ -401,18 +427,7 @@
                   // Clear the editor's code.
                   this.jsCode = jsCodeGroups.slice(1).map(g => g.allLines).join('\n');
         
-                  // Run the code by adding it to a new script tag.
-                  document.head.appendChild(
-                    Object.assign(document.createElement('script'), {
-                      src: url,
-                      onload() {
-                        URL.revokeObjectURL(url);
-                        document.head.removeChild(this);
-                      },
-                    })
-                  );
-        
-                  messageParent({action: 'runCode', args: [jsCodeGroup0.lines]});
+                  messageParent({target: 'runner', func: 'runCode', args: [jsCodeGroup0.lines]});
                 },
                 getEditorPct(evt) {    
                   const rect = this.$refs.main.getBoundingClientRect();
@@ -460,21 +475,6 @@
                 addEventListener('mousemove', this.onWindowMouseMove);
                 addEventListener('mouseup', this.onWindowMouseUp);
                 addEventListener('error', this.onWindowError);
-        
-                const vueApp = this;
-                for (const [key, value] of Object.entries(console)) {
-                  if ('function' === typeof value) {
-                    console[key] = function() {
-                      vueApp.displays.push({
-                        type: 'log',
-                        classNames: ['log', key],
-                        name: `console.${key}`,
-                        values: [...arguments],
-                      });
-                      return value.apply(this, arguments);
-                    };
-                  }
-                }
               }
             })
             .component('ace-editor', getAceComponentProps())
@@ -694,7 +694,7 @@
         
         function getJSValueComponentProps() {
           return {
-            props: ['value'],
+            props: ['description', 'path'],
             data() {
               return {
                 isExpanded: false,
@@ -709,90 +709,76 @@
               }
             },
             computed: {
-              type() {
-                const {value} = this;
-                if (value === null) return 'null';
-                const typeName = typeof value;
-                if (typeName === 'object') {
-                  const typeName2 = Object.prototype.toString.call(value).slice(8, -1);
-                  return typeName2 !== 'Date'
-                    ? (value[Symbol.iterator] && 'number' === typeof value.length)
-                      ? 'array-like'
-                      : typeName2 === 'Promise'
-                        ? 'promise'
-                        : typeName
-                    : 'date';
-                }
-                return typeName;
+              isPartialDescription() {
+                return this.description.entries === undefined;
+              },
+              isExpandable() {
+                return !this.description.isPrimitive;
               },
               isMultiline() {
-                const {type} = this;
-                return type === 'function'
-                  || type === 'array-like'
-                  || type === 'object'
-                  || (type === 'string' && /[\r\n]/.test(this.value));
+                const {isPrimitive, string, typeName} = this.description;
+                return !isPrimitive
+                  || (typeName === 'string' && /[\r\n]/.test(string));
               },
-              string() {
-                const {value, type} = this;
-                if (type === 'date') {
-                  return new Intl.DateTimeFormat(undefined, {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    weekday: 'short',
-                    hour: 'numeric',
-                    minute: 'numeric',
-                    second: 'numeric',
-                    fractionalSecondDigits: 3,
-                    timeZoneName: 'long'
-                  }).format(value);
+              classNames() {
+                const {isPrimitive, string, typeName} = this.description;
+                const isBlockElem = (!isPrimitive && this.isExpanded)
+                  || (typeName === 'string' && /[\r\n]/.test(string));
+                return [
+                  'js-value',
+                  typeName,
+                  isBlockElem ? 'd-flex' : 'd-inline-flex'
+                ];
+              },
+              arrowClassNames() {
+                const classNames = ['d-inline-block'];
+                if (this.isExpanded) classNames.push('rotated-90deg');
+                return classNames;
+              },
+              entryGroups() {
+                return [
+                  { key: 'entries', label: '[[Prototype]]', },
+                  { key: 'protoEntries' },
+                ];
+              }
+            },
+            methods: {
+              toggleExpanded() {
+                this.isExpanded = !this.isExpanded;
+                if (this.isExpanded && this.isPartialDescription) {
+                  messageParent({target: 'runner', func: 'sendDescriptionFor', args: [this.path]});
                 }
-                return value?.toString() ?? `${value}`;
               }
             },
             template: `
-              <div v-if="isMultiline">
-                <div v-if="type === 'function'" class="js-value function">{{ string }}</div>
-                <div v-if="type === 'array-like'" class="js-value array-like">
-                  <span @click="isExpanded = !isExpanded" :class="'d-inline-block ' + (isExpanded ? 'rotated-90deg' : '')">
+              <div :class="classNames">
+                <div>
+                  <span v-if="isExpandable" @click="toggleExpanded" :class="arrowClassNames">
                     <icon name="play"></icon>
                   </span>
-                  <template v-if="Array.isArray(value)">Array({{ value.length }})</template>
-                  <template v-if="!Array.isArray(value)">Iterable({{ value.length }})</template>
-                  <table v-if="hasBeenExpanded" v-show="isExpanded">
-                    <tr v-for="(item, index) in value">
-                      <td class="align-top">{{ index }}</td>
-                      <td><js-value :value="item"></js-value></td>
-                    </tr>
-                  </table>
                 </div>
-                <div v-if="type === 'object'" class="js-value object">
-                  <span @click="isExpanded = !isExpanded" :class="'d-inline-block ' + (isExpanded ? 'rotated-90deg' : '')">
-                    <icon name="play"></icon>
-                  </span>
-                  <template v-if="true">Object({{ Object.keys(value).length }})</template>
-                  <table v-if="hasBeenExpanded" v-show="isExpanded">
-                    <tr v-for="keyValue in Object.entries(value)">
-                      <td class="align-top">{{ keyValue[0] }}</td>
-                      <td><js-value :value="keyValue[1]"></js-value></td>
-                    </tr>
-                  </table>
+                <div style="flex-grow: 1; padding-left: 0.5em;">
+                  <div>{{ description.string }}</div>
+                  <div v-if="hasBeenExpanded" v-show="isExpanded" class="expansion">
+                    <div v-if="isPartialDescription">Loading&hellip;</div>
+                    <template v-else>
+                      <template v-for="group in entryGroups">
+                        <div v-for="(entry, entryIndex) in description[group.key]" style="display: flex;">
+                          <div>{{ entry[0] }}</div>
+                          <div style="flex-grow: 1;">
+                            <js-value
+                              :description="entry[1]"
+                              :path="path.concat([group.key, entryIndex])">
+                            </js-value>
+                          </div>
+                        </div>
+                      </template>
+                    </template>
+                  </div>
                 </div>
-                <div v-if="type === 'string'" class="js-value string">{{ string }}</div>
               </div>
-              <template v-else>
-                <div v-if="type === 'bigint'" class="js-value bigint">{{ string }}</div>
-                <div v-if="type === 'boolean'" class="js-value boolean">{{ string }}</div>
-                <div v-if="type === 'date'" class="js-value date">{{ string }}</div>
-                <div v-if="type === 'null'" class="js-value null">{{ string }}</div>
-                <div v-if="type === 'number'" class="js-value number">{{ string }}</div>
-                <div v-if="type === 'promise'" class="js-value promise">{{ string }}</div>
-                <div v-if="type === 'string'" class="js-value string">{{ string }}</div>
-                <div v-if="type === 'symbol'" class="js-value symbol">{{ string }}</div>
-                <div v-if="type === 'undefined'" class="js-value undefined">{{ string }}</div>
-              </template>
             `
-          }
+          };
         }
         
         /**
@@ -878,6 +864,64 @@
           return trim ? text.replace(/^(\s*[\r\n]+)+|\s+$/g, '') : text;
         }
         
+        /**
+         * NOTE:  Called via main by the runner.
+         * @param {object} options
+         * @param {string} options.type
+         * @param {string} options.logId
+         * @param {string} options.key
+         * @param {any[][]} options.descriptions
+         */
+        function appendLog({type, logId, key, descriptions}) {
+          mountedApp.displays.push({
+            type,
+            classNames: ['log', key],
+            name: `console.${key}`,
+            descriptions,
+            logId,
+          });
+        }
+        
+        /**
+         * NOTE:  Called via main by the runner.
+         * @param {object} options
+         * @param {string} options.type
+         * @param {string} options.message
+         * @param {number} options.line
+         * @param {number} options.column
+         */
+        function appendError({type, message, line, column}) {
+          mountedApp.displays.push({
+            type,
+            message,
+            line,
+            column,
+          });
+        }
+        
+        async function updateDescriptionFor(path, description) {
+          const logId = path.shift();
+          const display = mountedApp.displays.find(d => d.logId === logId);
+          const foundDescr = display.descriptions[path.shift()];
+        
+          let level = foundDescr;
+          let pathPartIndex = 0;
+          for (const pathPart of path) {
+            level = level[pathPart];
+            if (pathPartIndex % 2) level = level[1];
+            pathPartIndex++;
+          }
+        
+          // console.log('updateDescriptionFor', {
+          //   path,
+          //   description,
+          //   display: JSON.parse(JSON.stringify(display)),
+          //   foundDescr: JSON.parse(JSON.stringify(foundDescr)),
+          //   level: JSON.parse(JSON.stringify(level)),
+          // });
+          Object.assign(level, description);
+        }
+        
       },
       jsUrls: [
         'https://unpkg.com/vue@3/dist/vue.global.prod.js',
@@ -894,8 +938,9 @@
       functions: {
       },
       onMessage(message) {
-        const {action, args} = message.data;
-        callableRunnerFrame.apply(action, args);
+        const {target, func, args} = message.data;
+        if (target === 'runner') callableRunnerFrame.apply(func, args);
+        else console.error('Unhandled message sent to main handler:', message);
       },
       async onReady() {
         this.call('init', script.textContent, JSON.parse(JSON.stringify(script.dataset)));

@@ -39,10 +39,13 @@
       functions: {
       },
       onMessage(message) {
-        console.log('callableViewerFrame.onMessage', message);
+        const {target, func, args} = message.data;
+        if (target === 'viewer') callableViewerFrame.apply(func, args);
+        else console.error('Unhandled message sent to main handler:', message);
       },
       async onReady() {
         callableViewerFrame = createViewerFrame(script, this);
+        this.call('init');
       },
       body: '',
       style: {width: 0, height: 0, border: 0},
@@ -77,8 +80,9 @@
       functions: {
       },
       onMessage(message) {
-        const {action, args} = message.data;
-        callableRunnerFrame.apply(action, args);
+        const {target, func, args} = message.data;
+        if (target === 'runner') callableRunnerFrame.apply(func, args);
+        else console.error('Unhandled message sent to main handler:', message);
       },
       async onReady() {
         this.call('init', script.textContent, JSON.parse(JSON.stringify(script.dataset)));
