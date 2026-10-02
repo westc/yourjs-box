@@ -60,6 +60,14 @@ async function definePlaceholderValues() {
   const jsRunnerContent = fs.readFileSync(jsRunnerSrc, 'utf8');
 
   Object.assign(PLACEHOLDER_VALUES, {
+    // Information about this package that is shown in the viewer.
+    PACKAGE_INFO: JSON.stringify({
+      name: pkg.name,
+      version: pkg.version,
+      homepage: pkg.homepage,
+      repoUrl: REPO_URL,
+      bugsUrl: pkg.bugs.url,
+    }),
     CSS_VIEWER_IFRAME: JSON.stringify(new CleanCSS().minify(fs.readFileSync(cssIframeSrc, 'utf8')).styles),
     HTML_VIEWER_IFRAME: JSON.stringify(htmlMinifier.minify(fs.readFileSync(htmlIframeSrc, 'utf8'), {
       collapseWhitespace: true,

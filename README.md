@@ -39,6 +39,12 @@ If the editor already has code in it you are asked before it is replaced.
 
 ### Toolbar
 
+- Clicking the **logo** (or the &#9432; button) opens the About window, which
+  shows the version, this console's settings and keyboard shortcuts.  Its
+  **Copy as HTML** tab gives you the HTML for this console (with its current
+  code, its original code or no code) as an embed snippet or a full page that
+  you can copy or download.  Only the `data-*` attributes that were set on the
+  script tag are included.
 - **Clear** removes everything from the console.  Code can also call
   `console.clear()`.
 - **Reset** clears the console and puts the original code back into the editor.

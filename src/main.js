@@ -5,6 +5,11 @@
    */
   const VIEWER_IFRAME_CSS = [[CSS_VIEWER_IFRAME_FILE_PLACEHOLDER]];
   /**
+   * Information about this package (eg. its version).
+   * @type {{name: string, version: string, homepage: string, repoUrl: string, bugsUrl: string}}
+   */
+  const PACKAGE_INFO = [[PACKAGE_INFO_FILE_PLACEHOLDER]];
+  /**
    * Viewer IFRAME's HTML code
    * @type {string}
    */
@@ -158,7 +163,6 @@
   function main(script) {
     const dataset = JSON.parse(JSON.stringify(script.dataset));
     const runnerMode = dataset.runner === 'window' ? 'window' : 'worker';
-    dataset.runner = runnerMode;
 
     /** @type {ReturnType<createCallableFrame>} */
     let callableViewerFrame;
@@ -193,7 +197,9 @@
         relayMessage(message.data, {runner});
       },
       async onReady() {
-        this.call('init', script.textContent, dataset);
+        // The dataset is passed as is so that the viewer knows which options
+        // were actually specified (eg. when copying the console as HTML).
+        this.call('init', script.textContent, dataset, {runnerMode, packageInfo: PACKAGE_INFO});
       },
       body: VIEWER_IFRAME_HTML,
       style: {

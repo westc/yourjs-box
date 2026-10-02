@@ -63,7 +63,8 @@
   </div>
   <div id="bottomNav">
     <div class="brand">
-      <span class="logo"><span class="logo-mark">JS</span><span class="logo-text">Box</span></span>
+      <button class="logo-button" title="About JS Box" @click="openAbout('about')"><span class="logo"><span class="logo-mark">JS</span><span class="logo-text">Box</span></span></button>
+      <button class="info-button" title="About JS Box" @click="openAbout('about')"><icon name="info"></icon></button>
       <span class="runner-badge" :title="runnerMode === 'window' ? 'Code runs directly in this page' : 'Code runs in a Web Worker (no DOM access)'">{{ runnerMode === 'window' ? 'Window' : 'Worker' }}</span>
     </div>
     <div class="buttons">
@@ -73,6 +74,63 @@
           <icon :name="bottomButton.iconName"></icon><span v-if="bottomButton.label" class="label">{{ bottomButton.label }}</span>
         </button>
       </template>
+    </div>
+  </div>
+  <div v-if="isAboutOpen" class="dialog-backdrop" @mousedown.self="closeAbout" @keydown.esc="closeAbout">
+    <div :class="['dialog', 'about-dialog', aboutTab === 'html' ? 'is-export' : '']" role="dialog" aria-modal="true" aria-label="About JS Box">
+      <div class="about-header">
+        <div class="tabs" role="tablist">
+          <button role="tab" :aria-selected="aboutTab === 'about'" :class="['tab', aboutTab === 'about' ? 'active' : '']" @click="aboutTab = 'about'">About</button>
+          <button role="tab" :aria-selected="aboutTab === 'html'" :class="['tab', aboutTab === 'html' ? 'active' : '']" @click="aboutTab = 'html'">Copy as HTML</button>
+        </div>
+        <button class="close-button" ref="aboutCloseButton" title="Close" @click="closeAbout"><icon name="close"></icon></button>
+      </div>
+      <div v-if="aboutTab === 'about'" class="about-body">
+        <div class="about-title">
+          <span class="logo logo-medium"><span class="logo-mark">JS</span><span class="logo-text">Box</span></span>
+          <div>
+            <div class="about-name">YourJS Box <span class="about-aka">aka JS Box</span></div>
+            <div class="about-version">Version {{ packageInfo.version }}</div>
+          </div>
+        </div>
+        <p class="about-description">An interactive JavaScript console that can be embedded in any web page with a single script tag.</p>
+        <div class="about-links">
+          <a :href="packageInfo.homepage" target="_blank" rel="noopener">Website</a>
+          <a :href="packageInfo.repoUrl" target="_blank" rel="noopener">GitHub</a>
+          <a :href="packageInfo.repoUrl + '#readme'" target="_blank" rel="noopener">Documentation</a>
+          <a :href="packageInfo.bugsUrl" target="_blank" rel="noopener">Report an issue</a>
+        </div>
+        <h3>This console</h3>
+        <dl class="about-details">
+          <dt>Code runs in</dt><dd>{{ runnerDescription }}</dd>
+          <dt>Theme</dt><dd>{{ themeDescription }}</dd>
+          <dt>Layout</dt><dd>{{ layoutDescription }}</dd>
+        </dl>
+        <h3>Keyboard shortcuts</h3>
+        <dl class="about-details">
+          <dt><kbd>{{ modKey }}</kbd> + <kbd>Enter</kbd></dt><dd>Run the next block of code</dd>
+          <dt><kbd>Esc</kbd></dt><dd>Close this window</dd>
+        </dl>
+        <div class="about-footer">MIT License &copy; 2023-present Christopher West &middot; Built with Vue, Ace and Prism</div>
+      </div>
+      <div v-else class="about-body export-body">
+        <div class="export-options">
+          <div class="segmented" role="radiogroup" aria-label="Code">
+            <button v-for="option in exportCodeOptions" role="radio" :aria-checked="exportCode === option.value" :class="exportCode === option.value ? 'active' : ''" @click="exportCode = option.value">{{ option.label }}</button>
+          </div>
+          <div class="segmented" role="radiogroup" aria-label="Format">
+            <button v-for="option in exportFormatOptions" role="radio" :aria-checked="exportFormat === option.value" :class="exportFormat === option.value ? 'active' : ''" @click="exportFormat = option.value">{{ option.label }}</button>
+          </div>
+        </div>
+        <div class="export-note">{{ exportNote }}</div>
+        <div class="export-preview">
+          <ace-editor :model-value="exportHtml" language="html" :theme="theme" height="100%" :read-only="true"></ace-editor>
+        </div>
+        <div class="export-actions">
+          <button class="dialog-button" @click="downloadExport">Download page</button>
+          <button class="dialog-button primary" @click="copyExport">{{ copyLabel }}</button>
+        </div>
+      </div>
     </div>
   </div>
   <div v-if="dialog" class="dialog-backdrop" @mousedown.self="closeDialog(false)" @keydown.esc="closeDialog(false)">

@@ -23,10 +23,18 @@ function getAutoDividerOrient() {
   return innerWidth < NARROW_WIDTH ? 'horizontal' : 'vertical';
 }
 
-function init(jsCode, dataset) {
+/**
+ * @param {string} jsCode
+ * @param {{[key: string]: string}} dataset
+ *   The data attributes exactly as they were specified on the script tag.
+ * @param {{runnerMode: "worker"|"window", packageInfo: {name: string, version: string, homepage: string, repoUrl: string, bugsUrl: string}}} meta
+ */
+function init(jsCode, dataset, meta) {
   const hidePrefix = dataset.hidePrefix ?? '';
   const darkSchemeQuery = matchMedia('(prefers-color-scheme: dark)');
-  const {visibleCode, hiddenGroups} = extractHiddenGroups(unindentMin(jsCode), hidePrefix);
+  const originalCode = unindentMin(jsCode);
+  const {visibleCode, hiddenGroups} = extractHiddenGroups(originalCode, hidePrefix);
+  const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
   const copyHiddenGroups = () => hiddenGroups.map(group => ({...group}));
 
   mountedApp = Vue
@@ -36,7 +44,17 @@ function init(jsCode, dataset) {
           displays: [],
           hidePrefix,
           hiddenGroups: copyHiddenGroups(),
-          runnerMode: dataset.runner,
+          runnerMode: meta.runnerMode,
+          packageInfo: meta.packageInfo,
+          // Every group of code that was run (in order) which is used when
+          // copying the console as HTML.  Unlike the displays this is only
+          // cleared by a reset.
+          runHistory: [],
+          isAboutOpen: false,
+          aboutTab: 'about',
+          exportCode: 'current',
+          exportFormat: 'snippet',
+          copyLabel: 'Copy',
           // The number of groups of code sent to the runner that haven't
           // finished running yet.
           runningCount: 0,
@@ -65,8 +83,74 @@ function init(jsCode, dataset) {
         theme() {
           return this.forcedTheme ?? (this.prefersDark ? 'dark' : 'light');
         },
+        modKey() {
+          return isMac ? '\u2318' : 'Ctrl';
+        },
+        runnerDescription() {
+          return this.runnerMode === 'window'
+            ? 'This page (it can use the page\'s globals and DOM)'
+            : 'A Web Worker (isolated from the page, no DOM)';
+        },
+        themeDescription() {
+          const name = this.theme === 'dark' ? 'Dark' : 'Light';
+          return `${name} (${this.forcedTheme ? 'set by data-theme' : 'follows your system'})`;
+        },
+        layoutDescription() {
+          return (this.dividerOrient === 'vertical' ? 'Editor beside the console' : 'Editor below the console')
+            + (this.isDividerOrientAuto ? ' (automatic)' : '');
+        },
+        exportCodeOptions() {
+          return [
+            {value: 'current', label: 'Current code', note: 'The code that already ran followed by the code in the editor.'},
+            {value: 'original', label: 'Original code', note: 'The code this console started with.'},
+            {value: 'blank', label: 'Blank', note: 'An empty console with the same settings.'},
+          ];
+        },
+        exportFormatOptions() {
+          return [
+            {value: 'snippet', label: 'Embed snippet'},
+            {value: 'page', label: 'Full page'},
+          ];
+        },
+        exportNote() {
+          return this.exportCodeOptions.find(o => o.value === this.exportCode).note;
+        },
+        /**
+         * The code that the copied console will start with.
+         */
+        exportJsCode() {
+          if (this.exportCode === 'original') return originalCode;
+          if (this.exportCode === 'blank') return '';
+
+          // The groups that already ran, then the groups in the editor with
+          // any hidden groups that haven't run yet in their original places.
+          const blocks = this.runHistory.slice();
+          const pendingHiddenGroups = this.hiddenGroups.slice();
+          let visibleCount = this.runCount;
+          const addPendingHiddenGroups = () => {
+            while (pendingHiddenGroups.length && pendingHiddenGroups[0].runCount <= visibleCount) {
+              blocks.push(pendingHiddenGroups.shift().allLines);
+            }
+          };
+          addPendingHiddenGroups();
+          for (const group of parseJSCodeGroups(this.jsCode)) {
+            if (!group.allLines.trim()) continue;
+            blocks.push(group.allLines);
+            visibleCount++;
+            addPendingHiddenGroups();
+          }
+          blocks.push(...pendingHiddenGroups.map(group => group.allLines));
+          return joinCodeBlocks(blocks);
+        },
+        exportHtml() {
+          return buildConsoleHtml({
+            code: this.exportJsCode,
+            dataset,
+            packageInfo: this.packageInfo,
+            isFullPage: this.exportFormat === 'page',
+          });
+        },
         bottomButtons() {
-          const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
           return [
             {
               iconName: 'clear',
@@ -166,6 +250,7 @@ function init(jsCode, dataset) {
             value: group.lines,
           });
           this.runningCount++;
+          this.runHistory.push(group.allLines);
           messageParent({target: 'runner', func: 'runCode', args: [group.lines]});
         },
         clearConsole() {
@@ -188,6 +273,7 @@ function init(jsCode, dataset) {
           this.hiddenGroups = copyHiddenGroups();
           this.runCount = 0;
           this.runningCount = 0;
+          this.runHistory = [];
           messageParent({target: 'runner', func: 'reset', args: []});
           this.runHiddenGroups();
         },
@@ -219,6 +305,48 @@ function init(jsCode, dataset) {
             this.dialog = {...options, resolve};
             this.$nextTick(() => this.$refs.dialogConfirmButton?.focus());
           });
+        },
+        /**
+         * @param {"about"|"html"} tab
+         */
+        openAbout(tab) {
+          this.aboutTab = tab;
+          this.isAboutOpen = true;
+          this.$nextTick(() => this.$refs.aboutCloseButton?.focus());
+        },
+        closeAbout() {
+          this.isAboutOpen = false;
+        },
+        async copyExport() {
+          const text = this.exportHtml;
+          try {
+            await navigator.clipboard.writeText(text);
+          }
+          catch (e) {
+            // Falls back to the older way of copying text.
+            const textarea = Object.assign(document.createElement('textarea'), {value: text});
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            textarea.remove();
+          }
+          this.copyLabel = 'Copied!';
+          clearTimeout(this.copyLabelTimeout);
+          this.copyLabelTimeout = setTimeout(() => this.copyLabel = 'Copy', 1600);
+        },
+        /**
+         * Downloads the console as a full HTML page.
+         */
+        downloadExport() {
+          const html = buildConsoleHtml({
+            code: this.exportJsCode,
+            dataset,
+            packageInfo: this.packageInfo,
+            isFullPage: true,
+          });
+          const url = URL.createObjectURL(new Blob([html], {type: 'text/html'}));
+          Object.assign(document.createElement('a'), {href: url, download: 'js-box.html'}).click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
         },
         closeDialog(isConfirmed) {
           const {dialog} = this;
@@ -339,6 +467,7 @@ function getAceComponentProps() {
       'keybinding',
       'language',
       'modelValue',
+      'readOnly',
       'theme',
       'width',
     ],
@@ -396,6 +525,13 @@ function getAceComponentProps() {
         theme: this.themeSig,
       });
       this.editor = editor;
+
+      // Read-only editors don't need syntax checking (eg. hints in the gutter).
+      if (this.readOnly) {
+        editor.setReadOnly(true);
+        editor.setHighlightActiveLine(false);
+        editor.session.setUseWorker(false);
+      }
 
       // Use VSCode keybinding but remove the CTRL+ENTER and CTRL+SHIFT+ENTER
       // (or on Mac CMD+ENTER and CMD+SHIFT+ENTER) commands so that they can be
@@ -532,6 +668,8 @@ function getIconComponentProps() {
           // https://icon-sets.iconify.design/mdi/error-outline/
           error: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm1-5C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18a8 8 0 0 1-8-8a8 8 0 0 1 8-8a8 8 0 0 1 8 8a8 8 0 0 1-8 8"/></svg>',
           // Icons similar to those in the browser's console.
+          info: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.25v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="5" r="1" fill="currentColor"/></svg>',
+          close: '<svg viewBox="0 0 16 16"><path d="M4 4l8 8m0-8l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
           clear: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.75 12.25l8.5-8.5" stroke="currentColor" stroke-width="1.5"/></svg>',
           copyToEditor: '<svg viewBox="0 0 16 16"><path d="M6 3.5L2.5 7 6 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 7h6.5a4 4 0 0 1 4 4v1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
           spinner: '<svg viewBox="0 0 16 16" class="spin"><path d="M8 1.75a6.25 6.25 0 1 1-6.25 6.25" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>',
@@ -712,6 +850,81 @@ function extractHiddenGroups(jsCode, hidePrefix) {
     visibleCode: visibleGroups.map(g => g.allLines).join('\n'),
     hiddenGroups,
   };
+}
+
+/**
+ * Joins groups of code back together making sure that each one (other than
+ * the first) starts with a header so that they stay separate groups.
+ * @param {string[]} blocks
+ * @returns {string}
+ */
+function joinCodeBlocks(blocks) {
+  return blocks
+    .map(block => block.replace(/^(\s*[\r\n])+|\s+$/g, ''))
+    .filter(Boolean)
+    .map((block, index) => {
+      const firstLine = block.split(/\r\n|\r|\n/)[0];
+      return index && !/^\/\/[^]*\\\\$/.test(firstLine) ? `// \\\\\n${block}` : block;
+    })
+    .join('\n\n');
+}
+
+/**
+ * Builds the HTML for a console that uses the given code and data attributes.
+ * @param {Object} options
+ * @param {string} options.code
+ * @param {{[key: string]: string}} options.dataset
+ * @param {{name: string, version: string}} options.packageInfo
+ * @param {boolean} options.isFullPage
+ *   If `true` a full page is returned, otherwise just a snippet to embed.
+ * @returns {string}
+ */
+function buildConsoleHtml({code, dataset, packageInfo, isFullPage}) {
+  const {name, version} = packageInfo;
+  const src = `https://cdn.jsdelivr.net/npm/${name}@${version.split('.')[0]}/dist/${name}.min.js`;
+  const attrs = Object.entries(dataset)
+    .map(([key, value]) => ` data-${key.replace(/[A-Z]/g, c => '-' + c.toLowerCase())}="${escapeHtmlAttribute(value)}"`)
+    .join('');
+  const indent = isFullPage ? '    ' : '  ';
+
+  // Keeps the code from ending the script tag early.
+  const safeCode = code.replace(/<\/(script)/gi, '<\\/$1').replace(/<!--/g, '<\\!--');
+  const scriptLines = safeCode.trim()
+    ? [
+        `<script src="${src}"${attrs}>`,
+        ...safeCode.split('\n').map(line => line.trim() ? '  ' + line : ''),
+        '</script>',
+      ]
+    : [`<script src="${src}"${attrs}></script>`];
+  const indentedScript = scriptLines.map(line => line ? indent + line : line).join('\n');
+
+  return isFullPage
+    ? [
+        '<!DOCTYPE html>',
+        '<html lang="en">',
+        '  <head>',
+        '    <meta charset="utf-8">',
+        '    <meta name="viewport" content="width=device-width, initial-scale=1">',
+        '    <title>JS Box</title>',
+        '    <style>',
+        '      html, body { height: 100%; margin: 0; }',
+        '    </style>',
+        '  </head>',
+        '  <body>',
+        indentedScript,
+        '  </body>',
+        '</html>',
+        '',
+      ].join('\n')
+    : `<div style="height: 400px;">\n${indentedScript}\n</div>\n`;
+}
+
+/**
+ * @param {string} value
+ * @returns {string}
+ */
+function escapeHtmlAttribute(value) {
+  return `${value}`.replace(/[&"<>]/g, c => `&#${c.charCodeAt(0)};`);
 }
 
 /**
