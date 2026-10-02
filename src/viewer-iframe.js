@@ -4,13 +4,37 @@ const Prism = window.Prism;
 delete window.Prism;
 Prism.plugins.autoloader.loadLanguages('javascript');
 
+/**
+ * The minimum amount of time (in milliseconds) that the loading screen is shown.
+ */
+const MIN_LOADING_TIME = 1000;
+
 function init(jsCode, dataset) {
+  const hidePrefix = dataset.hidePrefix ?? '';
+  const darkSchemeQuery = matchMedia('(prefers-color-scheme: dark)');
+  const {visibleCode, hiddenGroups} = extractHiddenGroups(unindentMin(jsCode), hidePrefix);
+  const copyHiddenGroups = () => hiddenGroups.map(group => ({...group}));
+
   mountedApp = Vue
     .createApp({
       data() {
         return {
           displays: [],
-          jsCode: unindentMin(jsCode),
+          hidePrefix,
+          hiddenGroups: copyHiddenGroups(),
+          runnerMode: dataset.runner,
+          // The number of groups of code sent to the runner that haven't
+          // finished running yet.
+          runningCount: 0,
+          /** @type {{title: string, message: string, confirmText: string, resolve: (isConfirmed: boolean) => void}?} */
+          dialog: null,
+          isDisplaysScrolledToBottom: true,
+          // Like the browser's dev tools, follow the system's color scheme
+          // unless a theme was specified.
+          forcedTheme: /^(light|dark)$/.test(dataset.theme) ? dataset.theme : null,
+          prefersDark: darkSchemeQuery.matches,
+          runCount: 0,
+          jsCode: visibleCode,
           dividerOrient: dataset.dividerOrient === 'vertical' ? 'vertical' : 'horizontal',
           isMovingDivider: false,
           dividerPct: '50%',
@@ -19,23 +43,42 @@ function init(jsCode, dataset) {
         };
       },
       computed: {
+        theme() {
+          return this.forcedTheme ?? (this.prefersDark ? 'dark' : 'light');
+        },
         bottomButtons() {
+          const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
           return [
             {
+              iconName: 'clear',
+              title: 'Clear console',
+              callback() { this.clearConsole(); },
+            },
+            {
+              iconName: 'refresh',
+              title: this.runnerMode === 'worker'
+                ? 'Reset (also stops any code that is still running)'
+                : 'Reset',
+              callback() { this.resetConsole(); },
+            },
+            { isSeparator: true },
+            {
               iconName: 'horizontalView',
-              title: 'Horizontal View',
+              title: 'Show the editor below the console',
               callback() { this.dividerOrient = 'horizontal'; },
               showIf() { return this.dividerOrient !== 'horizontal'; }
             },
             {
               iconName: 'verticalView',
-              title: 'Vertical View',
+              title: 'Show the editor beside the console',
               callback() { this.dividerOrient = 'vertical'; },
               showIf() { return this.dividerOrient !== 'vertical'; }
             },
             {
-              iconName: 'play',
-              title: 'Run Code',
+              iconName: this.runningCount ? 'spinner' : 'play',
+              label: 'Run',
+              className: 'primary',
+              title: `Run the next block of code (${isMac ? '\u2318' : 'Ctrl+'}Enter)`,
               callback() { this.runCode(); },
               disableIf() { return !this.canRunCode; }
             },
@@ -68,24 +111,104 @@ function init(jsCode, dataset) {
           }
         },
         runCode() {
-          const {jsCode} = this;
-          const jsCodeGroups = parseJSCodeGroups(jsCode);
-          const jsCodeGroup0 = jsCodeGroups[0];
+          // Always show the output of code that is run.
+          this.isDisplaysScrolledToBottom = true;
 
-          const url = URL.createObjectURL(new Blob([jsCodeGroup0.allLines], {type: 'application/javascript'}));
+          const [jsCodeGroup0, ...otherJsCodeGroups] = parseJSCodeGroups(this.jsCode);
+          this.runGroup(jsCodeGroup0);
 
-          // Add the code to the displays.
+          // Remove the code that was run from the editor.
+          this.jsCode = otherJsCodeGroups.map(g => g.allLines).join('\n');
+
+          this.runCount++;
+        },
+        /**
+         * Runs the next hidden group if all of the visible code that came
+         * before it has already been run.  This is called again once the runner
+         * finishes running each group so that the displays stay in order.
+         */
+        runHiddenGroups() {
+          const {hiddenGroups} = this;
+          if (hiddenGroups.length && hiddenGroups[0].runCount <= this.runCount) {
+            this.runGroup(hiddenGroups.shift());
+          }
+        },
+        /**
+         * Adds a group of code to the displays and then runs it.
+         * @param {ReturnType<parseJSCodeGroups>[number]} group
+         */
+        runGroup(group) {
+          const {header, isHidden} = parseGroupHeader(group.headerLines, this.hidePrefix);
           this.displays.push({
             type: 'prism',
-            header: jsCodeGroup0.headerLines,
-            value: jsCodeGroup0.lines,
-            url,
+            header,
+            isHidden,
+            isCodeShown: !isHidden,
+            value: group.lines,
           });
+          this.runningCount++;
+          messageParent({target: 'runner', func: 'runCode', args: [group.lines]});
+        },
+        clearConsole() {
+          this.displays = [];
+          messageParent({target: 'runner', func: 'clearLogs', args: []});
+        },
+        async resetConsole() {
+          const isConfirmed = await this.confirm({
+            title: 'Reset the console?',
+            message: 'The output will be cleared and the editor will go back to the original code.'
+              + (this.runnerMode === 'window'
+                ? '  Anything the code already defined on the page will stay defined.'
+                : ''),
+            confirmText: 'Reset',
+          });
+          if (!isConfirmed) return;
 
-          // Clear the editor's code.
-          this.jsCode = jsCodeGroups.slice(1).map(g => g.allLines).join('\n');
-
-          messageParent({target: 'runner', func: 'runCode', args: [jsCodeGroup0.lines]});
+          this.displays = [];
+          this.jsCode = visibleCode;
+          this.hiddenGroups = copyHiddenGroups();
+          this.runCount = 0;
+          this.runningCount = 0;
+          messageParent({target: 'runner', func: 'reset', args: []});
+          this.runHiddenGroups();
+        },
+        /**
+         * Copies code that was already run into the editor so that it can be run
+         * again (as is or modified), first asking before replacing any code that
+         * is in the editor.
+         * @param {string} code
+         */
+        async copyToEditor(code) {
+          if (this.jsCode.trim() && this.jsCode !== code) {
+            const isConfirmed = await this.confirm({
+              title: 'Replace the code in the editor?',
+              message: 'The code that is currently in the editor will be replaced with a copy of the code you selected.',
+              confirmText: 'Replace',
+            });
+            if (!isConfirmed) return;
+          }
+          this.jsCode = code;
+        },
+        /**
+         * Shows a dialog asking the user to confirm something.
+         * @param {{title: string, message: string, confirmText: string}} options
+         * @returns {Promise<boolean>}
+         */
+        confirm(options) {
+          this.dialog?.resolve(false);
+          return new Promise(resolve => {
+            this.dialog = {...options, resolve};
+            this.$nextTick(() => this.$refs.dialogConfirmButton?.focus());
+          });
+        },
+        closeDialog(isConfirmed) {
+          const {dialog} = this;
+          this.dialog = null;
+          dialog?.resolve(isConfirmed);
+        },
+        onDisplaysScroll() {
+          const {scrollTop, scrollHeight, clientHeight} = this.$refs.displaysScroller;
+          this.isDisplaysScrolledToBottom = scrollHeight - scrollTop - clientHeight < 8;
         },
         getEditorPct(evt) {    
           const rect = this.$refs.main.getBoundingClientRect();
@@ -129,10 +252,38 @@ function init(jsCode, dataset) {
           })
         }
       },
+      watch: {
+        theme: {
+          handler(theme) {
+            document.documentElement.dataset.theme = theme;
+          },
+          immediate: true,
+        },
+        // Like the browser's console, keep showing the newest output unless the
+        // user has scrolled up to look at older output.
+        'displays.length'() {
+          if (this.isDisplaysScrolledToBottom) {
+            this.$nextTick(() => {
+              const scroller = this.$refs.displaysScroller;
+              scroller.scrollTop = scroller.scrollHeight;
+            });
+          }
+        },
+      },
       mounted() {
         addEventListener('mousemove', this.onWindowMouseMove);
         addEventListener('mouseup', this.onWindowMouseUp);
         addEventListener('error', this.onWindowError);
+        darkSchemeQuery.addEventListener('change', e => this.prefersDark = e.matches);
+
+        // Hidden code that came before all visible code gets run immediately.
+        this.runHiddenGroups();
+
+        // Shows the loading screen for at least a moment and then fades it out.
+        setTimeout(
+          () => document.querySelector('#splash').classList.add('hidden'),
+          Math.max(0, MIN_LOADING_TIME - performance.now())
+        );
       }
     })
     .component('ace-editor', getAceComponentProps())
@@ -193,9 +344,13 @@ function getAceComponentProps() {
       }
     },
     watch: {
+      themeSig(newValue) {
+        this.editor.setTheme(newValue);
+      },
       modelValue(newValue) {
         if (newValue !== this.editor.getValue()) {
-          this.editor.setValue(newValue);
+          // -1 puts the cursor at the start instead of selecting everything.
+          this.editor.setValue(newValue, -1);
         }
       }
     },
@@ -342,6 +497,13 @@ function getIconComponentProps() {
           play: '<svg viewBox="0 0 16 16"><path fill="currentColor" d="M2 1v14l12-7z"/></svg>',
           // https://icon-sets.iconify.design/mdi/error-outline/
           error: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm1-5C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18a8 8 0 0 1-8-8a8 8 0 0 1 8-8a8 8 0 0 1 8 8a8 8 0 0 1-8 8"/></svg>',
+          // Icons similar to those in the browser's console.
+          clear: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.75 12.25l8.5-8.5" stroke="currentColor" stroke-width="1.5"/></svg>',
+          copyToEditor: '<svg viewBox="0 0 16 16"><path d="M6 3.5L2.5 7 6 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 7h6.5a4 4 0 0 1 4 4v1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+          spinner: '<svg viewBox="0 0 16 16" class="spin"><path d="M8 1.75a6.25 6.25 0 1 1-6.25 6.25" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>',
+          chevron: '<svg viewBox="0 0 16 16"><path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+          consoleError: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.5 5.5l5 5m0-5l-5 5" stroke="#fff" stroke-width="1.75" stroke-linecap="round"/></svg>',
+          consoleWarning: '<svg viewBox="0 0 16 16"><path d="M8 1.75L14.75 14H1.25z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 6v3.5" stroke="#202124" stroke-width="1.75" stroke-linecap="round"/><circle cx="8" cy="11.75" r="1" fill="#202124"/></svg>',
         };
         return (codes[this.name] ?? codes.missing).replace('<svg', '$& xmlns="http://www.w3.org/2000/svg" style="height: 1em; width: 1em; display: inline-block; transform: translateY(0.1em);"');
       }
@@ -352,7 +514,7 @@ function getIconComponentProps() {
 
 function getJSValueComponentProps() {
   return {
-    props: ['description', 'path'],
+    props: ['description', 'path', 'name', 'isDimName'],
     data() {
       return {
         isExpanded: false,
@@ -373,35 +535,28 @@ function getJSValueComponentProps() {
       isExpandable() {
         return !this.description.isPrimitive;
       },
-      isMultiline() {
-        const {isPrimitive, string, typeName} = this.description;
-        return !isPrimitive
-          || (typeName === 'string' && /[\r\n]/.test(string));
+      isEntry() {
+        return this.name != null;
       },
       classNames() {
-        const {isPrimitive, string, typeName} = this.description;
-        const isBlockElem = (!isPrimitive && this.isExpanded)
-          || (typeName === 'string' && /[\r\n]/.test(string));
         return [
           'js-value',
-          typeName,
-          isBlockElem ? 'd-flex' : 'd-inline-flex'
+          // Entries are always on their own line just like expanded values.
+          (this.isEntry || (this.isExpandable && this.isExpanded)) ? 'd-block' : 'd-inline-block',
+          this.isExpanded ? 'expanded' : '',
         ];
       },
-      arrowClassNames() {
-        const classNames = ['d-inline-block'];
-        if (this.isExpanded) classNames.push('rotated-90deg');
-        return classNames;
-      },
       entryGroups() {
+        // protoEntries only ever contains the [[Prototype]] entry.
         return [
-          { key: 'entries', label: '[[Prototype]]', },
-          { key: 'protoEntries' },
+          { key: 'entries', isDim: entry => entry[2] === false },
+          { key: 'protoEntries', isDim: () => true },
         ];
       }
     },
     methods: {
       toggleExpanded() {
+        if (!this.isExpandable) return;
         this.isExpanded = !this.isExpanded;
         if (this.isExpanded && this.isPartialDescription) {
           messageParent({target: 'runner', func: 'sendDescriptionFor', args: [this.path]});
@@ -410,29 +565,23 @@ function getJSValueComponentProps() {
     },
     template: `
       <div :class="classNames">
-        <div>
-          <span v-if="isExpandable" @click="toggleExpanded" :class="arrowClassNames">
-            <icon name="play"></icon>
-          </span>
-        </div>
-        <div style="flex-grow: 1; padding-left: 0.5em;">
-          <div>{{ description.string }}</div>
-          <div v-if="hasBeenExpanded" v-show="isExpanded" class="expansion">
-            <div v-if="isPartialDescription">Loading&hellip;</div>
-            <template v-else>
-              <template v-for="group in entryGroups">
-                <div v-for="(entry, entryIndex) in description[group.key]" style="display: flex;">
-                  <div>{{ entry[0] }}</div>
-                  <div style="flex-grow: 1;">
-                    <js-value
-                      :description="entry[1]"
-                      :path="path.concat([group.key, entryIndex])">
-                    </js-value>
-                  </div>
-                </div>
-              </template>
+        <div :class="['js-value-header', isExpandable ? 'expandable' : '']" @click="toggleExpanded"><span
+          v-if="isExpandable || isEntry" :class="['arrow', isExpandable ? 'expandable' : '', isExpanded ? 'expanded' : '']"></span><template
+          v-if="isEntry"><span :class="['entry-key', isDimName ? 'dim' : '']">{{ name }}</span>: </template><span
+          v-for="part in description.parts" :class="'t-' + part[0]">{{ part[1] }}</span></div>
+        <div v-if="hasBeenExpanded" v-show="isExpanded" class="expansion">
+          <div v-if="isPartialDescription" class="loading">Loading&hellip;</div>
+          <template v-else>
+            <template v-for="group in entryGroups">
+              <js-value
+                v-for="(entry, entryIndex) in description[group.key]"
+                :name="entry[0]"
+                :is-dim-name="group.isDim(entry)"
+                :description="entry[1]"
+                :path="path.concat([group.key, entryIndex])">
+              </js-value>
             </template>
-          </div>
+          </template>
         </div>
       </div>
     `
@@ -485,6 +634,53 @@ function parseJSCodeGroups(jsCode) {
 }
 
 /**
+ * Determines the header that should be displayed for a group of code and
+ * whether or not the group's code should be hidden.  A group is hidden if its
+ * header starts with `hidePrefix`, in which case anything after the prefix (and
+ * an optional colon) is used as the header.
+ * @param {string} headerLines
+ * @param {string} hidePrefix
+ * @returns {{header: string, isHidden: boolean}}
+ */
+function parseGroupHeader(headerLines, hidePrefix) {
+  const isHidden = !!hidePrefix && headerLines.startsWith(hidePrefix);
+  return {
+    header: isHidden
+      ? headerLines.slice(hidePrefix.length).replace(/^\s*:?\s*/, '')
+      : headerLines,
+    isHidden,
+  };
+}
+
+/**
+ * Separates the hidden groups of code from the visible code.
+ * @param {string} jsCode
+ * @param {string} hidePrefix
+ * @returns {{
+ *   visibleCode: string,
+ *   hiddenGroups: (ReturnType<parseJSCodeGroups>[number] & {runCount: number})[]
+ * }}
+ *   `visibleCode` is the code to show in the editor.  Each hidden group has a
+ *   `runCount` indicating how many visible groups must be run before it runs.
+ */
+function extractHiddenGroups(jsCode, hidePrefix) {
+  const visibleGroups = [];
+  const hiddenGroups = [];
+  for (const group of parseJSCodeGroups(jsCode)) {
+    if (parseGroupHeader(group.headerLines, hidePrefix).isHidden) {
+      hiddenGroups.push({...group, runCount: visibleGroups.length});
+    }
+    else {
+      visibleGroups.push(group);
+    }
+  }
+  return {
+    visibleCode: visibleGroups.map(g => g.allLines).join('\n'),
+    hiddenGroups,
+  };
+}
+
+/**
  * Finds the minimum indentation of all of the lines that have non-space
  * characters and removes the indentation accordingly for all indented lines.
  * @param {string} text
@@ -523,59 +719,128 @@ function unindentMin(text, opt_options) {
 }
 
 /**
+ * Picks the properties of a description sent by the runner so that nothing
+ * unexpected makes its way into the displays.
+ * @param {*} description
+ */
+function sanitizeDescription(description) {
+  description = Object(description);
+  return {
+    typeName: `${description.typeName}`,
+    isPrimitive: !!description.isPrimitive,
+    // Each part is [kind, text] where kind is used in a class name.
+    parts: Array.from(description.parts ?? [], part => [
+      /^[a-z]+$/.test(Object(part)[0]) ? part[0] : 'text',
+      `${Object(part)[1]}`,
+    ]),
+    ...sanitizeEntries(description),
+  };
+}
+
+/**
+ * Picks the entries of a description sent by the runner.
+ * @param {*} description
+ */
+function sanitizeEntries(description) {
+  description = Object(description);
+  const result = {};
+  for (const key of ['entries', 'protoEntries']) {
+    if (Array.isArray(description[key])) {
+      // Each entry is [key, description, isEnumerable].
+      result[key] = description[key].map(entry => [
+        `${Object(entry)[0]}`,
+        sanitizeDescription(Object(entry)[1]),
+        Object(entry)[2] !== false,
+      ]);
+    }
+  }
+  return result;
+}
+
+/**
  * NOTE:  Called via main by the runner.
  * @param {object} options
- * @param {string} options.type
  * @param {string} options.logId
  * @param {string} options.key
- * @param {any[][]} options.descriptions
+ * @param {any[]} options.descriptions
+ * @param {{headers: string[], rows: {index: string, cells: any[]}[]}|null} options.table
  */
-function appendLog({type, logId, key, descriptions}) {
+function appendLog({logId, key, descriptions, table}) {
+  key = `${key}`;
   mountedApp.displays.push({
-    type,
-    classNames: ['log', key],
+    type: 'log',
+    key,
     name: `console.${key}`,
-    descriptions,
-    logId,
+    descriptions: Array.from(descriptions, sanitizeDescription),
+    table: table ? {
+      headers: Array.from(table.headers, h => `${h}`),
+      rows: Array.from(table.rows, row => ({
+        index: `${row.index}`,
+        cells: Array.from(row.cells, cell => cell && sanitizeDescription(cell)),
+      })),
+    } : null,
+    logId: `${logId}`,
   });
 }
 
 /**
  * NOTE:  Called via main by the runner.
  * @param {object} options
- * @param {string} options.type
  * @param {string} options.message
- * @param {number} options.line
- * @param {number} options.column
+ * @param {number=} options.line
+ * @param {number=} options.column
  */
-function appendError({type, message, line, column}) {
+function appendError({message, line, column}) {
   mountedApp.displays.push({
-    type,
-    message,
-    line,
-    column,
+    type: 'error',
+    message: `${message}`,
+    line: +line,
+    column: +column,
   });
 }
 
-async function updateDescriptionFor(path, description) {
+/**
+ * NOTE:  Called via main by the runner.
+ * @param {(string|number)[]} path
+ *   The log ID, the argument index and then pairs of entry group keys and entry
+ *   indices.
+ * @param {*} description
+ */
+function updateDescriptionFor(path, description) {
+  path = Array.from(path);
   const logId = path.shift();
-  const display = mountedApp.displays.find(d => d.logId === logId);
-  const foundDescr = display.descriptions[path.shift()];
+  const display = mountedApp.displays.find(d => d.type === 'log' && d.logId === logId);
+  let level = display?.descriptions[toIndex(path.shift())];
 
-  let level = foundDescr;
-  let pathPartIndex = 0;
-  for (const pathPart of path) {
-    level = level[pathPart];
-    if (pathPartIndex % 2) level = level[1];
-    pathPartIndex++;
+  for (let i = 0; level && i < path.length; i += 2) {
+    const groupKey = path[i];
+    if (groupKey !== 'entries' && groupKey !== 'protoEntries') return;
+    level = level[groupKey]?.[toIndex(path[i + 1])]?.[1];
   }
 
-  // console.log('updateDescriptionFor', {
-  //   path,
-  //   description,
-  //   display: JSON.parse(JSON.stringify(display)),
-  //   foundDescr: JSON.parse(JSON.stringify(foundDescr)),
-  //   level: JSON.parse(JSON.stringify(level)),
-  // });
-  Object.assign(level, description);
+  if (level) Object.assign(level, sanitizeEntries(description));
+}
+
+/**
+ * NOTE:  Called via main by the runner once it has run a group of code.
+ */
+function onCodeRan() {
+  mountedApp.runningCount = Math.max(0, mountedApp.runningCount - 1);
+  mountedApp.runHiddenGroups();
+}
+
+/**
+ * NOTE:  Called via main by the runner when console.clear() is called.
+ */
+function clearDisplays() {
+  mountedApp.displays = [{type: 'notice', message: 'Console was cleared'}];
+}
+
+/**
+ * Only allows non-negative integers to be used as an index.
+ * @param {*} value
+ * @returns {number|undefined}
+ */
+function toIndex(value) {
+  return Number.isInteger(value) && value >= 0 ? value : undefined;
 }

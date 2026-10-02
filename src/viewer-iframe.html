@@ -1,30 +1,52 @@
-<div id="vueApp">
+<div id="splash" aria-label="Loading">
+  <div class="splash-content">
+    <span class="logo logo-large"><span class="logo-mark">JS</span><span class="logo-text">Box</span></span>
+    <div class="splash-progress"><div></div></div>
+  </div>
+</div>
+<div id="vueApp" v-cloak>
   <div id="main" ref="main" :class="mainElemClassNames" :style="mainElemStyles" @mousedown="onMainElemMouseDown">
     <div id="displays">
-      <div>
+      <div ref="displaysScroller" @scroll="onDisplaysScroll">
         <template v-for="display in displays">
-          <div v-if="display.type === 'prism'" @click="this.jsCode = display.value">
-            <div v-if="display.header" class="prism-header">{{ display.header }}</div>
-            <prism language="javascript" :code="display.value" is-dark match-braces></prism>
+          <div v-if="display.type === 'prism'">
+            <div v-if="display.isHidden" class="code-header toggleable no-select" @click="display.isCodeShown = !display.isCodeShown" :title="display.isCodeShown ? 'Hide Code' : 'Show Code'">
+              <span :class="['arrow', 'expandable', display.isCodeShown ? 'expanded' : '']"></span>{{ display.header || 'Hidden code' }}
+            </div>
+            <div v-else-if="display.header" class="code-header">{{ display.header }}</div>
+            <div v-if="display.isCodeShown" class="console-row code-row">
+              <span class="row-icon"><icon name="chevron"></icon></span>
+              <prism language="javascript" :code="display.value" :is-dark="theme === 'dark'" match-braces></prism>
+              <button class="copy-to-editor-button" title="Copy to editor" @click="copyToEditor(display.value)"><icon name="copyToEditor"></icon></button>
+            </div>
           </div>
-          <template v-if="display.type === 'log'">
-            <div :class="display.classNames">
-              <div class="type no-select">{{ display.name }}</div>
-              <div>
-                <js-value
-                  v-for="(description, index) in display.descriptions"
-                  :description="description"
-                  :path="[display.logId, index]">
-                </js-value>
-              </div>
+          <div v-if="display.type === 'log'" :class="['console-row', 'log-' + display.key]" :title="display.name">
+            <span v-if="display.key === 'error'" class="row-icon"><icon name="consoleError"></icon></span>
+            <span v-else-if="display.key === 'warn'" class="row-icon"><icon name="consoleWarning"></icon></span>
+            <div class="row-content">
+              <table v-if="display.table" class="console-table">
+                <thead>
+                  <tr><th v-for="header in display.table.headers">{{ header }}</th></tr>
+                </thead>
+                <tbody>
+                  <tr v-for="row in display.table.rows">
+                    <td>{{ row.index }}</td>
+                    <td v-for="cell in row.cells"><template v-if="cell"><span v-for="part in cell.parts" :class="'t-' + part[0]">{{ part[1] }}</span></template></td>
+                  </tr>
+                </tbody>
+              </table>
+              <js-value
+                v-for="(description, index) in display.descriptions"
+                :description="description"
+                :path="[display.logId, index]">
+              </js-value>
             </div>
-          </template>
-          <template v-if="display.type === 'error'">
-            <div class="error-display">
-              <div><icon name="error"></icon></div>
-              <div>{{ display.message }}</div>
-            </div>
-          </template>
+          </div>
+          <div v-if="display.type === 'notice'" class="console-row notice">{{ display.message }}</div>
+          <div v-if="display.type === 'error'" class="console-row log-error">
+            <span class="row-icon"><icon name="consoleError"></icon></span>
+            <div class="row-content">{{ display.message }}</div>
+          </div>
         </template>
       </div>
     </div>
@@ -33,22 +55,34 @@
       <ace-editor
         v-model="jsCode"
         language="javascript"
-        theme="dark"
+        :theme="theme"
         @key-combo="onEditorKeyCombo"
         height="100%">
       </ace-editor>
     </div>
   </div>
   <div id="bottomNav">
-    <div>
-      <span id="logo">JSBox</span>
+    <div class="brand">
+      <span class="logo"><span class="logo-mark">JS</span><span class="logo-text">Box</span></span>
+      <span class="runner-badge" :title="runnerMode === 'window' ? 'Code runs directly in this page' : 'Code runs in a Web Worker (no DOM access)'">{{ runnerMode === 'window' ? 'Window' : 'Worker' }}</span>
     </div>
     <div class="buttons">
       <template v-for="bottomButton in bottomButtons">
-        <button @click="bottomButton.callback.call(this, $event)" :title="bottomButton.title" :disabled="bottomButton.disableIf &amp;&amp; bottomButton.disableIf.call(this)">
-          <icon :name="bottomButton.iconName"></icon>
+        <span v-if="bottomButton.isSeparator" class="separator"></span>
+        <button v-else :class="bottomButton.className" @click="bottomButton.callback.call(this, $event)" :title="bottomButton.title" :disabled="bottomButton.disableIf &amp;&amp; bottomButton.disableIf.call(this)">
+          <icon :name="bottomButton.iconName"></icon><span v-if="bottomButton.label" class="label">{{ bottomButton.label }}</span>
         </button>
       </template>
+    </div>
+  </div>
+  <div v-if="dialog" class="dialog-backdrop" @mousedown.self="closeDialog(false)" @keydown.esc="closeDialog(false)">
+    <div class="dialog" role="alertdialog" aria-modal="true" :aria-label="dialog.title">
+      <div class="dialog-title">{{ dialog.title }}</div>
+      <div class="dialog-message">{{ dialog.message }}</div>
+      <div class="dialog-buttons">
+        <button class="dialog-button" @click="closeDialog(false)">Cancel</button>
+        <button class="dialog-button primary" ref="dialogConfirmButton" @click="closeDialog(true)">{{ dialog.confirmText }}</button>
+      </div>
     </div>
   </div>
 </div>

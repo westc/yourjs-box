@@ -10,58 +10,169 @@
    */
   const VIEWER_IFRAME_HTML = [[HTML_VIEWER_IFRAME_FILE_PLACEHOLDER]];
   /**
-   * Indicates if you can use a blob.  This will be false if testing in local
-   * file system.
+   * The URL of this script which is used to remove this script's lines from the
+   * stack traces of errors in window mode.
    */
-  const CAN_USE_BLOB_SRC = !(u=>(URL.revokeObjectURL(u),u.startsWith('blob:null/')))(URL.createObjectURL(new Blob()));
+  const OWN_URL = document.currentScript?.src ?? '';
+
+  /**
+   * The page's console methods before any console in window mode replaced them
+   * so that this script's own messages don't show up in those consoles.  These
+   * are shared by every copy of this script that is loaded in the page.
+   */
+  const ORIGINAL_CONSOLE = window[Symbol.for('yourjs-console.originalConsole')] ??= {...console};
+
+  /**
+   * The only functions that may be relayed to the viewer and to the runner.
+   * The runner executes the user's code so anything it sends must be limited
+   * to these calls.
+   */
+  const RELAYABLE_FUNCS = {
+    viewer: ['appendLog', 'appendError', 'clearDisplays', 'onCodeRan', 'updateDescriptionFor'],
+    runner: ['clearLogs', 'reset', 'runCode', 'sendDescriptionFor'],
+  };
+
+  /**
+   * Relays a message to its target as long as the function being called is
+   * allowed.
+   * @param {*} data
+   * @param {{[target: string]: {apply: (func: string, args: any[]) => void}}} targets
+   */
+  function relayMessage(data, targets) {
+    const {target, func, args} = Object(data);
+    const targetObj = targets[target];
+    if (targetObj && RELAYABLE_FUNCS[target].includes(func) && Array.isArray(args)) {
+      targetObj.apply(func, args);
+    }
+    else {
+      ORIGINAL_CONSOLE.error('Unhandled message sent to main handler:', data);
+    }
+  }
+
+  [[JS_RUNNER_FILE_PLACEHOLDER]]
+
+  /**
+   * Runs the user's code in a Web Worker.  The worker can be terminated which
+   * makes it possible to reset the console even if the code never finishes.
+   * @param {(message: any) => void} onMessage
+   */
+  function createWorkerRunner(onMessage) {
+    const WORKER_SOURCE = '(function(){'
+      + 'var runner = (' + createRunner + ')(function(m) { postMessage(m); }, {mode: "worker"});'
+      + 'onmessage = function(e) {'
+      +   'var d = e.data;'
+      +   'if (d && Object.prototype.hasOwnProperty.call(runner, d.func) && Array.isArray(d.args)) {'
+      +     'runner[d.func].apply(null, d.args);'
+      +   '}'
+      + '};'
+      + 'postMessage({target: "main", func: "ready"});'
+      + '})();';
+
+    // A data URL gives the worker an opaque origin so that it cannot make
+    // requests with the page's cookies.  Not all browsers support data URL
+    // workers so a blob URL is used as a fallback.
+    let canUseDataUrl = true;
+    let blobUrl;
+    let worker, isReady, pendingMessages;
+
+    function start() {
+      isReady = false;
+      pendingMessages = [];
+      const url = canUseDataUrl
+        ? 'data:text/javascript;charset=utf-8,' + encodeURIComponent(WORKER_SOURCE)
+        : (blobUrl ??= URL.createObjectURL(new Blob([WORKER_SOURCE], {type: 'text/javascript'})));
+      try {
+        worker = new Worker(url);
+      }
+      catch (e) {
+        if (!canUseDataUrl) throw e;
+        canUseDataUrl = false;
+        return start();
+      }
+
+      const thisWorker = worker;
+      worker.onmessage = e => {
+        if (thisWorker !== worker) return;
+        if (e.data?.target === 'main' && e.data.func === 'ready') {
+          isReady = true;
+          for (const message of pendingMessages.splice(0)) worker.postMessage(message);
+        }
+        else {
+          onMessage(e.data);
+        }
+      };
+      worker.onerror = e => {
+        // If the worker failed to start from a data URL try a blob URL.
+        if (thisWorker === worker && !isReady && canUseDataUrl) {
+          e.preventDefault();
+          canUseDataUrl = false;
+          const messages = pendingMessages;
+          worker.terminate();
+          start();
+          pendingMessages.push(...messages);
+        }
+      };
+    }
+
+    start();
+
+    return {
+      apply(func, args) {
+        if (func === 'reset') {
+          worker.terminate();
+          start();
+        }
+        else if (isReady) {
+          worker.postMessage({func, args});
+        }
+        else {
+          pendingMessages.push({func, args});
+        }
+      },
+    };
+  }
+
+  /**
+   * Runs the user's code directly in this window so that it has access to
+   * everything defined by the page.
+   * @param {(message: any) => void} onMessage
+   */
+  function createWindowRunner(onMessage) {
+    const runner = createRunner(onMessage, {mode: 'window', ownUrl: OWN_URL});
+    return {
+      apply(func, args) {
+        // Anything the code defined stays defined so a reset can only forget
+        // the logged values.
+        if (func === 'reset') runner.clearLogs();
+        else runner[func](...args);
+      },
+    };
+  }
 
   /**
    * Function executed when the script is included in a document.
    * @param {HTMLScriptElement} script
-   *   This is the current script but also the placeholder for where lupa will
-   *   be inserted into the DOM.
+   *   This is the current script but also the placeholder for where the
+   *   console will be inserted into the DOM.
    */
   function main(script) {
-    createFrames(script);
-  }
+    const dataset = JSON.parse(JSON.stringify(script.dataset));
+    const runnerMode = dataset.runner === 'window' ? 'window' : 'worker';
+    dataset.runner = runnerMode;
 
-  /**
-   * @param {HTMLScriptElement} script 
-   */
-  function createFrames(script) {
     /** @type {ReturnType<createCallableFrame>} */
     let callableViewerFrame;
+    const sendToViewer = data => relayMessage(data, {viewer: callableViewerFrame});
+    const runner = runnerMode === 'window'
+      ? createWindowRunner(sendToViewer)
+      : createWorkerRunner(sendToViewer);
 
-    const callableRunnerFrame = createCallableFrame({
-      jsCode() {
-        [[JS_RUNNER_IFRAME_FILE_PLACEHOLDER]]
-      },
-      functions: {
-      },
-      onMessage(message) {
-        const {target, func, args} = message.data;
-        if (target === 'viewer') callableViewerFrame.apply(func, args);
-        else console.error('Unhandled message sent to main handler:', message);
-      },
-      async onReady() {
-        callableViewerFrame = createViewerFrame(script, this);
-        this.call('init');
-      },
-      body: '',
-      style: {width: 0, height: 0, border: 0},
-      useBlobSrc: CAN_USE_BLOB_SRC,
-    });
+    // The theme is determined up front so that the loading screen uses it.
+    const theme = /^(light|dark)$/.test(dataset.theme)
+      ? dataset.theme
+      : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 
-    script.parentNode.insertBefore(callableRunnerFrame.iframe, script);
-  }
-
-  /**
-   * @param {HTMLScriptElement} script 
-   * @param {ReturnType<createCallableFrame>} callableRunnerFrame 
-   * @returns {ReturnType<createCallableFrame>}
-   */
-  function createViewerFrame(script, callableRunnerFrame) {
-    const callableViewerFrame = createCallableFrame({
+    callableViewerFrame = createCallableFrame({
       jsCode() {
         [[JS_VIEWER_IFRAME_FILE_PLACEHOLDER]]
       },
@@ -77,28 +188,23 @@
         'https://unpkg.com/prism-themes@1/themes/prism-vsc-dark-plus.min.css',
         'https://unpkg.com/prismjs@1/plugins/match-braces/prism-match-braces.min.css',
       ],
-      functions: {
-      },
+      htmlAttributes: 'data-theme="' + theme + '"',
       onMessage(message) {
-        const {target, func, args} = message.data;
-        if (target === 'runner') callableRunnerFrame.apply(func, args);
-        else console.error('Unhandled message sent to main handler:', message);
+        relayMessage(message.data, {runner});
       },
       async onReady() {
-        this.call('init', script.textContent, JSON.parse(JSON.stringify(script.dataset)));
+        this.call('init', script.textContent, dataset);
       },
       body: VIEWER_IFRAME_HTML,
       style: {
         width: '100%',
         height: '100%',
-        border: 0
+        border: 0,
+        display: 'block',
       },
-      useBlobSrc: CAN_USE_BLOB_SRC,
     });
 
     script.parentNode.insertBefore(callableViewerFrame.iframe, script);
-
-    return callableViewerFrame;
   }
 
   // NOTE:  This solution was intentionally written without using newer JS
@@ -108,9 +214,14 @@
       // NOTE:  Referencing with window to ensure that local namespace will not
       // interfere.
       window.addEventListener('message', function(e) {
-        if (e.data.funcName && e.data.args) {
-          var func = eval(e.data.funcName);
-          if ('function' === typeof func) func.apply(e, e.data.args || []);
+        var data = e.data;
+        if (
+          e.source === window.parent
+          && data && /^[A-Za-z_$][\w$]*$/.test(data.funcName)
+          && Array.isArray(data.args)
+        ) {
+          var func = eval(data.funcName);
+          if ('function' === typeof func) func.apply(e, data.args);
         }
       });
 
@@ -139,9 +250,8 @@
      * @param {string=} options.body
      * @param {(CSSStyleDeclaration|string)=} options.style
      *   The HTML code that will be used to instantiate the page.
-     * @param {boolean=} options.useBlobSrc
-     *   If specified a `Blob` will be used to construct the URL of the IFRAME
-     *   instead of using a data URL.
+     * @param {string=} options.htmlAttributes
+     *   Attributes to add to the `<html>` element of the IFRAME.
      * @param {((this: R, event: MessageEvent) => void)=} options.onMessage
      * @param {((this: R, event: MessageEvent) => void)=} options.onReady
      * @returns {R}
@@ -153,71 +263,66 @@
       var onReady = options.onReady;
       var style = options.style;
 
-      function getUrl(content, type) {
-        return (options.useBlobSrc && window.URL && 'function' === typeof URL.createObjectURL && 'function' === typeof Blob)
-          ? URL.createObjectURL(new Blob([content], {type: type}))
-          : toDataURL(content, {type: type, charset: 'utf8'});
-      }
-
       // isReady indicates if the IFRAME is ready to have messages sent to it
       // while READY_ID is used internally to confirm if the IFRAME is actually
       // ready to receive function calls.
       var isReady, READY_ID = Math.random() + '' + Math.random();
 
-      // Turns the script code for the IFRAME into a data URL.
-      var IFRAME_SCRIPT_SRC = getUrl(
-        [
-          '(function(){',
-          IFRAME_SCRIPT_MESSAGE_CODE,
-          'var applyParent, callParent;',
-          '(function(READY_ID){',
-          parseFunction(function() {
-            applyParent = function(funcName, args) {
-              window.parent.postMessage({funcName: funcName, args: args, id: READY_ID}, '*');
-            };
+      // The script code for the IFRAME.
+      var IFRAME_SCRIPT_CODE = [
+        '(function(){',
+        IFRAME_SCRIPT_MESSAGE_CODE,
+        'var applyParent, callParent;',
+        '(function(READY_ID){',
+        parseFunction(function() {
+          applyParent = function(funcName, args) {
+            window.parent.postMessage({funcName: funcName, args: args, id: READY_ID}, '*');
+          };
 
-            callParent = function(funcName) {
-              window.parent.postMessage(
-                {funcName: funcName, args: Array.prototype.slice.call(arguments, 1), id: READY_ID},
-                '*'
-              );
-            };
+          callParent = function(funcName) {
+            window.parent.postMessage(
+              {funcName: funcName, args: Array.prototype.slice.call(arguments, 1), id: READY_ID},
+              '*'
+            );
+          };
 
-            var interval = setInterval(function() {
-              if (/^(complete|interactive)$/.test(document.readyState)) {
-                clearInterval(interval);
-                messageParent(READY_ID);
-              }
-            }, 100);
-          }).body,
-          '})(' + JSON.stringify(READY_ID) + ');',
-          'function' !== typeof jsCode ? jsCode || '' : parseFunction(jsCode).body,
-          '})();',
-        ].join('\n'),
-        'text/javascript'
-      );
+          var interval = setInterval(function() {
+            if (/^(complete|interactive)$/.test(document.readyState)) {
+              clearInterval(interval);
+              messageParent(READY_ID);
+            }
+          }, 100);
+        }).body,
+        '})(' + JSON.stringify(READY_ID) + ');',
+        'function' !== typeof jsCode ? jsCode || '' : parseFunction(jsCode).body,
+        '})();',
+      ].join('\n')
+      // Prevents the HTML parser from ending the inline script early.
+      .replace(/<(?=\/script|!--)/gi, '\\x3C');
 
-      // Creates the IFRAME and sets its source by leveraging data URLs.
+      // Creates the IFRAME and sets its source via srcdoc.
       var IFRAME = document.createElement('iframe');
       var HTML_CODE = [
         '<!DOCTYPE html>',
-        '<html>',
+        '<html ' + (options.htmlAttributes || '') + '>',
         '<head>',
         options.head || '',
         (options.cssUrls || []).map(function(cssUrl) {
           return '<link href="' + cssUrl + '" rel="stylesheet">';
         }).join('\n'),
-        (options.jsUrls || []).map(function(jsUrl) {
-          return '<script src="' + jsUrl + '"><\x2fscript>';
-        }).join('\n'),
         '</head>',
         '<body>',
         options.body || '',
-        '<script src="' + IFRAME_SCRIPT_SRC + '"><\x2fscript>',
+        // The scripts are loaded after the body so that the body can be shown
+        // while they load.
+        (options.jsUrls || []).map(function(jsUrl) {
+          return '<script src="' + jsUrl + '"><\x2fscript>';
+        }).join('\n'),
+        '<script>' + IFRAME_SCRIPT_CODE + '<\x2fscript>',
         '</body>',
         '</html>'
       ].join('\n');
-      IFRAME.src = getUrl(HTML_CODE, 'text/html');
+      IFRAME.srcdoc = HTML_CODE;
 
       // Set the style of the iframe.
       if (style) {
@@ -252,6 +357,8 @@
           else if (dataIsReadyId) {
             isReady = true;
             if ('function' === typeof onReady) onReady.call(callableFrame, e);
+            // Sends anything that was queued before the IFRAME was ready.
+            while (queuedMessages.length) postToFrame(queuedMessages.shift());
           }
           else { // !isReady
             console.warn('Message sent from callable frame prematurely:', e);
@@ -261,12 +368,17 @@
 
       // Returns an object which makes it possible to call functions and get
       // access to the IFRAME.
+      var queuedMessages = [];
+      function postToFrame(message) {
+        if (isReady) IFRAME.contentWindow.postMessage(message, '*');
+        else queuedMessages.push(message);
+      }
       var callableFrame = {
         apply: function(funcName, args) {
-          IFRAME.contentWindow.postMessage({funcName: funcName, args: args}, '*');
+          postToFrame({funcName: funcName, args: args});
         },
         call: function(funcName) {
-          IFRAME.contentWindow.postMessage({funcName: funcName, args: Array.prototype.slice.call(arguments, 1)}, '*');
+          postToFrame({funcName: funcName, args: Array.prototype.slice.call(arguments, 1)});
         },
         iframe: IFRAME
       };
@@ -278,44 +390,6 @@
      * @property {(funcName: string, ...args: any[]) => void} call
      * @property {HTMLIFrameElement} iframe
      */
-
-    /**
-     * Turns a string that can represent a text document and returns the
-     * corresponding data URL (AKA data URI).
-     * @param {string} text
-     *   The text to turn into a data URL.
-     * @param {Object} options
-     *   Optional.  An object containing the different options to set.
-     * @param {boolean=} options.base64
-     *   Optional, defaults to the `false`.  Indicates if the returned data URL
-     *   should be base64 encoded.
-     * @param {string=} options.charset
-     *   Optional.  Indicates the character set of the content.  Examples are
-     *   "US-ASCII", "UTF-8", etc.
-     * @param {string=} options.type
-     *   Optional, defaults to the empty string.  The content type of `text` (eg.
-     *   `"text/html"`).
-     * @returns {string}
-     *   A data URL which represents `text` as the given `type`.
-     */
-    function toDataURL(text, options) {
-      options = Object(options);
-      var base64 = options.base64;
-      var charset = options.charset;
-      return ('data:'
-          + (options.type ?? '')
-          + ';'
-          + (charset ? 'charset=' + charset + ';' : '')
-          + (base64 ? 'base64;' : '')
-        ).replace(/;$/, '')
-        + ','
-        + (base64
-          // unescape() and encodeURIComponent() used based on this solution:
-          // https://stackoverflow.com/a/26603875/657132
-          ? window.btoa(unescape(encodeURIComponent(text)))
-          : encodeURIComponent(text)
-        );
-    }
 
     /**
      * Determines if `obj` has its own property named `prop`.
@@ -385,8 +459,7 @@
       };
     }
 
-    // Make toDataURL() and parseFunction() available.
-    createCallableFrame.toDataURL = toDataURL;
+    // Make parseFunction() available.
     createCallableFrame.parseFunction = parseFunction;
 
     return createCallableFrame;

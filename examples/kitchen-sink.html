@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>Kitchen Sink</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0 auto;
+        max-width: 1100px;
+        padding: 1em;
+      }
+      nav a {
+        margin-right: 0.5em;
+      }
+      nav a.active {
+        font-weight: bold;
+      }
+      section {
+        margin: 2em 0;
+      }
+      .console {
+        border: 1px solid #ccc;
+        height: 420px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Kitchen Sink</h1>
+    <script>
+      // Used by the window mode example.
+      var hostGreeting = 'Hello from the host page';
+    </script>
+    <nav>
+      Build:
+      <a data-param="build" data-value="full">main.full.js</a>
+      <a data-param="build" data-value="main">main.js</a>
+      <a data-param="build" data-value="min">main.min.js</a>
+      &middot;
+      Theme:
+      <a data-param="theme" data-value="">system</a>
+      <a data-param="theme" data-value="light">light</a>
+      <a data-param="theme" data-value="dark">dark</a>
+      &middot;
+      <a href="./">All examples</a>
+    </nav>
+
+    <section>
+      <h2>Logging &amp; value types</h2>
+      <div class="console">
+        <script type="text/x-console">
+          // Every console method \\
+          console.log('log', 1, 'two');
+          console.info('info');
+          console.warn('warn');
+          console.error('error');
+          console.debug('debug');
+
+          // Primitive values \\
+          console.log('a string', 42, 3.14, -0, NaN, Infinity, 123n, true, null, undefined, Symbol('sym'));
+          console.log('multi\nline\nstring');
+
+          // Objects (click the arrows to expand) \\
+          console.log({a: 1, nested: {b: [1, 2, {c: 3}]}});
+          console.log([1, 'two', {three: 3}], new Date(), /re+gex/gi);
+          console.log(new Map([['key', 'value'], [{obj: true}, [1, 2]]]), new Set([1, 'a', {}]));
+          console.log(new Uint8Array([1, 2, 3]), function namedFn() {}, () => {});
+
+          // Class instances \\
+          class Person {
+            constructor(name) { this.name = name; }
+            greet() { return `Hi, I'm ${this.name}`; }
+          }
+          class Team extends Array {}
+          console.log(new Person('Ada'), Team.from(['Ada', 'Grace']));
+          console.log(Person, Object.create(null));
+        </script>
+      </div>
+    </section>
+
+    <section>
+      <h2>console.table</h2>
+      <div class="console">
+        <script type="text/x-console" data-divider-orient="vertical">
+          // Array of objects \\
+          console.table([{name: 'Ada', born: 1815}, {name: 'Grace', born: 1906, navy: true}]);
+
+          // Object of objects \\
+          console.table({ada: {lang: 'Analytical Engine'}, grace: {lang: 'COBOL'}});
+
+          // Mixed primitives and objects \\
+          console.table(['a', 1, {x: 1}, null]);
+
+          // Only some columns \\
+          console.table([{a: 1, b: 2, c: 3}, {a: 4, b: 5, c: 6}], ['a', 'c']);
+
+          // Array of arrays \\
+          console.table([[1, 2], [3, 4, 5]]);
+
+          // Not tabular so it is logged normally \\
+          console.table('just a string');
+        </script>
+      </div>
+    </section>
+
+    <section>
+      <h2>Hidden code (<code>data-hide-prefix="HIDE"</code>)</h2>
+      <div class="console">
+        <script type="text/x-console" data-hide-prefix="HIDE">
+          // HIDE: Helpers (runs on load) \\
+          function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+          }
+          const greeting = 'Hello from hidden code';
+          console.log('The first hidden block ran on load.');
+
+          // Use the hidden helpers \\
+          console.log(greeting);
+          sleep(500).then(() => console.log('Slept for 500ms'));
+
+          // HIDE \\
+          console.log('A hidden block with no label runs right after the block before it.');
+
+          // Visible again \\
+          console.log('Visible block');
+
+          // HIDE: Trailing hidden block \\
+          console.log('Trailing hidden blocks run after the last visible block.');
+        </script>
+      </div>
+    </section>
+
+    <section>
+      <h2>Errors &amp; async code</h2>
+      <div class="console">
+        <script type="text/x-console">
+          // Thrown error \\
+          throw new Error('Something went wrong');
+
+          // Reference error \\
+          notDefined();
+
+          // Syntax error \\
+          const = 5;
+
+          // Unhandled promise rejection \\
+          Promise.reject(new Error('Rejected!'));
+
+          // Async logs \\
+          (async () => {
+            for (let i = 1; i <= 3; i++) {
+              await new Promise(resolve => setTimeout(resolve, 500));
+              console.log(`Tick ${i}`);
+            }
+          })();
+        </script>
+      </div>
+    </section>
+
+    <section>
+      <h2>Web Worker (the default)</h2>
+      <p>Code runs in a Web Worker so it can't touch the page.  Reset stops code that never finishes.</p>
+      <div class="console">
+        <script type="text/x-console" data-divider-orient="vertical">
+          // Top-level declarations are shared between blocks \\
+          let counter = 0;
+          var total = 10;
+
+          // Use them in a later block \\
+          counter++;
+          console.log({counter, total});
+
+          // There is no DOM in a worker \\
+          console.log(typeof document, typeof window, self.constructor.name);
+
+          // Try to escape through the relay (should be ignored) \\
+          postMessage({target: 'viewer', func: 'eval', args: ['alert("escaped!")']});
+          console.log('If no alert appeared then the relay blocked it.');
+
+          // Infinite loop (click Reset to stop it) \\
+          while (true) {}
+        </script>
+      </div>
+    </section>
+
+    <section>
+      <h2 id="window-target">Window mode (<code>data-runner="window"</code>)</h2>
+      <p>Code runs directly in this page so it can use the page's globals and DOM.</p>
+      <div class="console">
+        <script type="text/x-console" data-runner="window">
+          // The page's globals are available \\
+          console.log(document.title, hostGreeting);
+
+          // So is the page's DOM \\
+          const heading = document.querySelector('#window-target');
+          heading.textContent = 'Changed by the console!';
+          console.log(heading, document.body);
+        </script>
+      </div>
+    </section>
+
+    <script>
+      // Turns each text/x-console template into a real script using the build
+      // chosen via ?build=full|main|min (defaults to full) and the theme chosen
+      // via ?theme=light|dark (defaults to the system's color scheme).
+      (() => {
+        const params = new URLSearchParams(location.search);
+        const build = params.get('build') || 'full';
+        const theme = params.get('theme') || '';
+        const src = {full: 'main.full.js', main: 'main.js', min: 'main.min.js'}[build] || 'main.full.js';
+
+        for (const link of document.querySelectorAll('nav a[data-param]')) {
+          const {param, value} = link.dataset;
+          const linkParams = new URLSearchParams({build, theme, [param]: value});
+          link.href = '?' + linkParams;
+          link.classList.toggle('active', ({build, theme})[param] === value);
+        }
+
+        for (const template of document.querySelectorAll('script[type="text/x-console"]')) {
+          const script = document.createElement('script');
+          for (const {name, value} of template.attributes) {
+            if (name !== 'type') script.setAttribute(name, value);
+          }
+          if (theme) script.dataset.theme = theme;
+          script.textContent = template.textContent;
+          script.src = `../dist/${src}`;
+          template.replaceWith(script);
+        }
+      })();
+    </script>
+  </body>
+</html>

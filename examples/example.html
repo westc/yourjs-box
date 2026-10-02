@@ -21,6 +21,16 @@
         console.info(3, new Date(), {people: [{name: 'John Smith'}]});
         console.debug(4);
 
+        // Show some data as a table. \\
+        console.table([
+          {name: 'John Smith', age: 42},
+          {name: 'Jane Doe', email: 'jane@example.com'},
+          'just a string',
+        ]);
+
+        // HIDE: Sneaky setup \\
+        const secret = 'only visible if you expand the hidden block';
+
         // Call log() once every second for 10 seconds. \\
         (async() => {
           const startTime = Date.now();

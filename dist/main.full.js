@@ -3,342 +3,691 @@
    * Viewer IFRAME's CSS code
    * @type {string}
    */
-  const VIEWER_IFRAME_CSS = "@import url(https://fonts.googleapis.com/css2?family=Raleway:wght@100;400;700;900&display=swap);[v-cloak]{display:none}#vueApp{display:flex;flex-direction:column;font-family:Raleway,sans-serif;inset:0;position:fixed}#main{flex-grow:1;display:grid;gap:0;position:relative}#main.col-orient.is-moving-divider{cursor:col-resize}#main.row-orient.is-moving-divider{cursor:row-resize}#main.is-moving-divider::after{display:block;content:'';position:absolute;background-image:repeating-linear-gradient(45deg,hsl(0deg,100%,50%,75%),hsl(60deg,100%,50%,75%),hsl(120deg,100%,50%,75%),hsl(180deg,100%,50%,75%),hsl(240deg,100%,50%,75%),hsl(300deg,100%,50%,75%),hsl(360deg,100%,50%,75%) 100px);box-shadow:inset 0 0 0 1px #fff;z-index:99}#main.col-orient.is-moving-divider::after{width:var(--divider-size);left:calc(100% - var(--temp-editor-pct) - var(--divider-size) + var(--divider-size)/ 2);top:0;bottom:0}#main.row-orient.is-moving-divider::after{height:var(--divider-size);top:calc(100% - var(--temp-editor-pct) - var(--divider-size) + var(--divider-size)/ 2);left:0;right:0}#main.col-orient{grid-template-columns:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2);grid-template-rows:1fr}#main.row-orient{grid-template-columns:1fr;grid-template-rows:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2)}#main.col-orient .divider{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.2),rgba(0,0,0,0),rgba(255,255,255,.2) 10px),linear-gradient(90deg,#ccc,#000,#000,#ccc);cursor:col-resize}#main.row-orient .divider{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.2),rgba(0,0,0,0),rgba(255,255,255,.2) 10px),linear-gradient(0deg,#ccc,#000,#000,#ccc);cursor:row-resize}#displays{position:relative}#displays>div{position:absolute;inset:0;overflow:auto}#bottomNav{flex-grow:0;display:flex;flex-direction:row;background-image:linear-gradient(to bottom,hsl(55deg,100%,60%),hsl(55deg,100%,50%) 50%,hsl(50deg,100%,50%) 50%,hsl(55deg,100%,45%));align-items:center;-webkit-user-select:none;user-select:none}#bottomNav>:first-child{flex-grow:1;padding:0 .5em}#bottomNav>.buttons{flex-grow:0}#bottomNav>.buttons>button{border:0!important;background-color:rgba(255,255,255,.2);box-shadow:-.1em 0 .1em -.1em #000,.1em 0 .1em -.1em #000;padding:0 .5em}button{cursor:pointer}button:disabled{cursor:not-allowed}#bottomNav>.buttons>button.active,#bottomNav>.buttons>button:hover{background-color:rgba(0,0,0,.2)}#logo{font-size:1.2em;font-weight:900;filter:drop-shadow(0 0 1px #FFF) drop-shadow(0 0 1px #FFF) drop-shadow(0 0 1px #FFF) drop-shadow(0 0 1px #FFF) drop-shadow(0 0 1px #000)}.rotated-90deg{transform:rotate(90deg)}.align-top{vertical-align:top!important}.d-inline-block{display:inline-block!important}.d-block{display:block!important}.d-flex{display:flex!important}.d-inline-flex{display:inline-flex!important}.error-display{background-color:#fcc;box-shadow:inset 0 1px 1px -1px red;color:#600;padding:.5em;text-wrap:wrap;white-space-collapse:preserve;display:flex;flex-direction:row;font-family:'Courier New',Courier,monospace;font-size:.9em}.error-display>:last-child{flex-grow:1;margin-left:.25em}.js-value{display:inline;margin-right:.75em;text-wrap:wrap;white-space-collapse:preserve}.js-value.promise{color:hsl(30deg,100%,25%)}.js-value.string{color:hsl(60deg,100%,25%)}.js-value.number{color:hsl(120deg,100%,25%)}.js-value.bigint{color:hsl(180deg,100%,25%)}.js-value.symbol{color:hsl(210deg,100%,25%)}.js-value.boolean{color:hsl(240deg,100%,25%)}.js-value.date{color:hsl(270deg,100%,25%)}.js-value.function{color:hsl(300deg,100%,25%);font-style:italic}.js-value.array-like,.js-value.object{display:block}.js-value .expansion{box-shadow:-.5em 0 .25em -.5em;margin:0 0 0 -.875em;padding:0 0 0 .5em}.log{background-color:#eee;font-family:'Courier New',Courier,monospace;font-size:.9em;padding:.125em .25em}.log.warn{background-color:#ff9;color:#660}.log.error{background-color:#fdd;color:#600}.log.info{background-color:#def;color:#006}.log.debug{background-color:#dff;color:#006}.log>.type{box-shadow:0 .5em .5em -.5em;color:#0009;font-size:.8em;margin:0 0 .5em;background-image:linear-gradient(90deg,#0000,#0002 80%,#0001);text-align:left}.no-select{-webkit-user-select:none;user-select:none}.prism-header{background-image:linear-gradient(0deg,#0008,#2228 80%,#1118),linear-gradient(90deg,#000,#222 80%,#111);color:#eee;font-size:.8em;padding:.2em .5em;text-align:left;text-wrap:wrap;white-space-collapse:preserve}";
+  const VIEWER_IFRAME_CSS = "[v-cloak]{display:none}body,html{height:100%;margin:0}body{background-color:var(--console-bg);font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}#vueApp{display:flex;flex-direction:column;inset:0;position:fixed}#main{display:grid;flex-grow:1;gap:0;min-height:0;position:relative}#main.is-moving-divider{-webkit-user-select:none;user-select:none}#main.col-orient.is-moving-divider{cursor:col-resize}#main.row-orient.is-moving-divider{cursor:row-resize}#main.is-moving-divider::after{background-color:var(--accent);content:'';position:absolute;z-index:99}#main.col-orient.is-moving-divider::after{bottom:0;left:calc(100% - var(--temp-editor-pct) - var(--divider-size)/ 2 - 1px);top:0;width:2px}#main.row-orient.is-moving-divider::after{height:2px;left:0;right:0;top:calc(100% - var(--temp-editor-pct) - var(--divider-size)/ 2 - 1px)}#main.col-orient{grid-template-columns:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2);grid-template-rows:1fr}#main.row-orient{grid-template-columns:1fr;grid-template-rows:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2)}.divider{background-color:var(--divider-bg);box-sizing:border-box;position:relative;transition:background-color .15s}#main.col-orient .divider{border-left:1px solid var(--toolbar-border);border-right:1px solid var(--toolbar-border);cursor:col-resize}#main.row-orient .divider{border-bottom:1px solid var(--toolbar-border);border-top:1px solid var(--toolbar-border);cursor:row-resize}.divider::after{background-color:var(--divider-grip);border-radius:2px;content:'';left:50%;position:absolute;top:50%;transform:translate(-50%,-50%);transition:background-color .15s}#main.col-orient .divider::after{height:32px;width:2px}#main.row-orient .divider::after{height:2px;width:32px}#main.is-moving-divider .divider,.divider:hover{background-color:var(--divider-hover-bg)}#main.is-moving-divider .divider::after,.divider:hover::after{background-color:var(--accent)}#displays{position:relative}#displays>div{position:absolute;inset:0;overflow:auto}#bottomNav{align-items:center;background-color:var(--toolbar-bg);border-top:1px solid var(--toolbar-border);color:var(--toolbar-text);display:flex;flex:0 0 auto;font-size:12px;gap:8px;height:32px;padding:0 6px 0 8px;-webkit-user-select:none;user-select:none}#bottomNav>.brand{align-items:center;display:flex;flex-grow:1;gap:8px}.runner-badge{border:1px solid var(--toolbar-border);border-radius:999px;color:var(--muted-text);font-size:10px;letter-spacing:.04em;line-height:15px;padding:0 6px;text-transform:uppercase}#bottomNav>.buttons{align-items:center;display:flex;gap:2px}#bottomNav .separator{background-color:var(--toolbar-border);height:16px;margin:0 4px;width:1px}#bottomNav button{align-items:center;background:0 0;border:0;border-radius:4px;color:inherit;cursor:pointer;display:inline-flex;font:inherit;gap:5px;height:24px;justify-content:center;min-width:26px;padding:0 6px}#bottomNav button>span:not(.label){display:inline-flex;font-size:14px}#bottomNav button svg:not(.spin){transform:none!important}#bottomNav button:hover:not(:disabled){background-color:var(--button-hover)}#bottomNav button:disabled{cursor:not-allowed;opacity:.45}#bottomNav button.primary{background-color:var(--accent);color:var(--accent-text);font-weight:600;margin-left:2px;padding:0 10px 0 8px}#bottomNav button.primary>span:not(.label){font-size:11px}#bottomNav button.primary:hover:not(:disabled){background-color:var(--accent-hover)}#bottomNav button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}.spin{animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.logo{align-items:center;color:var(--toolbar-text);display:inline-flex;font-weight:700;gap:5px;letter-spacing:-.01em;line-height:1}.logo-mark{align-items:flex-end;background-color:#f7df1e;border-radius:3px;box-sizing:border-box;color:#1a1a1a;display:inline-flex;font-size:9.5px;font-weight:800;height:18px;justify-content:flex-end;letter-spacing:-.02em;padding:0 2px 2px 0;width:18px}.logo-text{font-size:14px}.logo-large{gap:12px}.logo-large>.logo-mark{border-radius:10px;box-shadow:0 8px 24px rgb(0 0 0 / .18);font-size:24px;height:56px;padding:0 6px 5px 0;width:56px}.logo-large>.logo-text{font-size:36px}#splash{align-items:center;background-color:var(--console-bg);display:flex;inset:0;justify-content:center;position:fixed;transition:opacity .35s ease,visibility .35s;z-index:1000}#splash.hidden{opacity:0;visibility:hidden}.splash-content{align-items:center;animation:splash-in .4s ease-out both;display:flex;flex-direction:column;gap:24px}.splash-progress{background-color:var(--toolbar-border);border-radius:3px;height:3px;overflow:hidden;width:140px}.splash-progress>div{animation:splash-progress 1.1s ease-in-out infinite;background-color:var(--accent);border-radius:inherit;height:100%;width:40%}@keyframes splash-in{from{opacity:0;transform:translateY(6px)}}@keyframes splash-progress{from{transform:translateX(-100%)}to{transform:translateX(250%)}}.dialog-backdrop{align-items:center;animation:fade-in .12s ease-out;background-color:var(--backdrop);display:flex;inset:0;justify-content:center;position:fixed;z-index:900}.dialog{animation:dialog-in .15s ease-out;background-color:var(--dialog-bg);border:1px solid var(--toolbar-border);border-radius:8px;box-shadow:0 12px 40px rgb(0 0 0 / .3);color:var(--console-text);font-size:13px;padding:16px;width:min(360px,calc(100% - 32px))}.dialog-title{font-size:14px;font-weight:600;margin-bottom:6px}.dialog-message{color:var(--muted-text);line-height:1.45}.dialog-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}.dialog-button{background:0 0;border:1px solid var(--toolbar-border);border-radius:4px;color:inherit;cursor:pointer;font:inherit;height:28px;padding:0 12px}.dialog-button:hover{background-color:var(--button-hover)}.dialog-button.primary{background-color:var(--accent);border-color:var(--accent);color:var(--accent-text);font-weight:600}.dialog-button.primary:hover{background-color:var(--accent-hover)}.dialog-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}@keyframes fade-in{from{opacity:0}}@keyframes dialog-in{from{opacity:0;transform:scale(.96)}}.rotated-90deg{transform:rotate(90deg)}.align-top{vertical-align:top!important}.d-inline-block{display:inline-block!important}.d-block{display:block!important}.d-flex{display:flex!important}.d-inline-flex{display:inline-flex!important}.no-select{-webkit-user-select:none;user-select:none}:root{color-scheme:light;--console-font:ui-monospace,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;--console-bg:#fff;--console-text:#1f1f1f;--row-border:#f0f0f0;--arrow:#727272;--chevron:#9aa0a6;--entry-key:#881391;--preview-key:#5f6368;--string:#c41a16;--number:#1a1aa6;--null:#80868b;--header-bg:#f1f3f4;--header-text:#3c4043;--warn-bg:#fffbe5;--warn-border:#fff5c2;--warn-text:#5c3c00;--warn-icon:#e8a600;--error-bg:#fff0f0;--error-border:#ffd6d6;--error-text:#dc362e;--error-icon:#dc362e;--table-header-bg:#f3f3f3;--table-border:#d0d0d0;--toolbar-bg:#f3f3f3;--toolbar-border:#d6d6d6;--toolbar-text:#333;--muted-text:#5f6368;--button-hover:rgb(0 0 0 / 0.08);--accent:#1a73e8;--accent-hover:#1765cc;--accent-text:#fff;--divider-bg:#f3f3f3;--divider-hover-bg:#e8eaed;--divider-grip:#b0b0b0;--dialog-bg:#fff;--backdrop:rgb(0 0 0 / 0.25)}:root[data-theme=dark]{color-scheme:dark;--console-bg:#242424;--console-text:#e3e3e3;--row-border:#3a3a3a;--arrow:#9aa0a6;--chevron:#80868b;--entry-key:#5db0d7;--preview-key:#9aa0a6;--string:#f28b54;--number:#9980ff;--null:#8e8e8e;--header-bg:#2d2e30;--header-text:#c4c7c5;--warn-bg:#332b00;--warn-border:#665500;--warn-text:#ffd17a;--warn-icon:#ffd17a;--error-bg:#290000;--error-border:#5c0000;--error-text:#ff8080;--error-icon:#ff6b6b;--table-header-bg:#2e2e2e;--table-border:#4a4a4a;--toolbar-bg:#2b2b2b;--toolbar-border:#474747;--toolbar-text:#e3e3e3;--muted-text:#9aa0a6;--button-hover:rgb(255 255 255 / 0.1);--accent:#8ab4f8;--accent-hover:#aecbfa;--accent-text:#202124;--divider-bg:#2b2b2b;--divider-hover-bg:#333;--divider-grip:#6b6b6b;--dialog-bg:#2d2e30;--backdrop:rgb(0 0 0 / 0.5)}#displays{background-color:var(--console-bg);color:var(--console-text)}#displays>div{font-family:var(--console-font);font-size:12px;line-height:16px}.console-row{border-bottom:1px solid var(--row-border);padding:2px 8px 2px 24px;position:relative;white-space:pre-wrap;word-break:break-word}.console-row>.row-icon{left:6px;line-height:0;position:absolute;top:4px}.log-error,.log-warn{margin-top:-1px}.log-warn{background-color:var(--warn-bg);border-bottom-color:var(--warn-border);border-top:1px solid var(--warn-border);color:var(--warn-text)}.log-warn>.row-icon{color:var(--warn-icon)}.log-error{background-color:var(--error-bg);border-bottom-color:var(--error-border);border-top:1px solid var(--error-border);color:var(--error-text)}.log-error>.row-icon{color:var(--error-icon)}.code-header{background-color:var(--header-bg);border-bottom:1px solid var(--row-border);color:var(--header-text);font-weight:700;padding:2px 8px;white-space:pre-wrap}.code-header.toggleable{cursor:pointer}.code-row .copy-to-editor-button{align-items:center;background-color:var(--console-bg);border:1px solid var(--toolbar-border);border-radius:4px;color:var(--toolbar-text);cursor:pointer;display:inline-flex;height:22px;justify-content:center;opacity:0;padding:0;position:absolute;right:6px;top:2px;transition:opacity .15s;width:22px}.code-row .copy-to-editor-button:focus-visible,.code-row:hover .copy-to-editor-button{opacity:1}.code-row .copy-to-editor-button:hover{background-color:var(--toolbar-bg)}@media (hover:none){.code-row .copy-to-editor-button{opacity:.8}}.notice{color:var(--null);font-style:italic}.code-row>.row-icon{color:var(--chevron)}.code-row code,.code-row pre{background:0 0!important;font-family:var(--console-font)!important;font-size:12px!important;line-height:16px!important;padding:0!important;text-shadow:none!important}.js-value{max-width:100%;vertical-align:top}.row-content>.js-value+.js-value{margin-left:1ch}.js-value-header.expandable{cursor:default}.js-value .expansion{padding-left:12px}.js-value .loading{color:var(--null);padding-left:12px}.arrow{display:inline-block;height:10px;position:relative;width:12px}.arrow.expandable::before{border-color:transparent transparent transparent var(--arrow);border-style:solid;border-width:4px 0 4px 6px;content:'';left:2px;position:absolute;top:1px;transform-origin:3px 4px;transition:transform .1s}.arrow.expandable.expanded::before{transform:rotate(90deg)}.entry-key{color:var(--entry-key)}.entry-key.dim{opacity:.6}.t-key{color:var(--preview-key)}.t-regexp,.t-string,.t-symbol{color:var(--string)}.t-number{color:var(--number)}.t-null{color:var(--null)}.t-function{font-style:italic}.t-node{color:var(--entry-key)}.console-table{border:1px solid var(--table-border);border-collapse:collapse;margin:2px 0 4px;white-space:nowrap}.console-table td,.console-table th{border-left:1px solid var(--table-border);max-width:300px;overflow:hidden;padding:1px 4px;text-align:left;text-overflow:ellipsis}.console-table th{background-color:var(--table-header-bg);border-bottom:1px solid var(--table-border);font-weight:400}";
   /**
    * Viewer IFRAME's HTML code
    * @type {string}
    */
-  const VIEWER_IFRAME_HTML = "<div id=\"vueApp\"><div id=\"main\" ref=\"main\" :class=\"mainElemClassNames\" :style=\"mainElemStyles\" @mousedown=\"onMainElemMouseDown\"><div id=\"displays\"><div><template v-for=\"display in displays\"><div v-if=\"display.type === 'prism'\" @click=\"this.jsCode = display.value\"><div v-if=\"display.header\" class=\"prism-header\">{{ display.header }}</div><prism language=\"javascript\" :code=\"display.value\" is-dark match-braces></prism></div><template v-if=\"display.type === 'log'\"><div :class=\"display.classNames\"><div class=\"type no-select\">{{ display.name }}</div><div><js-value v-for=\"(description, index) in display.descriptions\" :description=\"description\" :path=\"[display.logId, index]\"></js-value></div></div></template><template v-if=\"display.type === 'error'\"><div class=\"error-display\"><div><icon name=\"error\"></icon></div><div>{{ display.message }}</div></div></template></template></div></div><div class=\"divider\" ref=\"mainDivider\"></div><div id=\"editor\"><ace-editor v-model=\"jsCode\" language=\"javascript\" theme=\"dark\" @key-combo=\"onEditorKeyCombo\" height=\"100%\"></ace-editor></div></div><div id=\"bottomNav\"><div><span id=\"logo\">JSBox</span></div><div class=\"buttons\"><template v-for=\"bottomButton in bottomButtons\"><button @click=\"bottomButton.callback.call(this, $event)\" :title=\"bottomButton.title\" :disabled=\"bottomButton.disableIf &amp;&amp; bottomButton.disableIf.call(this)\"><icon :name=\"bottomButton.iconName\"></icon></button></template></div></div></div>";
+  const VIEWER_IFRAME_HTML = "<div id=\"splash\" aria-label=\"Loading\"><div class=\"splash-content\"><span class=\"logo logo-large\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div class=\"splash-progress\"><div></div></div></div></div><div id=\"vueApp\" v-cloak><div id=\"main\" ref=\"main\" :class=\"mainElemClassNames\" :style=\"mainElemStyles\" @mousedown=\"onMainElemMouseDown\"><div id=\"displays\"><div ref=\"displaysScroller\" @scroll=\"onDisplaysScroll\"><template v-for=\"display in displays\"><div v-if=\"display.type === 'prism'\"><div v-if=\"display.isHidden\" class=\"code-header toggleable no-select\" @click=\"display.isCodeShown = !display.isCodeShown\" :title=\"display.isCodeShown ? 'Hide Code' : 'Show Code'\"><span :class=\"['arrow', 'expandable', display.isCodeShown ? 'expanded' : '']\"></span>{{ display.header || 'Hidden code' }}</div><div v-else-if=\"display.header\" class=\"code-header\">{{ display.header }}</div><div v-if=\"display.isCodeShown\" class=\"console-row code-row\"><span class=\"row-icon\"><icon name=\"chevron\"></icon></span><prism language=\"javascript\" :code=\"display.value\" :is-dark=\"theme === 'dark'\" match-braces></prism><button class=\"copy-to-editor-button\" title=\"Copy to editor\" @click=\"copyToEditor(display.value)\"><icon name=\"copyToEditor\"></icon></button></div></div><div v-if=\"display.type === 'log'\" :class=\"['console-row', 'log-' + display.key]\" :title=\"display.name\"><span v-if=\"display.key === 'error'\" class=\"row-icon\"><icon name=\"consoleError\"></icon></span><span v-else-if=\"display.key === 'warn'\" class=\"row-icon\"><icon name=\"consoleWarning\"></icon></span><div class=\"row-content\"><table v-if=\"display.table\" class=\"console-table\"><thead><tr><th v-for=\"header in display.table.headers\">{{ header }}</th></tr></thead><tbody><tr v-for=\"row in display.table.rows\"><td>{{ row.index }}</td><td v-for=\"cell in row.cells\"><template v-if=\"cell\"><span v-for=\"part in cell.parts\" :class=\"'t-' + part[0]\">{{ part[1] }}</span></template></td></tr></tbody></table><js-value v-for=\"(description, index) in display.descriptions\" :description=\"description\" :path=\"[display.logId, index]\"></js-value></div></div><div v-if=\"display.type === 'notice'\" class=\"console-row notice\">{{ display.message }}</div><div v-if=\"display.type === 'error'\" class=\"console-row log-error\"><span class=\"row-icon\"><icon name=\"consoleError\"></icon></span><div class=\"row-content\">{{ display.message }}</div></div></template></div></div><div class=\"divider\" ref=\"mainDivider\"></div><div id=\"editor\"><ace-editor v-model=\"jsCode\" language=\"javascript\" :theme=\"theme\" @key-combo=\"onEditorKeyCombo\" height=\"100%\"></ace-editor></div></div><div id=\"bottomNav\"><div class=\"brand\"><span class=\"logo\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span> <span class=\"runner-badge\" :title=\"runnerMode === 'window' ? 'Code runs directly in this page' : 'Code runs in a Web Worker (no DOM access)'\">{{ runnerMode === 'window' ? 'Window' : 'Worker' }}</span></div><div class=\"buttons\"><template v-for=\"bottomButton in bottomButtons\"><span v-if=\"bottomButton.isSeparator\" class=\"separator\"></span> <button v-else :class=\"bottomButton.className\" @click=\"bottomButton.callback.call(this, $event)\" :title=\"bottomButton.title\" :disabled=\"bottomButton.disableIf &amp;&amp; bottomButton.disableIf.call(this)\"><icon :name=\"bottomButton.iconName\"></icon><span v-if=\"bottomButton.label\" class=\"label\">{{ bottomButton.label }}</span></button></template></div></div><div v-if=\"dialog\" class=\"dialog-backdrop\" @mousedown.self=\"closeDialog(false)\" @keydown.esc=\"closeDialog(false)\"><div class=\"dialog\" role=\"alertdialog\" aria-modal=\"true\" :aria-label=\"dialog.title\"><div class=\"dialog-title\">{{ dialog.title }}</div><div class=\"dialog-message\">{{ dialog.message }}</div><div class=\"dialog-buttons\"><button class=\"dialog-button\" @click=\"closeDialog(false)\">Cancel</button> <button class=\"dialog-button primary\" ref=\"dialogConfirmButton\" @click=\"closeDialog(true)\">{{ dialog.confirmText }}</button></div></div></div></div>";
   /**
-   * Indicates if you can use a blob.  This will be false if testing in local
-   * file system.
+   * The URL of this script which is used to remove this script's lines from the
+   * stack traces of errors in window mode.
    */
-  const CAN_USE_BLOB_SRC = !(u=>(URL.revokeObjectURL(u),u.startsWith('blob:null/')))(URL.createObjectURL(new Blob()));
+  const OWN_URL = document.currentScript?.src ?? '';
+
+  /**
+   * The page's console methods before any console in window mode replaced them
+   * so that this script's own messages don't show up in those consoles.  These
+   * are shared by every copy of this script that is loaded in the page.
+   */
+  const ORIGINAL_CONSOLE = window[Symbol.for('yourjs-console.originalConsole')] ??= {...console};
+
+  /**
+   * The only functions that may be relayed to the viewer and to the runner.
+   * The runner executes the user's code so anything it sends must be limited
+   * to these calls.
+   */
+  const RELAYABLE_FUNCS = {
+    viewer: ['appendLog', 'appendError', 'clearDisplays', 'onCodeRan', 'updateDescriptionFor'],
+    runner: ['clearLogs', 'reset', 'runCode', 'sendDescriptionFor'],
+  };
+
+  /**
+   * Relays a message to its target as long as the function being called is
+   * allowed.
+   * @param {*} data
+   * @param {{[target: string]: {apply: (func: string, args: any[]) => void}}} targets
+   */
+  function relayMessage(data, targets) {
+    const {target, func, args} = Object(data);
+    const targetObj = targets[target];
+    if (targetObj && RELAYABLE_FUNCS[target].includes(func) && Array.isArray(args)) {
+      targetObj.apply(func, args);
+    }
+    else {
+      ORIGINAL_CONSOLE.error('Unhandled message sent to main handler:', data);
+    }
+  }
+
+  /**
+   * Creates the runner which runs the user's code and reports what it logs.  This
+   * function must be self-contained because in worker mode it is converted to a
+   * string and run inside of a Web Worker.
+   * @param {(message: {target: string, func: string, args: any[]}) => void} send
+   *   Sends a message to the viewer (relayed by the main script).
+   * @param {Object} options
+   * @param {"worker"|"window"} options.mode
+   *   "worker" if running inside of a Web Worker or "window" if running directly
+   *   in the page that included the main script.
+   * @param {string=} options.ownUrl
+   *   The URL of the script containing this function.  Stack trace lines that
+   *   refer to it are removed so that only the lines for the user's code remain.
+   */
+  function createRunner(send, options) {
+    const {mode} = options;
+    const ownUrl = options.ownUrl || (mode === 'worker' ? self.location.href : '');
+    const logArgsById = {};
+    let logCount = 0;
+    let snippetCount = 0;
+  
+    // Overrides for console functions.  In window mode this also captures
+    // anything else that the page logs, just like the browser's console.
+    for (const key of ['clear', 'debug', 'error', 'info', 'log', 'table', 'warn']) {
+      const original = console[key];
+      if ('function' !== typeof original) continue;
+      console[key] = function(...args) {
+        if (key === 'clear') {
+          clearLogs();
+          send({target: 'viewer', func: 'clearDisplays', args: [true]});
+        }
+        else {
+          const table = key === 'table' ? parseTable(args[0], args[1]) : null;
+  
+          // console.table() only shows the data that was tabulated.
+          if (table) args = args.slice(0, 1);
+  
+          // Keep track of the args so that they can be expanded later.
+          const logId = `${++logCount}`;
+          logArgsById[logId] = args.map(value => ({...summarize(value), value}));
+  
+          send({
+            target: 'viewer',
+            func: 'appendLog',
+            args: [{
+              logId,
+              key,
+              descriptions: logArgsById[logId].map(without(['value'])),
+              table,
+            }]
+          });
+        }
+  
+        // Calls and returns the original console function.
+        return original.apply(this, arguments);
+      };
+    }
+  
+    addEventListener('error', evt => {
+      reportUncaught(evt.error !== undefined ? evt.error : evt.message);
+    });
+  
+    addEventListener('unhandledrejection', evt => {
+      reportUncaught(evt.reason, true);
+    });
+  
+    /**
+     * @param {*} error
+     * @param {boolean=} isInPromise
+     */
+    function reportUncaught(error, isInPromise) {
+      send({
+        target: 'viewer',
+        func: 'appendError',
+        args: [{
+          message: (isInPromise ? 'Uncaught (in promise) ' : 'Uncaught ')
+            + cleanStack(error?.stack ?? `${error?.message ?? error}`),
+        }]
+      });
+    }
+  
+    /**
+     * Removes the lines of a stack trace that refer to this runner's own code so
+     * that only the lines for the user's code are left.
+     * @param {string} stack
+     * @returns {string}
+     */
+    function cleanStack(stack) {
+      return `${stack}`
+        .split('\n')
+        .filter(line => !(ownUrl && /^\s*at\b/.test(line) && line.includes(ownUrl)))
+        .join('\n');
+    }
+  
+    function without(props, obj) {
+      if (!obj) return obj => without(props, obj);
+      const ret = {...obj};
+      for (const prop of props) delete ret[prop];
+      return ret;
+    }
+  
+    /**
+     * Turns the arguments passed to `console.table()` into a table similar to the
+     * one that the browser's console would show.
+     * @param {*} data
+     * @param {string[]=} columns
+     *   Optional.  If given only these columns will be shown.
+     * @return {{headers: string[], rows: {index: string, cells: (ReturnType<summarize>|null)[]}[]}|null}
+     *   The table or `null` if `data` cannot be shown as a table.
+     */
+    function parseTable(data, columns) {
+      if (data === null || 'object' !== typeof data) return null;
+  
+      const VALUE_HEADER = 'Value';
+      const headers = [];
+      let hasValueColumn = false;
+      const rowsData = Object.keys(data).map(index => {
+        const row = data[index];
+        const rowData = {index, values: {}, hasValue: false};
+        if (row !== null && ('object' === typeof row || 'function' === typeof row)) {
+          for (const key of Object.keys(row)) {
+            if (!headers.includes(key)) headers.push(key);
+            rowData.values[key] = row[key];
+          }
+        }
+        else {
+          hasValueColumn = true;
+          rowData.hasValue = true;
+          rowData.value = row;
+        }
+        return rowData;
+      });
+  
+      // Like the browser, only show the "Value" column if no columns were given.
+      const shownHeaders = Array.isArray(columns) ? columns.map(c => `${c}`) : headers;
+      const showValueColumn = hasValueColumn && !Array.isArray(columns);
+      return {
+        headers: ['(index)', ...shownHeaders, ...(showValueColumn ? [VALUE_HEADER] : [])],
+        rows: rowsData.map(({index, values, hasValue, value}) => ({
+          index,
+          cells: [
+            ...shownHeaders.map(h => Object.hasOwn(values, h) ? summarize(values[h], 2) : null),
+            ...(showValueColumn ? [hasValue ? summarize(value, 2) : null] : []),
+          ],
+        })),
+      };
+    }
+  
+    /**
+     * @param {*} value 
+     * @returns {string}
+     */
+    function getTypeName(value) {
+      if (value === null || value === undefined) return '' + value;
+      const typeOfValue = typeof value;
+      // Checking for object or undefined because document.all has a type of
+      // undefined.
+      return (typeOfValue === 'object' || typeOfValue === 'undefined')
+        ? Object.prototype.toString.call(value).slice(8, -1)
+        : typeOfValue;
+    }
+  
+    /**
+     * Gets the name of the class that `value` is an instance of (eg. "Person" for
+     * `new Person()`) falling back to `typeName` if the name can't be determined.
+     * @param {*} value
+     * @param {string} typeName
+     * @returns {string}
+     */
+    function getClassName(value, typeName) {
+      try {
+        const name = Object.getPrototypeOf(value)?.constructor?.name;
+        if (name && 'string' === typeof name) return name;
+      } catch (e) {}
+      return typeName;
+    }
+  
+    /**
+     * The maximum number of properties or items shown in a preview.
+     */
+    const MAX_PREVIEW_PROPS = 5;
+    const MAX_PREVIEW_ITEMS = 100;
+  
+    /**
+     * A preview is made up of parts so that the viewer can color each part like
+     * the browser's console does.  Each part is `[kind, text]` where `kind` is one
+     * of "text", "key", "string", "number", "null", "symbol", "regexp" or
+     * "function".
+     * @typedef {[string, string][]} PreviewParts
+     */
+  
+    /**
+     * @param {*} value
+     * @param {number=} depth
+     *   Optional, defaults to `0`.  `0` is used for values passed directly to a
+     *   console function, `1` for property values shown when expanding an object
+     *   and `2` for values nested within another value's preview.
+     * @param {boolean=} isPrototype
+     *   Optional, defaults to `false`.  If `true` only the name of the prototype
+     *   will be shown (eg. "Object").
+     * @returns {{typeName: string, isPrimitive: boolean, parts: PreviewParts}}
+     */
+    function summarize(value, depth = 0, isPrototype = false) {
+      const typeName = getTypeName(value);
+      const isPrimitive = typeName === 'function'
+        ? false
+        : typeName === typeName.toLowerCase();
+      const parts = isPrototype
+        ? [['text', typeName !== 'Object' ? typeName : getClassName(value, typeName)]]
+        : getPreviewParts(value, depth, typeName);
+      return {typeName, isPrimitive, parts};
+    }
+  
+    /**
+     * @param {*} value
+     * @param {number} depth
+     * @param {string=} typeName
+     * @returns {PreviewParts}
+     */
+    function getPreviewParts(value, depth, typeName = getTypeName(value)) {
+      if (typeName === 'string') {
+        if (!depth) return [['text', value]];
+        if (depth > 1 && value.length > 100) value = value.slice(0, 99) + '…';
+        return [['string', quote(value)]];
+      }
+      if (typeName === 'number') return [['number', Object.is(value, -0) ? '-0' : '' + value]];
+      if (typeName === 'bigint') return [['number', value + 'n']];
+      if (typeName === 'boolean') return [['number', '' + value]];
+      if (typeName === 'null' || typeName === 'undefined') return [['null', typeName]];
+      if (typeName === 'symbol') return [['symbol', value.toString()]];
+      if (typeName === 'function') return getFunctionPreviewParts(value, depth);
+  
+      // Previewing can throw for objects like Map.prototype which claim to be a
+      // Map (via Symbol.toStringTag) but whose getters only work on a Map.
+      try {
+        return getObjectPreviewParts(value, depth, typeName);
+      }
+      catch (e) {
+        return [['text', typeName]];
+      }
+    }
+  
+    /**
+     * Quotes a string the way the browser's console does.
+     * @param {string} string
+     * @returns {string}
+     */
+    function quote(string) {
+      const json = JSON.stringify(string);
+      return string.includes("'")
+        ? json
+        : `'${json.slice(1, -1).replace(/\\"/g, '"')}'`;
+    }
+  
+    /**
+     * @param {Function} value
+     * @param {number} depth
+     * @returns {PreviewParts}
+     */
+    function getFunctionPreviewParts(value, depth) {
+      let source = '';
+      try {
+        source = Function.prototype.toString.call(value);
+      } catch (e) {}
+      const isClass = /^class\b/.test(source);
+  
+      // Like the browser, show the source of functions passed directly to a
+      // console function.
+      if (!depth) {
+        return [['text', isClass ? source : source.replace(/^(async\s+)?function\b\s*/, '$1ƒ ')]];
+      }
+      if (depth > 1) return [['function', 'ƒ']];
+      return [['function', isClass ? `class ${value.name}` : `ƒ ${value.name}()`]];
+    }
+  
+    /**
+     * @param {*} value
+     * @param {number} depth
+     * @param {string} typeName
+     * @returns {PreviewParts}
+     */
+    function getObjectPreviewParts(value, depth, typeName) {
+      const className = getClassName(value, typeName);
+      const isArrayLike = /^Array(?:[^a-z]|$)|[^A-Z]Array$/.test(typeName);
+  
+      if (typeName === 'Date') {
+        return [['text', isNaN(value) ? 'Invalid Date' : Date.prototype.toString.call(value)]];
+      }
+      if (typeName === 'RegExp') return [['regexp', '' + value]];
+      // DOM nodes (only available in window mode) are shown like the browser
+      // shows them in previews (eg. "h2#title.big").
+      if ('undefined' !== typeof Node && value instanceof Node) {
+        if (value.nodeType === Node.ELEMENT_NODE) {
+          return [['node', value.localName
+            + (value.id ? '#' + value.id : '')
+            + [...value.classList].map(c => '.' + c).join('')]];
+        }
+        if (value.nodeType === Node.TEXT_NODE) return [['string', quote(value.data)]];
+        return [['node', value.nodeName]];
+      }
+      if (value instanceof Error) {
+        return [['text', !depth ? cleanStack(value.stack ?? `${value}`) : `${value.name}: ${value.message}`]];
+      }
+  
+      // Values nested within another preview are abbreviated.
+      if (depth > 1) {
+        if (isArrayLike) return [['text', `${className}(${value.length})`]];
+        if (typeName === 'Map' || typeName === 'Set') return [['text', `${className}(${value.size})`]];
+        return [['text', className === 'Object' ? '{…}' : className]];
+      }
+  
+      const parts = [];
+      const addItems = (items, total, addItem) => {
+        items.forEach((item, index) => {
+          if (index) parts.push(['text', ', ']);
+          addItem(item);
+        });
+        if (total > items.length) parts.push(['text', (items.length ? ', ' : '') + '…']);
+      };
+  
+      if (isArrayLike) {
+        const length = value.length;
+        parts.push(['text', typeName === 'Array' && className === 'Array' ? `(${length}) [` : `${className}(${length}) [`]);
+        addItems(
+          Array.from({length: Math.min(length, MAX_PREVIEW_ITEMS)}, (_, i) => i),
+          length,
+          i => parts.push(...(i in value ? getPreviewParts(value[i], 2) : [['null', 'empty']]))
+        );
+        parts.push(['text', ']']);
+      }
+      else if (typeName === 'Map' || typeName === 'Set') {
+        const items = [...value].slice(0, MAX_PREVIEW_ITEMS);
+        parts.push(['text', `${className}(${value.size}) {`]);
+        addItems(items, value.size, item => {
+          if (typeName === 'Map') {
+            parts.push(...getPreviewParts(item[0], 2), ['text', ' => '], ...getPreviewParts(item[1], 2));
+          }
+          else {
+            parts.push(...getPreviewParts(item, 2));
+          }
+        });
+        parts.push(['text', '}']);
+      }
+      else {
+        const keys = Object.keys(value);
+        if (className !== 'Object') parts.push(['text', className + ' ']);
+        if (typeName === 'Number' || typeName === 'String' || typeName === 'Boolean') {
+          parts.push(['text', '{'], ...getPreviewParts(value.valueOf(), 2), ['text', '}']);
+        }
+        else {
+          parts.push(['text', '{']);
+          addItems(keys.slice(0, MAX_PREVIEW_PROPS), keys.length, key => {
+            // Like the browser, don't call getters just to show a preview.
+            const descriptor = Object.getOwnPropertyDescriptor(value, key);
+            parts.push(
+              ['key', key],
+              ['text', ': '],
+              ...('value' in descriptor ? getPreviewParts(descriptor.value, 2) : [['text', '(…)']])
+            );
+          });
+          parts.push(['text', '}']);
+        }
+      }
+      return parts;
+    }
+  
+    /**
+     * Describes the children of a value so that it can be expanded in the viewer.
+     * @param {*} value
+     * @param {*=} receiver
+     *   Optional, defaults to `value`.  The object used as `this` when calling
+     *   getters.  When describing a prototype this is the object that was
+     *   originally logged so that getters (eg. `size` on `Map.prototype`) work.
+     */
+    function describe(value, receiver = value) {
+      const typeName = getTypeName(value);
+      const entries = [];
+      const $entries = [];
+      const protoEntries = [];
+      const $protoEntries = [];
+  
+      if (value !== null && ('object' === typeof value || 'function' === typeof value)) {
+        let wasIterated = false;
+        try {
+          // Map
+          if (typeName === 'Map') {
+            for (const [k, v] of [...value]) {
+              entries.push([getPreviewParts(k, 2).map(part => part[1]).join(''), summarize(v, 1)]);
+              $entries.push({value: v});
+            }
+            wasIterated = true;
+          }
+          // other iterable (eg. Int8Array, Set)
+          else if (typeName !== 'Array' && typeName !== 'function' && 'function' === typeof value[Symbol.iterator]) {
+            let index = 0;
+            for (const v of value) {
+              entries.push(['' + index, summarize(v, 1)]);
+              $entries.push({value: v});
+              ++index;
+            }
+            wasIterated = true;
+          }
+        }
+        catch (e) {
+          // Prototypes such as Map.prototype look iterable but cannot be iterated
+          // so their properties will be listed instead.
+          entries.length = $entries.length = 0;
+        }
+  
+        // Array, Object, functions, prototypes, etc.
+        if (!wasIterated) {
+          for (const k of Object.getOwnPropertyNames(value)) {
+            try {
+              const descriptor = Object.getOwnPropertyDescriptor(value, k);
+              const v = 'value' in descriptor ? descriptor.value : Reflect.get(value, k, receiver);
+              entries.push([k, summarize(v, 1), descriptor.enumerable]);
+              $entries.push({value: v});
+            } catch(e) {}
+          }
+        }
+  
+        // The prototype is its own subtree which can be expanded to see its
+        // properties (and its own prototype).
+        const proto = Object.getPrototypeOf(value);
+        if (proto !== null) {
+          protoEntries.push(['[[Prototype]]', summarize(proto, 1, true)]);
+          $protoEntries.push({value: proto, receiver});
+        }
+      }
+  
+      return {entries, protoEntries, $entries, $protoEntries};
+    }
+  
+    // ['123', 0, 'entries', 0]
+    // ['123', 0, 'entries', 0]
+    // LOGS = {
+    //   '123': [
+    //     {
+    //       value: {a: 4},
+    //       $entries: [{value: 4}]
+    //     }
+    //   ]
+    // }
+  
+    /**
+     * Runs the code as a classic script so that top-level declarations are
+     * shared between all of the code that is run.
+     * @param {string} jsCode
+     */
+    function runCode(jsCode) {
+      // Names the code so that stack traces refer to it by this name.
+      const source = `${jsCode}\n//# sourceURL=snippet-${++snippetCount}.js`;
+  
+      if (mode === 'worker') {
+        const url = URL.createObjectURL(new Blob([source], {type: 'text/javascript'}));
+        try {
+          importScripts(url);
+        }
+        catch (e) {
+          reportUncaught(e);
+        }
+        finally {
+          URL.revokeObjectURL(url);
+        }
+      }
+      else {
+        const script = document.createElement('script');
+        script.textContent = source;
+        document.head.appendChild(script);
+        script.remove();
+      }
+  
+      // Lets the viewer know that any synchronous logs have already been sent.
+      send({target: 'viewer', func: 'onCodeRan', args: []});
+    }
+  
+    /**
+     * @param {(string|number)[]} path
+     *   The log ID, the argument index and then pairs of entry group keys and
+     *   entry indices.
+     */
+    function sendDescriptionFor(path) {
+      // Get the description of the desired value.
+      let level = logArgsById;
+      let pathPartIndex = 0;
+      for (let pathPart of path) {
+        if (pathPartIndex && pathPartIndex % 2 === 0) {
+          pathPart = '$' + pathPart;
+        }
+        level = level?.[pathPart];
+        pathPartIndex++;
+      }
+      if (!level) return;
+      const description = describe(level.value, 'receiver' in level ? level.receiver : level.value);
+  
+      // Change the summary to an actual description at the level found.
+      Object.assign(level, description);
+  
+      // Send the description without values back to the viewer.
+      send({
+        target: 'viewer',
+        func: 'updateDescriptionFor',
+        args: [path, without(['$entries', '$protoEntries'], description)],
+      });
+    }
+  
+    /**
+     * Forgets all of the logged values (eg. when the console is cleared).
+     */
+    function clearLogs() {
+      for (const logId of Object.keys(logArgsById)) delete logArgsById[logId];
+    }
+  
+    return {clearLogs, runCode, sendDescriptionFor};
+  }
+  
+
+  /**
+   * Runs the user's code in a Web Worker.  The worker can be terminated which
+   * makes it possible to reset the console even if the code never finishes.
+   * @param {(message: any) => void} onMessage
+   */
+  function createWorkerRunner(onMessage) {
+    const WORKER_SOURCE = '(function(){'
+      + 'var runner = (' + createRunner + ')(function(m) { postMessage(m); }, {mode: "worker"});'
+      + 'onmessage = function(e) {'
+      +   'var d = e.data;'
+      +   'if (d && Object.prototype.hasOwnProperty.call(runner, d.func) && Array.isArray(d.args)) {'
+      +     'runner[d.func].apply(null, d.args);'
+      +   '}'
+      + '};'
+      + 'postMessage({target: "main", func: "ready"});'
+      + '})();';
+
+    // A data URL gives the worker an opaque origin so that it cannot make
+    // requests with the page's cookies.  Not all browsers support data URL
+    // workers so a blob URL is used as a fallback.
+    let canUseDataUrl = true;
+    let blobUrl;
+    let worker, isReady, pendingMessages;
+
+    function start() {
+      isReady = false;
+      pendingMessages = [];
+      const url = canUseDataUrl
+        ? 'data:text/javascript;charset=utf-8,' + encodeURIComponent(WORKER_SOURCE)
+        : (blobUrl ??= URL.createObjectURL(new Blob([WORKER_SOURCE], {type: 'text/javascript'})));
+      try {
+        worker = new Worker(url);
+      }
+      catch (e) {
+        if (!canUseDataUrl) throw e;
+        canUseDataUrl = false;
+        return start();
+      }
+
+      const thisWorker = worker;
+      worker.onmessage = e => {
+        if (thisWorker !== worker) return;
+        if (e.data?.target === 'main' && e.data.func === 'ready') {
+          isReady = true;
+          for (const message of pendingMessages.splice(0)) worker.postMessage(message);
+        }
+        else {
+          onMessage(e.data);
+        }
+      };
+      worker.onerror = e => {
+        // If the worker failed to start from a data URL try a blob URL.
+        if (thisWorker === worker && !isReady && canUseDataUrl) {
+          e.preventDefault();
+          canUseDataUrl = false;
+          const messages = pendingMessages;
+          worker.terminate();
+          start();
+          pendingMessages.push(...messages);
+        }
+      };
+    }
+
+    start();
+
+    return {
+      apply(func, args) {
+        if (func === 'reset') {
+          worker.terminate();
+          start();
+        }
+        else if (isReady) {
+          worker.postMessage({func, args});
+        }
+        else {
+          pendingMessages.push({func, args});
+        }
+      },
+    };
+  }
+
+  /**
+   * Runs the user's code directly in this window so that it has access to
+   * everything defined by the page.
+   * @param {(message: any) => void} onMessage
+   */
+  function createWindowRunner(onMessage) {
+    const runner = createRunner(onMessage, {mode: 'window', ownUrl: OWN_URL});
+    return {
+      apply(func, args) {
+        // Anything the code defined stays defined so a reset can only forget
+        // the logged values.
+        if (func === 'reset') runner.clearLogs();
+        else runner[func](...args);
+      },
+    };
+  }
 
   /**
    * Function executed when the script is included in a document.
    * @param {HTMLScriptElement} script
-   *   This is the current script but also the placeholder for where lupa will
-   *   be inserted into the DOM.
+   *   This is the current script but also the placeholder for where the
+   *   console will be inserted into the DOM.
    */
   function main(script) {
-    createFrames(script);
-  }
+    const dataset = JSON.parse(JSON.stringify(script.dataset));
+    const runnerMode = dataset.runner === 'window' ? 'window' : 'worker';
+    dataset.runner = runnerMode;
 
-  /**
-   * @param {HTMLScriptElement} script 
-   */
-  function createFrames(script) {
     /** @type {ReturnType<createCallableFrame>} */
     let callableViewerFrame;
+    const sendToViewer = data => relayMessage(data, {viewer: callableViewerFrame});
+    const runner = runnerMode === 'window'
+      ? createWindowRunner(sendToViewer)
+      : createWorkerRunner(sendToViewer);
 
-    const callableRunnerFrame = createCallableFrame({
-      jsCode() {
-        const logArgsById = {};
-        const OLD_CONSOLE = Object.assign({}, console);
-        
-        function init() {
-          // Overrides for console functions: log, warn, debug, info
-          for (const [key, value] of Object.entries(console)) {
-            if ('function' === typeof value && /^(debug|error|info|log|warn)$/.test(key)) {
-              console[key] = function() {
-                // Gets a unique logId.
-                let logId = '' + Date.now();
-                for (; logArgsById.hasOwnProperty(logId); logId += '.' + Math.random());
-        
-                // Keep track of the args.
-                logArgsById[logId] = Array.prototype.map.call(
-                  arguments,
-                  value => ({...summarize(value), value})
-                );
-          
-                // Sends the initial log data back to the parent to then relay it back to
-                // the viewer.
-                messageParent({
-                  target: 'viewer',
-                  func: 'appendLog',
-                  args: [{
-                    type: 'log',
-                    logId,
-                    key,
-                    descriptions: logArgsById[logId].map(without(['value']))
-                  }]
-                });
-          
-                // Calls and returns the original console function.
-                return value.apply(this, arguments);
-              };
-            }
-          }
-        
-          addEventListener('error', evt => {
-            messageParent({
-              target: 'viewer',
-              func: 'appendError',
-              args: [{
-                type: 'error',
-                message: evt.error?.stack ?? evt.message ?? evt.error?.message ?? `${evt.error}`,
-                line: evt.lineno,
-                column: evt.colno,
-              }]
-            });
-          });
-        }
-        
-        /**
-         * Determines if a value is an array that can be visualized like a table.  Such
-         * an array would only contain objects where at least one of them has at least
-         * one key.
-         * @param {*} value
-         * @return {any[][]|null}
-         */
-        function parseTableArray(value) {
-          if (!Array.isArray(value) || value.length < 1) return null;
-        
-          // Start the headers by looking at the first row if it is an array.
-          const colValToIndices = {};
-          let headers = [];
-          if (Array.isArray(value[0])) {
-            /** @type {any[]} */
-            const firstRow = value.shift();
-            headers = firstRow;
-            for (let i = 0, l = firstRow.length; i < l; i++) {
-              const item = firstRow[i];
-              if (Object.hasOwn(colValToIndices, item)) colValToIndices[item].push(i);
-              else colValToIndices[item] = [i];
-            }
-          }
-        
-          // Populate the rows and add any headers that were missing.
-          const newRows = [];
-          for (const oldRow of value) {
-            if (oldRow === null || 'object' !== typeof oldRow) return null;
-            const newRow = [];
-            if (Array.isArray(oldRow)) {
-              newRow.push(...oldRow);
-              if (oldRow.length > headers.length) {
-                headers.length = oldRow.length;
-              }
-            }
-            else {
-              const entries = Object.entries(oldRow);
-              if (!entries.length) return null;
-              for (const [oldKey, oldValue] of entries) {
-                /** @type {number[]} */
-                let indices = !Object.hasOwn(colValToIndices, oldKey)
-                  ? colValToIndices[oldKey] = [headers.push(oldKey) - 1]
-                  : colValToIndices[oldKey];
-                for (const index of indices) {
-                  newRow[index] = oldValue;
-                }
-              }
-            }
-            newRows.push(newRow);
-          }
-        
-          // Return the array of arrays representing the table.
-          return [headers, ...newRows];
-        }
-        
-        /**
-         * @param {*} value 
-         * @returns {string}
-         */
-        function getTypeName(value) {
-          if (value === null || value === undefined) return '' + value;
-          const typeOfValue = typeof value;
-          // Checking for object or undefined because document.all has a type of
-          // undefined.
-          return (typeOfValue === 'object' || typeOfValue === 'undefined')
-            ? Object.prototype.toString.call(value).slice(8, -1)
-            : typeOfValue;
-        }
-        
-        /**
-         * @param {*} value 
-         * @returns {{typeName: string, string: string, isPrimitive: boolean}}
-         */
-        function summarize(value) {
-          const typeName = getTypeName(value);
-          const isPrimitive = typeName === typeName.toLowerCase();
-        
-          if (typeName === 'symbol') string = value.toString();
-          else if (typeName === 'bigint') string = value + 'n';
-          else if (typeName === 'null' || typeName === 'undefined' || typeName === 'boolean' || typeName === 'number' || typeName === 'RegExp') {
-            string = '' + value;
-          }
-          else if (typeName === 'Date') {
-            string = 'Date('
-              + new Intl.DateTimeFormat(undefined, {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  weekday: 'short',
-                  hour: 'numeric',
-                  minute: '2-digit',
-                  second: '2-digit',
-                  fractionalSecondDigits: 3,
-                }).format(value)
-              + ')';
-          }
-          else if (typeName === 'string') string = value;
-          else if (typeName === 'function') string = `ƒ ${value.name}(\u2026)`;
-          else if (typeName === 'WeakMap' || typeName === 'WeakSet') string = typeName;
-          else if (typeName === 'Map' || typeName === 'Set') string = `${typeName}(${value.size})`;
-          else if (/^Array(?:[^a-z]|$)|[^A-Z]Array$|^String$/.test(typeName)) {
-            string = `${typeName}(${value.length})`;
-          }
-          else if (typeName === 'Number' || typeName === 'Boolean') string = `${typeName}(${value})`;
-          else string = `${typeName}(${Object.keys(value).length})`;
-        
-          return {typeName, string, isPrimitive};
-        }
-        
-        function describe(value) {
-          const {typeName, string, isPrimitive} = summarize(value);
-          const entries = [];
-          const $entries = [];
-          const protoEntries = [];
-          const $protoEntries = [];
-        
-          if (!isPrimitive) {
-            // Map
-            if (typeName === 'Map') {
-              for (const [k, v] of [...value]) {
-                entries.push([summarize(k).string, summarize(v)]);
-                $entries.push({value: v});
-              }
-            }
-            // other iterable (eg. Int8Array, Set)
-            else if (typeName !== 'Array' && 'function' === typeof value[Symbol.iterator]) {
-              let index = 0;
-              for (const v of value) {
-                entries.push(['' + index, summarize(v)]);
-                $entries.push({value: v});
-                ++index;
-              }
-            }
-            // Array, Object, etc.
-            else {
-              for (const k of Object.keys(value)) {
-                try {
-                  const v = value[k];
-                  entries.push([k, summarize(v)]);
-                  $entries.push({value: v});
-              } catch(e) {}
-              }
-            }
-        
-            // Add all proto entries but do in a try-catch just `value` is `__proto__`
-            // of an object.
-            try {
-              for (const k of Object.getOwnPropertyNames(Object.getPrototypeOf(value))) {
-                const v = value[k];
-                protoEntries.push([k, summarize(v)]);
-                $protoEntries.push({value: v});
-              }
-            } catch(e){}
-          }
-        
-          return {
-            entries,
-            isPrimitive,
-            protoEntries,
-            string,
-            typeName,
-            $entries,
-            $protoEntries
-          };
-        }
-        
-        // ['123', 0, 'entries', 0]
-        // ['123', 0, 'entries', 0]
-        // LOGS = {
-        //   '123': [
-        //     {
-        //       value: {a: 4},
-        //       $entries: [{value: 4}]
-        //     }
-        //   ]
-        // }
-        
-        function sendDescriptionFor(path) {
-          // OLD_CONSOLE.log('sendDescriptionFor', {logArgsById, path});
-          // Get the description of the desired value.
-          let level = logArgsById;
-          let pathPartIndex = 0;
-          for (let pathPart of path) {
-            if (pathPartIndex && pathPartIndex % 2 === 0) {
-              pathPart = '$' + pathPart;
-            }
-            level = level[pathPart];
-            pathPartIndex++;
-          }
-          const description = describe(level.value);
-        
-          // Change the summary to an actual description at the level found.
-          Object.assign(level, description);
-        
-          // Send the description without values back to the viewer.
-          messageParent({
-            target: 'viewer',
-            func: 'updateDescriptionFor',
-            args: [path, without(['$entries', '$protoEntries'], description)],
-          });
-        }
-        
-        function without(props, obj) {
-          if (!obj) return obj => without(props, obj);
-          const ret = {...obj};
-          for (const prop of props) delete ret[prop];
-          return ret;
-        }
-        
-        /**
-         * @param {string} jsCode 
-         */
-        function runCode(jsCode) {
-          const url = URL.createObjectURL(new Blob([jsCode], {type: 'application/javascript'}));
-        
-          // Run the code by adding it to a new script tag.
-          document.head.appendChild(
-            Object.assign(document.createElement('script'), {
-              src: url,
-              onload() {
-                URL.revokeObjectURL(url);
-                document.head.removeChild(this);
-              },
-            })
-          );
-        }
-        
-      },
-      functions: {
-      },
-      onMessage(message) {
-        const {target, func, args} = message.data;
-        if (target === 'viewer') callableViewerFrame.apply(func, args);
-        else console.error('Unhandled message sent to main handler:', message);
-      },
-      async onReady() {
-        callableViewerFrame = createViewerFrame(script, this);
-        this.call('init');
-      },
-      body: '',
-      style: {width: 0, height: 0, border: 0},
-      useBlobSrc: CAN_USE_BLOB_SRC,
-    });
+    // The theme is determined up front so that the loading screen uses it.
+    const theme = /^(light|dark)$/.test(dataset.theme)
+      ? dataset.theme
+      : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 
-    script.parentNode.insertBefore(callableRunnerFrame.iframe, script);
-  }
-
-  /**
-   * @param {HTMLScriptElement} script 
-   * @param {ReturnType<createCallableFrame>} callableRunnerFrame 
-   * @returns {ReturnType<createCallableFrame>}
-   */
-  function createViewerFrame(script, callableRunnerFrame) {
-    const callableViewerFrame = createCallableFrame({
+    callableViewerFrame = createCallableFrame({
       jsCode() {
         let mountedApp;
         
@@ -346,13 +695,37 @@
         delete window.Prism;
         Prism.plugins.autoloader.loadLanguages('javascript');
         
+        /**
+         * The minimum amount of time (in milliseconds) that the loading screen is shown.
+         */
+        const MIN_LOADING_TIME = 1000;
+        
         function init(jsCode, dataset) {
+          const hidePrefix = dataset.hidePrefix ?? '';
+          const darkSchemeQuery = matchMedia('(prefers-color-scheme: dark)');
+          const {visibleCode, hiddenGroups} = extractHiddenGroups(unindentMin(jsCode), hidePrefix);
+          const copyHiddenGroups = () => hiddenGroups.map(group => ({...group}));
+        
           mountedApp = Vue
             .createApp({
               data() {
                 return {
                   displays: [],
-                  jsCode: unindentMin(jsCode),
+                  hidePrefix,
+                  hiddenGroups: copyHiddenGroups(),
+                  runnerMode: dataset.runner,
+                  // The number of groups of code sent to the runner that haven't
+                  // finished running yet.
+                  runningCount: 0,
+                  /** @type {{title: string, message: string, confirmText: string, resolve: (isConfirmed: boolean) => void}?} */
+                  dialog: null,
+                  isDisplaysScrolledToBottom: true,
+                  // Like the browser's dev tools, follow the system's color scheme
+                  // unless a theme was specified.
+                  forcedTheme: /^(light|dark)$/.test(dataset.theme) ? dataset.theme : null,
+                  prefersDark: darkSchemeQuery.matches,
+                  runCount: 0,
+                  jsCode: visibleCode,
                   dividerOrient: dataset.dividerOrient === 'vertical' ? 'vertical' : 'horizontal',
                   isMovingDivider: false,
                   dividerPct: '50%',
@@ -361,23 +734,42 @@
                 };
               },
               computed: {
+                theme() {
+                  return this.forcedTheme ?? (this.prefersDark ? 'dark' : 'light');
+                },
                 bottomButtons() {
+                  const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
                   return [
                     {
+                      iconName: 'clear',
+                      title: 'Clear console',
+                      callback() { this.clearConsole(); },
+                    },
+                    {
+                      iconName: 'refresh',
+                      title: this.runnerMode === 'worker'
+                        ? 'Reset (also stops any code that is still running)'
+                        : 'Reset',
+                      callback() { this.resetConsole(); },
+                    },
+                    { isSeparator: true },
+                    {
                       iconName: 'horizontalView',
-                      title: 'Horizontal View',
+                      title: 'Show the editor below the console',
                       callback() { this.dividerOrient = 'horizontal'; },
                       showIf() { return this.dividerOrient !== 'horizontal'; }
                     },
                     {
                       iconName: 'verticalView',
-                      title: 'Vertical View',
+                      title: 'Show the editor beside the console',
                       callback() { this.dividerOrient = 'vertical'; },
                       showIf() { return this.dividerOrient !== 'vertical'; }
                     },
                     {
-                      iconName: 'play',
-                      title: 'Run Code',
+                      iconName: this.runningCount ? 'spinner' : 'play',
+                      label: 'Run',
+                      className: 'primary',
+                      title: `Run the next block of code (${isMac ? '\u2318' : 'Ctrl+'}Enter)`,
                       callback() { this.runCode(); },
                       disableIf() { return !this.canRunCode; }
                     },
@@ -410,24 +802,104 @@
                   }
                 },
                 runCode() {
-                  const {jsCode} = this;
-                  const jsCodeGroups = parseJSCodeGroups(jsCode);
-                  const jsCodeGroup0 = jsCodeGroups[0];
+                  // Always show the output of code that is run.
+                  this.isDisplaysScrolledToBottom = true;
         
-                  const url = URL.createObjectURL(new Blob([jsCodeGroup0.allLines], {type: 'application/javascript'}));
+                  const [jsCodeGroup0, ...otherJsCodeGroups] = parseJSCodeGroups(this.jsCode);
+                  this.runGroup(jsCodeGroup0);
         
-                  // Add the code to the displays.
+                  // Remove the code that was run from the editor.
+                  this.jsCode = otherJsCodeGroups.map(g => g.allLines).join('\n');
+        
+                  this.runCount++;
+                },
+                /**
+                 * Runs the next hidden group if all of the visible code that came
+                 * before it has already been run.  This is called again once the runner
+                 * finishes running each group so that the displays stay in order.
+                 */
+                runHiddenGroups() {
+                  const {hiddenGroups} = this;
+                  if (hiddenGroups.length && hiddenGroups[0].runCount <= this.runCount) {
+                    this.runGroup(hiddenGroups.shift());
+                  }
+                },
+                /**
+                 * Adds a group of code to the displays and then runs it.
+                 * @param {ReturnType<parseJSCodeGroups>[number]} group
+                 */
+                runGroup(group) {
+                  const {header, isHidden} = parseGroupHeader(group.headerLines, this.hidePrefix);
                   this.displays.push({
                     type: 'prism',
-                    header: jsCodeGroup0.headerLines,
-                    value: jsCodeGroup0.lines,
-                    url,
+                    header,
+                    isHidden,
+                    isCodeShown: !isHidden,
+                    value: group.lines,
                   });
+                  this.runningCount++;
+                  messageParent({target: 'runner', func: 'runCode', args: [group.lines]});
+                },
+                clearConsole() {
+                  this.displays = [];
+                  messageParent({target: 'runner', func: 'clearLogs', args: []});
+                },
+                async resetConsole() {
+                  const isConfirmed = await this.confirm({
+                    title: 'Reset the console?',
+                    message: 'The output will be cleared and the editor will go back to the original code.'
+                      + (this.runnerMode === 'window'
+                        ? '  Anything the code already defined on the page will stay defined.'
+                        : ''),
+                    confirmText: 'Reset',
+                  });
+                  if (!isConfirmed) return;
         
-                  // Clear the editor's code.
-                  this.jsCode = jsCodeGroups.slice(1).map(g => g.allLines).join('\n');
-        
-                  messageParent({target: 'runner', func: 'runCode', args: [jsCodeGroup0.lines]});
+                  this.displays = [];
+                  this.jsCode = visibleCode;
+                  this.hiddenGroups = copyHiddenGroups();
+                  this.runCount = 0;
+                  this.runningCount = 0;
+                  messageParent({target: 'runner', func: 'reset', args: []});
+                  this.runHiddenGroups();
+                },
+                /**
+                 * Copies code that was already run into the editor so that it can be run
+                 * again (as is or modified), first asking before replacing any code that
+                 * is in the editor.
+                 * @param {string} code
+                 */
+                async copyToEditor(code) {
+                  if (this.jsCode.trim() && this.jsCode !== code) {
+                    const isConfirmed = await this.confirm({
+                      title: 'Replace the code in the editor?',
+                      message: 'The code that is currently in the editor will be replaced with a copy of the code you selected.',
+                      confirmText: 'Replace',
+                    });
+                    if (!isConfirmed) return;
+                  }
+                  this.jsCode = code;
+                },
+                /**
+                 * Shows a dialog asking the user to confirm something.
+                 * @param {{title: string, message: string, confirmText: string}} options
+                 * @returns {Promise<boolean>}
+                 */
+                confirm(options) {
+                  this.dialog?.resolve(false);
+                  return new Promise(resolve => {
+                    this.dialog = {...options, resolve};
+                    this.$nextTick(() => this.$refs.dialogConfirmButton?.focus());
+                  });
+                },
+                closeDialog(isConfirmed) {
+                  const {dialog} = this;
+                  this.dialog = null;
+                  dialog?.resolve(isConfirmed);
+                },
+                onDisplaysScroll() {
+                  const {scrollTop, scrollHeight, clientHeight} = this.$refs.displaysScroller;
+                  this.isDisplaysScrolledToBottom = scrollHeight - scrollTop - clientHeight < 8;
                 },
                 getEditorPct(evt) {    
                   const rect = this.$refs.main.getBoundingClientRect();
@@ -471,10 +943,38 @@
                   })
                 }
               },
+              watch: {
+                theme: {
+                  handler(theme) {
+                    document.documentElement.dataset.theme = theme;
+                  },
+                  immediate: true,
+                },
+                // Like the browser's console, keep showing the newest output unless the
+                // user has scrolled up to look at older output.
+                'displays.length'() {
+                  if (this.isDisplaysScrolledToBottom) {
+                    this.$nextTick(() => {
+                      const scroller = this.$refs.displaysScroller;
+                      scroller.scrollTop = scroller.scrollHeight;
+                    });
+                  }
+                },
+              },
               mounted() {
                 addEventListener('mousemove', this.onWindowMouseMove);
                 addEventListener('mouseup', this.onWindowMouseUp);
                 addEventListener('error', this.onWindowError);
+                darkSchemeQuery.addEventListener('change', e => this.prefersDark = e.matches);
+        
+                // Hidden code that came before all visible code gets run immediately.
+                this.runHiddenGroups();
+        
+                // Shows the loading screen for at least a moment and then fades it out.
+                setTimeout(
+                  () => document.querySelector('#splash').classList.add('hidden'),
+                  Math.max(0, MIN_LOADING_TIME - performance.now())
+                );
               }
             })
             .component('ace-editor', getAceComponentProps())
@@ -535,9 +1035,13 @@
               }
             },
             watch: {
+              themeSig(newValue) {
+                this.editor.setTheme(newValue);
+              },
               modelValue(newValue) {
                 if (newValue !== this.editor.getValue()) {
-                  this.editor.setValue(newValue);
+                  // -1 puts the cursor at the start instead of selecting everything.
+                  this.editor.setValue(newValue, -1);
                 }
               }
             },
@@ -684,6 +1188,13 @@
                   play: '<svg viewBox="0 0 16 16"><path fill="currentColor" d="M2 1v14l12-7z"/></svg>',
                   // https://icon-sets.iconify.design/mdi/error-outline/
                   error: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm1-5C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18a8 8 0 0 1-8-8a8 8 0 0 1 8-8a8 8 0 0 1 8 8a8 8 0 0 1-8 8"/></svg>',
+                  // Icons similar to those in the browser's console.
+                  clear: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.75 12.25l8.5-8.5" stroke="currentColor" stroke-width="1.5"/></svg>',
+                  copyToEditor: '<svg viewBox="0 0 16 16"><path d="M6 3.5L2.5 7 6 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 7h6.5a4 4 0 0 1 4 4v1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+                  spinner: '<svg viewBox="0 0 16 16" class="spin"><path d="M8 1.75a6.25 6.25 0 1 1-6.25 6.25" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>',
+                  chevron: '<svg viewBox="0 0 16 16"><path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+                  consoleError: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.5 5.5l5 5m0-5l-5 5" stroke="#fff" stroke-width="1.75" stroke-linecap="round"/></svg>',
+                  consoleWarning: '<svg viewBox="0 0 16 16"><path d="M8 1.75L14.75 14H1.25z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 6v3.5" stroke="#202124" stroke-width="1.75" stroke-linecap="round"/><circle cx="8" cy="11.75" r="1" fill="#202124"/></svg>',
                 };
                 return (codes[this.name] ?? codes.missing).replace('<svg', '$& xmlns="http://www.w3.org/2000/svg" style="height: 1em; width: 1em; display: inline-block; transform: translateY(0.1em);"');
               }
@@ -694,7 +1205,7 @@
         
         function getJSValueComponentProps() {
           return {
-            props: ['description', 'path'],
+            props: ['description', 'path', 'name', 'isDimName'],
             data() {
               return {
                 isExpanded: false,
@@ -715,35 +1226,28 @@
               isExpandable() {
                 return !this.description.isPrimitive;
               },
-              isMultiline() {
-                const {isPrimitive, string, typeName} = this.description;
-                return !isPrimitive
-                  || (typeName === 'string' && /[\r\n]/.test(string));
+              isEntry() {
+                return this.name != null;
               },
               classNames() {
-                const {isPrimitive, string, typeName} = this.description;
-                const isBlockElem = (!isPrimitive && this.isExpanded)
-                  || (typeName === 'string' && /[\r\n]/.test(string));
                 return [
                   'js-value',
-                  typeName,
-                  isBlockElem ? 'd-flex' : 'd-inline-flex'
+                  // Entries are always on their own line just like expanded values.
+                  (this.isEntry || (this.isExpandable && this.isExpanded)) ? 'd-block' : 'd-inline-block',
+                  this.isExpanded ? 'expanded' : '',
                 ];
               },
-              arrowClassNames() {
-                const classNames = ['d-inline-block'];
-                if (this.isExpanded) classNames.push('rotated-90deg');
-                return classNames;
-              },
               entryGroups() {
+                // protoEntries only ever contains the [[Prototype]] entry.
                 return [
-                  { key: 'entries', label: '[[Prototype]]', },
-                  { key: 'protoEntries' },
+                  { key: 'entries', isDim: entry => entry[2] === false },
+                  { key: 'protoEntries', isDim: () => true },
                 ];
               }
             },
             methods: {
               toggleExpanded() {
+                if (!this.isExpandable) return;
                 this.isExpanded = !this.isExpanded;
                 if (this.isExpanded && this.isPartialDescription) {
                   messageParent({target: 'runner', func: 'sendDescriptionFor', args: [this.path]});
@@ -752,29 +1256,23 @@
             },
             template: `
               <div :class="classNames">
-                <div>
-                  <span v-if="isExpandable" @click="toggleExpanded" :class="arrowClassNames">
-                    <icon name="play"></icon>
-                  </span>
-                </div>
-                <div style="flex-grow: 1; padding-left: 0.5em;">
-                  <div>{{ description.string }}</div>
-                  <div v-if="hasBeenExpanded" v-show="isExpanded" class="expansion">
-                    <div v-if="isPartialDescription">Loading&hellip;</div>
-                    <template v-else>
-                      <template v-for="group in entryGroups">
-                        <div v-for="(entry, entryIndex) in description[group.key]" style="display: flex;">
-                          <div>{{ entry[0] }}</div>
-                          <div style="flex-grow: 1;">
-                            <js-value
-                              :description="entry[1]"
-                              :path="path.concat([group.key, entryIndex])">
-                            </js-value>
-                          </div>
-                        </div>
-                      </template>
+                <div :class="['js-value-header', isExpandable ? 'expandable' : '']" @click="toggleExpanded"><span
+                  v-if="isExpandable || isEntry" :class="['arrow', isExpandable ? 'expandable' : '', isExpanded ? 'expanded' : '']"></span><template
+                  v-if="isEntry"><span :class="['entry-key', isDimName ? 'dim' : '']">{{ name }}</span>: </template><span
+                  v-for="part in description.parts" :class="'t-' + part[0]">{{ part[1] }}</span></div>
+                <div v-if="hasBeenExpanded" v-show="isExpanded" class="expansion">
+                  <div v-if="isPartialDescription" class="loading">Loading&hellip;</div>
+                  <template v-else>
+                    <template v-for="group in entryGroups">
+                      <js-value
+                        v-for="(entry, entryIndex) in description[group.key]"
+                        :name="entry[0]"
+                        :is-dim-name="group.isDim(entry)"
+                        :description="entry[1]"
+                        :path="path.concat([group.key, entryIndex])">
+                      </js-value>
                     </template>
-                  </div>
+                  </template>
                 </div>
               </div>
             `
@@ -827,6 +1325,53 @@
         }
         
         /**
+         * Determines the header that should be displayed for a group of code and
+         * whether or not the group's code should be hidden.  A group is hidden if its
+         * header starts with `hidePrefix`, in which case anything after the prefix (and
+         * an optional colon) is used as the header.
+         * @param {string} headerLines
+         * @param {string} hidePrefix
+         * @returns {{header: string, isHidden: boolean}}
+         */
+        function parseGroupHeader(headerLines, hidePrefix) {
+          const isHidden = !!hidePrefix && headerLines.startsWith(hidePrefix);
+          return {
+            header: isHidden
+              ? headerLines.slice(hidePrefix.length).replace(/^\s*:?\s*/, '')
+              : headerLines,
+            isHidden,
+          };
+        }
+        
+        /**
+         * Separates the hidden groups of code from the visible code.
+         * @param {string} jsCode
+         * @param {string} hidePrefix
+         * @returns {{
+         *   visibleCode: string,
+         *   hiddenGroups: (ReturnType<parseJSCodeGroups>[number] & {runCount: number})[]
+         * }}
+         *   `visibleCode` is the code to show in the editor.  Each hidden group has a
+         *   `runCount` indicating how many visible groups must be run before it runs.
+         */
+        function extractHiddenGroups(jsCode, hidePrefix) {
+          const visibleGroups = [];
+          const hiddenGroups = [];
+          for (const group of parseJSCodeGroups(jsCode)) {
+            if (parseGroupHeader(group.headerLines, hidePrefix).isHidden) {
+              hiddenGroups.push({...group, runCount: visibleGroups.length});
+            }
+            else {
+              visibleGroups.push(group);
+            }
+          }
+          return {
+            visibleCode: visibleGroups.map(g => g.allLines).join('\n'),
+            hiddenGroups,
+          };
+        }
+        
+        /**
          * Finds the minimum indentation of all of the lines that have non-space
          * characters and removes the indentation accordingly for all indented lines.
          * @param {string} text
@@ -865,61 +1410,130 @@
         }
         
         /**
+         * Picks the properties of a description sent by the runner so that nothing
+         * unexpected makes its way into the displays.
+         * @param {*} description
+         */
+        function sanitizeDescription(description) {
+          description = Object(description);
+          return {
+            typeName: `${description.typeName}`,
+            isPrimitive: !!description.isPrimitive,
+            // Each part is [kind, text] where kind is used in a class name.
+            parts: Array.from(description.parts ?? [], part => [
+              /^[a-z]+$/.test(Object(part)[0]) ? part[0] : 'text',
+              `${Object(part)[1]}`,
+            ]),
+            ...sanitizeEntries(description),
+          };
+        }
+        
+        /**
+         * Picks the entries of a description sent by the runner.
+         * @param {*} description
+         */
+        function sanitizeEntries(description) {
+          description = Object(description);
+          const result = {};
+          for (const key of ['entries', 'protoEntries']) {
+            if (Array.isArray(description[key])) {
+              // Each entry is [key, description, isEnumerable].
+              result[key] = description[key].map(entry => [
+                `${Object(entry)[0]}`,
+                sanitizeDescription(Object(entry)[1]),
+                Object(entry)[2] !== false,
+              ]);
+            }
+          }
+          return result;
+        }
+        
+        /**
          * NOTE:  Called via main by the runner.
          * @param {object} options
-         * @param {string} options.type
          * @param {string} options.logId
          * @param {string} options.key
-         * @param {any[][]} options.descriptions
+         * @param {any[]} options.descriptions
+         * @param {{headers: string[], rows: {index: string, cells: any[]}[]}|null} options.table
          */
-        function appendLog({type, logId, key, descriptions}) {
+        function appendLog({logId, key, descriptions, table}) {
+          key = `${key}`;
           mountedApp.displays.push({
-            type,
-            classNames: ['log', key],
+            type: 'log',
+            key,
             name: `console.${key}`,
-            descriptions,
-            logId,
+            descriptions: Array.from(descriptions, sanitizeDescription),
+            table: table ? {
+              headers: Array.from(table.headers, h => `${h}`),
+              rows: Array.from(table.rows, row => ({
+                index: `${row.index}`,
+                cells: Array.from(row.cells, cell => cell && sanitizeDescription(cell)),
+              })),
+            } : null,
+            logId: `${logId}`,
           });
         }
         
         /**
          * NOTE:  Called via main by the runner.
          * @param {object} options
-         * @param {string} options.type
          * @param {string} options.message
-         * @param {number} options.line
-         * @param {number} options.column
+         * @param {number=} options.line
+         * @param {number=} options.column
          */
-        function appendError({type, message, line, column}) {
+        function appendError({message, line, column}) {
           mountedApp.displays.push({
-            type,
-            message,
-            line,
-            column,
+            type: 'error',
+            message: `${message}`,
+            line: +line,
+            column: +column,
           });
         }
         
-        async function updateDescriptionFor(path, description) {
+        /**
+         * NOTE:  Called via main by the runner.
+         * @param {(string|number)[]} path
+         *   The log ID, the argument index and then pairs of entry group keys and entry
+         *   indices.
+         * @param {*} description
+         */
+        function updateDescriptionFor(path, description) {
+          path = Array.from(path);
           const logId = path.shift();
-          const display = mountedApp.displays.find(d => d.logId === logId);
-          const foundDescr = display.descriptions[path.shift()];
+          const display = mountedApp.displays.find(d => d.type === 'log' && d.logId === logId);
+          let level = display?.descriptions[toIndex(path.shift())];
         
-          let level = foundDescr;
-          let pathPartIndex = 0;
-          for (const pathPart of path) {
-            level = level[pathPart];
-            if (pathPartIndex % 2) level = level[1];
-            pathPartIndex++;
+          for (let i = 0; level && i < path.length; i += 2) {
+            const groupKey = path[i];
+            if (groupKey !== 'entries' && groupKey !== 'protoEntries') return;
+            level = level[groupKey]?.[toIndex(path[i + 1])]?.[1];
           }
         
-          // console.log('updateDescriptionFor', {
-          //   path,
-          //   description,
-          //   display: JSON.parse(JSON.stringify(display)),
-          //   foundDescr: JSON.parse(JSON.stringify(foundDescr)),
-          //   level: JSON.parse(JSON.stringify(level)),
-          // });
-          Object.assign(level, description);
+          if (level) Object.assign(level, sanitizeEntries(description));
+        }
+        
+        /**
+         * NOTE:  Called via main by the runner once it has run a group of code.
+         */
+        function onCodeRan() {
+          mountedApp.runningCount = Math.max(0, mountedApp.runningCount - 1);
+          mountedApp.runHiddenGroups();
+        }
+        
+        /**
+         * NOTE:  Called via main by the runner when console.clear() is called.
+         */
+        function clearDisplays() {
+          mountedApp.displays = [{type: 'notice', message: 'Console was cleared'}];
+        }
+        
+        /**
+         * Only allows non-negative integers to be used as an index.
+         * @param {*} value
+         * @returns {number|undefined}
+         */
+        function toIndex(value) {
+          return Number.isInteger(value) && value >= 0 ? value : undefined;
         }
         
       },
@@ -935,28 +1549,23 @@
         'https://unpkg.com/prism-themes@1/themes/prism-vsc-dark-plus.min.css',
         'https://unpkg.com/prismjs@1/plugins/match-braces/prism-match-braces.min.css',
       ],
-      functions: {
-      },
+      htmlAttributes: 'data-theme="' + theme + '"',
       onMessage(message) {
-        const {target, func, args} = message.data;
-        if (target === 'runner') callableRunnerFrame.apply(func, args);
-        else console.error('Unhandled message sent to main handler:', message);
+        relayMessage(message.data, {runner});
       },
       async onReady() {
-        this.call('init', script.textContent, JSON.parse(JSON.stringify(script.dataset)));
+        this.call('init', script.textContent, dataset);
       },
       body: VIEWER_IFRAME_HTML,
       style: {
         width: '100%',
         height: '100%',
-        border: 0
+        border: 0,
+        display: 'block',
       },
-      useBlobSrc: CAN_USE_BLOB_SRC,
     });
 
     script.parentNode.insertBefore(callableViewerFrame.iframe, script);
-
-    return callableViewerFrame;
   }
 
   // NOTE:  This solution was intentionally written without using newer JS
@@ -966,9 +1575,14 @@
       // NOTE:  Referencing with window to ensure that local namespace will not
       // interfere.
       window.addEventListener('message', function(e) {
-        if (e.data.funcName && e.data.args) {
-          var func = eval(e.data.funcName);
-          if ('function' === typeof func) func.apply(e, e.data.args || []);
+        var data = e.data;
+        if (
+          e.source === window.parent
+          && data && /^[A-Za-z_$][\w$]*$/.test(data.funcName)
+          && Array.isArray(data.args)
+        ) {
+          var func = eval(data.funcName);
+          if ('function' === typeof func) func.apply(e, data.args);
         }
       });
 
@@ -997,9 +1611,8 @@
      * @param {string=} options.body
      * @param {(CSSStyleDeclaration|string)=} options.style
      *   The HTML code that will be used to instantiate the page.
-     * @param {boolean=} options.useBlobSrc
-     *   If specified a `Blob` will be used to construct the URL of the IFRAME
-     *   instead of using a data URL.
+     * @param {string=} options.htmlAttributes
+     *   Attributes to add to the `<html>` element of the IFRAME.
      * @param {((this: R, event: MessageEvent) => void)=} options.onMessage
      * @param {((this: R, event: MessageEvent) => void)=} options.onReady
      * @returns {R}
@@ -1011,71 +1624,66 @@
       var onReady = options.onReady;
       var style = options.style;
 
-      function getUrl(content, type) {
-        return (options.useBlobSrc && window.URL && 'function' === typeof URL.createObjectURL && 'function' === typeof Blob)
-          ? URL.createObjectURL(new Blob([content], {type: type}))
-          : toDataURL(content, {type: type, charset: 'utf8'});
-      }
-
       // isReady indicates if the IFRAME is ready to have messages sent to it
       // while READY_ID is used internally to confirm if the IFRAME is actually
       // ready to receive function calls.
       var isReady, READY_ID = Math.random() + '' + Math.random();
 
-      // Turns the script code for the IFRAME into a data URL.
-      var IFRAME_SCRIPT_SRC = getUrl(
-        [
-          '(function(){',
-          IFRAME_SCRIPT_MESSAGE_CODE,
-          'var applyParent, callParent;',
-          '(function(READY_ID){',
-          parseFunction(function() {
-            applyParent = function(funcName, args) {
-              window.parent.postMessage({funcName: funcName, args: args, id: READY_ID}, '*');
-            };
+      // The script code for the IFRAME.
+      var IFRAME_SCRIPT_CODE = [
+        '(function(){',
+        IFRAME_SCRIPT_MESSAGE_CODE,
+        'var applyParent, callParent;',
+        '(function(READY_ID){',
+        parseFunction(function() {
+          applyParent = function(funcName, args) {
+            window.parent.postMessage({funcName: funcName, args: args, id: READY_ID}, '*');
+          };
 
-            callParent = function(funcName) {
-              window.parent.postMessage(
-                {funcName: funcName, args: Array.prototype.slice.call(arguments, 1), id: READY_ID},
-                '*'
-              );
-            };
+          callParent = function(funcName) {
+            window.parent.postMessage(
+              {funcName: funcName, args: Array.prototype.slice.call(arguments, 1), id: READY_ID},
+              '*'
+            );
+          };
 
-            var interval = setInterval(function() {
-              if (/^(complete|interactive)$/.test(document.readyState)) {
-                clearInterval(interval);
-                messageParent(READY_ID);
-              }
-            }, 100);
-          }).body,
-          '})(' + JSON.stringify(READY_ID) + ');',
-          'function' !== typeof jsCode ? jsCode || '' : parseFunction(jsCode).body,
-          '})();',
-        ].join('\n'),
-        'text/javascript'
-      );
+          var interval = setInterval(function() {
+            if (/^(complete|interactive)$/.test(document.readyState)) {
+              clearInterval(interval);
+              messageParent(READY_ID);
+            }
+          }, 100);
+        }).body,
+        '})(' + JSON.stringify(READY_ID) + ');',
+        'function' !== typeof jsCode ? jsCode || '' : parseFunction(jsCode).body,
+        '})();',
+      ].join('\n')
+      // Prevents the HTML parser from ending the inline script early.
+      .replace(/<(?=\/script|!--)/gi, '\\x3C');
 
-      // Creates the IFRAME and sets its source by leveraging data URLs.
+      // Creates the IFRAME and sets its source via srcdoc.
       var IFRAME = document.createElement('iframe');
       var HTML_CODE = [
         '<!DOCTYPE html>',
-        '<html>',
+        '<html ' + (options.htmlAttributes || '') + '>',
         '<head>',
         options.head || '',
         (options.cssUrls || []).map(function(cssUrl) {
           return '<link href="' + cssUrl + '" rel="stylesheet">';
         }).join('\n'),
-        (options.jsUrls || []).map(function(jsUrl) {
-          return '<script src="' + jsUrl + '"><\x2fscript>';
-        }).join('\n'),
         '</head>',
         '<body>',
         options.body || '',
-        '<script src="' + IFRAME_SCRIPT_SRC + '"><\x2fscript>',
+        // The scripts are loaded after the body so that the body can be shown
+        // while they load.
+        (options.jsUrls || []).map(function(jsUrl) {
+          return '<script src="' + jsUrl + '"><\x2fscript>';
+        }).join('\n'),
+        '<script>' + IFRAME_SCRIPT_CODE + '<\x2fscript>',
         '</body>',
         '</html>'
       ].join('\n');
-      IFRAME.src = getUrl(HTML_CODE, 'text/html');
+      IFRAME.srcdoc = HTML_CODE;
 
       // Set the style of the iframe.
       if (style) {
@@ -1110,6 +1718,8 @@
           else if (dataIsReadyId) {
             isReady = true;
             if ('function' === typeof onReady) onReady.call(callableFrame, e);
+            // Sends anything that was queued before the IFRAME was ready.
+            while (queuedMessages.length) postToFrame(queuedMessages.shift());
           }
           else { // !isReady
             console.warn('Message sent from callable frame prematurely:', e);
@@ -1119,12 +1729,17 @@
 
       // Returns an object which makes it possible to call functions and get
       // access to the IFRAME.
+      var queuedMessages = [];
+      function postToFrame(message) {
+        if (isReady) IFRAME.contentWindow.postMessage(message, '*');
+        else queuedMessages.push(message);
+      }
       var callableFrame = {
         apply: function(funcName, args) {
-          IFRAME.contentWindow.postMessage({funcName: funcName, args: args}, '*');
+          postToFrame({funcName: funcName, args: args});
         },
         call: function(funcName) {
-          IFRAME.contentWindow.postMessage({funcName: funcName, args: Array.prototype.slice.call(arguments, 1)}, '*');
+          postToFrame({funcName: funcName, args: Array.prototype.slice.call(arguments, 1)});
         },
         iframe: IFRAME
       };
@@ -1136,44 +1751,6 @@
      * @property {(funcName: string, ...args: any[]) => void} call
      * @property {HTMLIFrameElement} iframe
      */
-
-    /**
-     * Turns a string that can represent a text document and returns the
-     * corresponding data URL (AKA data URI).
-     * @param {string} text
-     *   The text to turn into a data URL.
-     * @param {Object} options
-     *   Optional.  An object containing the different options to set.
-     * @param {boolean=} options.base64
-     *   Optional, defaults to the `false`.  Indicates if the returned data URL
-     *   should be base64 encoded.
-     * @param {string=} options.charset
-     *   Optional.  Indicates the character set of the content.  Examples are
-     *   "US-ASCII", "UTF-8", etc.
-     * @param {string=} options.type
-     *   Optional, defaults to the empty string.  The content type of `text` (eg.
-     *   `"text/html"`).
-     * @returns {string}
-     *   A data URL which represents `text` as the given `type`.
-     */
-    function toDataURL(text, options) {
-      options = Object(options);
-      var base64 = options.base64;
-      var charset = options.charset;
-      return ('data:'
-          + (options.type ?? '')
-          + ';'
-          + (charset ? 'charset=' + charset + ';' : '')
-          + (base64 ? 'base64;' : '')
-        ).replace(/;$/, '')
-        + ','
-        + (base64
-          // unescape() and encodeURIComponent() used based on this solution:
-          // https://stackoverflow.com/a/26603875/657132
-          ? window.btoa(unescape(encodeURIComponent(text)))
-          : encodeURIComponent(text)
-        );
-    }
 
     /**
      * Determines if `obj` has its own property named `prop`.
@@ -1243,8 +1820,7 @@
       };
     }
 
-    // Make toDataURL() and parseFunction() available.
-    createCallableFrame.toDataURL = toDataURL;
+    // Make parseFunction() available.
     createCallableFrame.parseFunction = parseFunction;
 
     return createCallableFrame;

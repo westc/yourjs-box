@@ -2,8 +2,16 @@
   "name": "yourjs-console",
   "version": "1.0.0",
   "description": "A simple way to embed a JavaScript console on your website.",
+  "unpkg": "dist/main.min.js",
+  "jsdelivr": "dist/main.min.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "start": "gulp"
+    "build": "gulp build",
+    "dev": "gulp dev",
+    "start": "gulp",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -22,6 +30,7 @@
   "devDependencies": {
     "@babel/core": "^7.23.6",
     "@babel/preset-env": "^7.23.6",
+    "browser-sync": "^3.0.4",
     "clean-css": "^5.3.3",
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
