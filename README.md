@@ -39,20 +39,29 @@ If the editor already has code in it you are asked before it is replaced.
 
 ### Toolbar
 
-- Clicking the **logo** opens the About window, which
-  shows the version, this console's settings and keyboard shortcuts.  Its
-  **Copy as HTML** tab gives you the HTML for this console (with its current
-  code, its original code or no code) as an embed snippet or a full page that
-  you can copy or download.  Only the `data-*` attributes that were set on the
-  script tag are included.
 - **Clear** removes everything from the console.  Code can also call
   `console.clear()`.
-- **Reset** clears the console and puts the original code back into the editor.
-  In worker mode this also stops any code that is still running (eg. an
-  infinite loop) by starting a new worker.
-- The layout button switches between showing the editor below or beside the
-  console.
+- **Full screen** shows the console using the whole screen.  If the browser
+  doesn't allow that (eg. on an iPhone) the console fills the browser window
+  instead.  Press <kbd>Esc</kbd> to exit.
 - **Run** runs the next block of code.
+- Clicking the **logo** opens the About window, which shows the version, this
+  console's settings and keyboard shortcuts.
+- The **&#8943;** button opens a menu with:
+  - **Text size**, which is remembered for every console on the same site.
+  - **Editor beside / below the console** to change the layout.
+  - **Pop out into a window**, which moves the console into a separate window
+    while the code keeps running in the page (so in window mode the code can
+    still change the page).  Close the window or click **Bring it back** to
+    move the console back into the page.
+  - **Copy as HTML**, which gives you the HTML for this console (with its
+    current code, its original code or no code) as an embed snippet or a full
+    page that you can copy or download.  Only the `data-*` attributes that were
+    set on the script tag are included.
+  - **Reset**, which clears the console and puts the original code back into
+    the editor.  In worker mode this also stops any code that is still running
+    (eg. an infinite loop) by starting a new worker.
+  - **About JS Box**
 
 ### Attributes
 

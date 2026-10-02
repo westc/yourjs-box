@@ -581,6 +581,111 @@ body {
   justify-content: flex-end;
 }
 
+/* The "More" menu */
+.more-menu {
+  background-color: var(--dialog-bg);
+  border: 1px solid var(--toolbar-border);
+  border-radius: 8px;
+  bottom: 38px;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 0.25);
+  color: var(--console-text);
+  font-size: 13px;
+  max-height: calc(100% - 48px);
+  min-width: 236px;
+  overflow: auto;
+  padding: 4px;
+  position: absolute;
+  right: 6px;
+  z-index: 800;
+}
+.menu-item {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 8px;
+  padding: 6px 8px;
+  text-align: left;
+  width: 100%;
+}
+.menu-item:hover:not(:disabled),
+.menu-item:focus-visible {
+  background-color: var(--button-hover);
+  outline: none;
+}
+.menu-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+.menu-icon {
+  color: var(--muted-text);
+  display: inline-flex;
+  font-size: 14px;
+  justify-content: center;
+  width: 16px;
+}
+.menu-icon svg {
+  transform: none !important;
+}
+.menu-row {
+  align-items: center;
+  display: flex;
+  gap: 2px;
+  padding: 2px 2px 2px 8px;
+}
+.menu-row-label {
+  flex-grow: 1;
+}
+.menu-step {
+  font-weight: 600;
+  justify-content: center;
+  width: auto;
+}
+.menu-percent {
+  color: var(--muted-text);
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+  min-width: 52px;
+}
+.menu-separator {
+  background-color: var(--toolbar-border);
+  height: 1px;
+  margin: 4px 0;
+}
+
+/* Shown in the page while the console is in a pop-out window */
+.popped-out {
+  align-items: center;
+  background-color: var(--console-bg);
+  color: var(--console-text);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  position: fixed;
+  z-index: 950;
+}
+.popped-out-content {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  text-align: center;
+}
+.popped-out-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+.popped-out-text {
+  color: var(--muted-text);
+  font-size: 13px;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -701,8 +806,8 @@ body {
 }
 #displays > div {
   font-family: var(--console-font);
-  font-size: 12px;
-  line-height: 16px;
+  font-size: calc(12px * var(--text-scale, 1));
+  line-height: calc(16px * var(--text-scale, 1));
 }
 
 /* Each message */
@@ -854,8 +959,8 @@ body {
 .code-row code {
   background: transparent !important;
   font-family: var(--console-font) !important;
-  font-size: 12px !important;
-  line-height: 16px !important;
+  font-size: calc(12px * var(--text-scale, 1)) !important;
+  line-height: calc(16px * var(--text-scale, 1)) !important;
   padding: 0 !important;
   text-shadow: none !important;
 }

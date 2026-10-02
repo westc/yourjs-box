@@ -69,6 +69,8 @@
   const RELAYABLE_FUNCS = {
     viewer: ['appendLog', 'appendError', 'clearDisplays', 'onCodeRan', 'updateDescriptionFor'],
     runner: ['clearLogs', 'reset', 'runCode', 'sendDescriptionFor'],
+    // Things that the viewer (but never the runner) can ask this script to do.
+    host: ['focusPopOut', 'popIn', 'popOut', 'requestPopIn', 'setMaximized'],
   };
 
   /**
@@ -201,9 +203,17 @@
     const showResults = dataset.showResults !== 'false';
     const libraryUrl = getLibraryFileUrl.bind(null, dataset.librariesUrl || DEFAULT_LIBRARIES_URL);
 
+    // The viewer in the page and, when the console is popped out, the viewer
+    // in the pop-out window.  Messages from the runner go to the active one.
     /** @type {ReturnType<createCallableFrame>} */
-    let callableViewerFrame;
-    const sendToViewer = data => relayMessage(data, {viewer: callableViewerFrame});
+    let inlineViewer;
+    /** @type {ReturnType<createCallableFrame>?} */
+    let popOutViewer = null;
+    /** @type {Window?} */
+    let popOutWindow = null;
+    let popOutWatcher;
+    let activeViewer;
+    const sendToViewer = data => relayMessage(data, {viewer: activeViewer});
     const runner = runnerMode === 'window'
       ? createWindowRunner(sendToViewer)
       : createWorkerRunner(sendToViewer);
@@ -213,59 +223,163 @@
       ? dataset.theme
       : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 
-    callableViewerFrame = createCallableFrame({
-      jsCode() {
-        [[JS_VIEWER_IFRAME_FILE_PLACEHOLDER]]
+    // What the viewer can ask this script to do (see RELAYABLE_FUNCS.host).
+    const hostFuncs = {
+      /**
+       * Makes the IFRAME fill the window (used if full screen isn't allowed).
+       * @param {boolean} isMaximized
+       */
+      setMaximized(isMaximized) {
+        const {style} = inlineViewer.iframe;
+        if (isMaximized) {
+          inlineViewer.normalCssText ??= style.cssText;
+          Object.assign(style, {position: 'fixed', inset: '0', width: '100%', height: '100%', zIndex: '2147483647'});
+        }
+        else if (inlineViewer.normalCssText != null) {
+          style.cssText = inlineViewer.normalCssText;
+          inlineViewer.normalCssText = null;
+        }
       },
-      // Exact versions are used so that a new release of a library can never
-      // change how an existing version of this console works.  Ace and Prism
-      // load other files (eg. language modes) from next to these files.
-      jsUrls: [
-        libraryUrl('vue', 'dist/vue.global.prod.js'),
-        libraryUrl('ace-builds', 'src-noconflict/ace.js'),
-        libraryUrl('prismjs', 'components/prism-core.min.js'),
-        libraryUrl('prismjs', 'plugins/autoloader/prism-autoloader.min.js'),
-        libraryUrl('prismjs', 'plugins/match-braces/prism-match-braces.min.js'),
-        // Used to find the last expression in each block of code so that its
-        // value can be shown.
-        ...(showResults ? [libraryUrl('acorn', 'dist/acorn.js')] : []),
-      ],
-      cssUrls: [
-        'data:text/css,' + encodeURIComponent(VIEWER_IFRAME_CSS),
-        libraryUrl('prism-themes', 'themes/prism-vsc-dark-plus.min.css'),
-        libraryUrl('prismjs', 'plugins/match-braces/prism-match-braces.min.css'),
-      ],
-      htmlAttributes: 'data-theme="' + theme + '"',
-      onMessage(message) {
-        relayMessage(message.data, {runner});
-      },
-      async onReady() {
-        // The dataset is passed as is so that the viewer knows which options
-        // were actually specified (eg. when copying the console as HTML).
-        this.call('init', script.textContent, dataset, {runnerMode, blockType, showResults, packageInfo: PACKAGE_INFO, libraryVersions: LIBRARY_VERSIONS});
-      },
-      body: VIEWER_IFRAME_HTML,
-      style: {
-        width: '100%',
-        height: '100%',
-        border: 0,
-        display: 'block',
-      },
-    });
+      /**
+       * Opens the console in a separate window.  The code still runs in this
+       * page.
+       * @param {*} state
+       *   The state of the viewer (eg. what was logged) to show in the window.
+       */
+      popOut(state) {
+        if (popOutWindow) {
+          popOutWindow.focus();
+          return;
+        }
+        const rect = inlineViewer.iframe.getBoundingClientRect();
+        const width = Math.max(820, Math.round(rect.width));
+        const height = Math.max(560, Math.round(rect.height));
+        const newWindow = open('', '_blank', `popup,width=${width},height=${height}`);
+        if (!newWindow) {
+          inlineViewer.call('onPopOutFailed');
+          return;
+        }
+        popOutWindow = newWindow;
+        popOutViewer = createViewer(newWindow, state);
+        // Lets the window send its state back even while it is closing (a
+        // message sent then can't be traced back to the window).  The name
+        // must match POP_IN_FUNCTION_NAME in the viewer.
+        newWindow.yourjsBoxPopIn = state => newWindow === popOutWindow && hostFuncs.popIn(state);
+        activeViewer = popOutViewer;
+        inlineViewer.call('setPoppedOut', true);
 
-    script.parentNode.insertBefore(callableViewerFrame.iframe, script);
+        // If the window is closed without sending its state (which it does
+        // when it is closed) bring the console back as it was.
+        popOutWatcher = setInterval(() => {
+          if (newWindow.closed) setTimeout(() => newWindow === popOutWindow && hostFuncs.popIn(null), 300);
+        }, 500);
+      },
+      /**
+       * Brings the console back into the page.
+       * @param {*} state
+       *   The state of the pop-out window's viewer or `null` to keep the state
+       *   from when the console was popped out.
+       */
+      popIn(state) {
+        const oldWindow = popOutWindow;
+        if (!oldWindow) return;
+        clearInterval(popOutWatcher);
+        popOutWindow = null;
+        popOutViewer.dispose();
+        popOutViewer = null;
+        activeViewer = inlineViewer;
+        inlineViewer.call('setPoppedOut', false, state);
+        if (!oldWindow.closed) oldWindow.close();
+      },
+      /** Asks the pop-out window to send its state back to the page. */
+      requestPopIn() {
+        if (popOutViewer) popOutViewer.call('popIn');
+      },
+      focusPopOut() {
+        popOutWindow?.focus();
+      },
+    };
+
+    // The pop-out window can't work without this page so it is closed too.
+    addEventListener('pagehide', () => popOutWindow?.close());
+
+    /**
+     * @param {Window=} targetWindow
+     *   If given the viewer is written into this window (a pop-out window).
+     * @param {*=} state
+     *   The state to restore in the pop-out window.
+     * @returns {ReturnType<createCallableFrame>}
+     */
+    function createViewer(targetWindow, state) {
+      return createCallableFrame({
+        jsCode() {
+          [[JS_VIEWER_IFRAME_FILE_PLACEHOLDER]]
+        },
+        // Exact versions are used so that a new release of a library can never
+        // change how an existing version of this console works.  Ace and Prism
+        // load other files (eg. language modes) from next to these files.
+        jsUrls: [
+          libraryUrl('vue', 'dist/vue.global.prod.js'),
+          libraryUrl('ace-builds', 'src-noconflict/ace.js'),
+          libraryUrl('prismjs', 'components/prism-core.min.js'),
+          libraryUrl('prismjs', 'plugins/autoloader/prism-autoloader.min.js'),
+          libraryUrl('prismjs', 'plugins/match-braces/prism-match-braces.min.js'),
+          // Used to find the last expression in each block of code so that its
+          // value can be shown.
+          ...(showResults ? [libraryUrl('acorn', 'dist/acorn.js')] : []),
+        ],
+        cssUrls: [
+          'data:text/css,' + encodeURIComponent(VIEWER_IFRAME_CSS),
+          libraryUrl('prism-themes', 'themes/prism-vsc-dark-plus.min.css'),
+          libraryUrl('prismjs', 'plugins/match-braces/prism-match-braces.min.css'),
+        ],
+        head: targetWindow ? '<meta charset="utf-8"><title>JS Box</title>' : '',
+        htmlAttributes: 'data-theme="' + theme + '"',
+        targetWindow,
+        onMessage(message) {
+          relayMessage(message.data, {runner, host: {apply: (func, args) => hostFuncs[func](...args)}});
+        },
+        async onReady() {
+          // The dataset is passed as is so that the viewer knows which options
+          // were actually specified (eg. when copying the console as HTML).
+          this.call('init', script.textContent, dataset, {
+            runnerMode,
+            blockType,
+            showResults,
+            packageInfo: PACKAGE_INFO,
+            libraryVersions: LIBRARY_VERSIONS,
+            isPopOut: !!targetWindow,
+            popOutState: state ?? null,
+          });
+        },
+        body: VIEWER_IFRAME_HTML,
+        style: {
+          width: '100%',
+          height: '100%',
+          border: 0,
+          display: 'block',
+        },
+      });
+    }
+
+    inlineViewer = activeViewer = createViewer();
+    script.parentNode.insertBefore(inlineViewer.iframe, script);
   }
 
   // NOTE:  This solution was intentionally written without using newer JS
   // features to make the minified version even smaller.
   var createCallableFrame = (function () {
     var IFRAME_SCRIPT_MESSAGE_CODE = parseFunction(function() {
+      // The window that created this one:  the opener if this is a pop-out
+      // window or else the parent of the IFRAME.
+      var HOST_WINDOW = window.opener || window.parent;
+
       // NOTE:  Referencing with window to ensure that local namespace will not
       // interfere.
       window.addEventListener('message', function(e) {
         var data = e.data;
         if (
-          e.source === window.parent
+          e.source === HOST_WINDOW
           && data && /^[A-Za-z_$][\w$]*$/.test(data.funcName)
           && Array.isArray(data.args)
         ) {
@@ -275,7 +389,7 @@
       });
 
       function messageParent(message) {
-        window.parent.postMessage(message, '*');
+        HOST_WINDOW.postMessage(message, '*');
       }
     }).body;
 
@@ -301,6 +415,9 @@
      *   The HTML code that will be used to instantiate the page.
      * @param {string=} options.htmlAttributes
      *   Attributes to add to the `<html>` element of the IFRAME.
+     * @param {Window=} options.targetWindow
+     *   If given the page is written into this (same origin) window (eg. a
+     *   pop-out window) instead of into a new IFRAME.
      * @param {((this: R, event: MessageEvent) => void)=} options.onMessage
      * @param {((this: R, event: MessageEvent) => void)=} options.onReady
      * @returns {R}
@@ -325,11 +442,11 @@
         '(function(READY_ID){',
         parseFunction(function() {
           applyParent = function(funcName, args) {
-            window.parent.postMessage({funcName: funcName, args: args, id: READY_ID}, '*');
+            HOST_WINDOW.postMessage({funcName: funcName, args: args, id: READY_ID}, '*');
           };
 
           callParent = function(funcName) {
-            window.parent.postMessage(
+            HOST_WINDOW.postMessage(
               {funcName: funcName, args: Array.prototype.slice.call(arguments, 1), id: READY_ID},
               '*'
             );
@@ -349,8 +466,12 @@
       // Prevents the HTML parser from ending the inline script early.
       .replace(/<(?=\/script|!--)/gi, '\\x3C');
 
-      // Creates the IFRAME and sets its source via srcdoc.
-      var IFRAME = document.createElement('iframe');
+      var TARGET_WINDOW = options.targetWindow;
+      var IFRAME = TARGET_WINDOW ? null : document.createElement('iframe');
+      function getFrameWindow() {
+        return TARGET_WINDOW || IFRAME.contentWindow;
+      }
+
       var HTML_CODE = [
         '<!DOCTYPE html>',
         '<html ' + (options.htmlAttributes || '') + '>',
@@ -371,10 +492,20 @@
         '</body>',
         '</html>'
       ].join('\n');
-      IFRAME.srcdoc = HTML_CODE;
+      // Writes the page into the target window or sets the IFRAME's source.
+      if (TARGET_WINDOW) {
+        TARGET_WINDOW.document.open();
+        TARGET_WINDOW.document.write(HTML_CODE);
+        TARGET_WINDOW.document.close();
+      }
+      else {
+        IFRAME.srcdoc = HTML_CODE;
+        // Allows the console to go full screen.
+        IFRAME.setAttribute('allow', 'fullscreen');
+      }
 
       // Set the style of the iframe.
-      if (style) {
+      if (style && IFRAME) {
         if ('string' === typeof style) {
           IFRAME.style.cssText = style;
         }
@@ -388,8 +519,8 @@
       }
 
       // Adds an event listener so that messages from the IFRAME will be captured.
-      addEventListener('message', function(e) {
-        if (e.source === IFRAME.contentWindow) {
+      function onWindowMessage(e) {
+        if (e.source === getFrameWindow()) {
           var data = e.data;
           var dataIsReadyId = READY_ID === data;
           if (isReady && !dataIsReadyId) {
@@ -413,13 +544,14 @@
             console.warn('Message sent from callable frame prematurely:', e);
           }
         }
-      });
+      }
+      addEventListener('message', onWindowMessage);
 
       // Returns an object which makes it possible to call functions and get
       // access to the IFRAME.
       var queuedMessages = [];
       function postToFrame(message) {
-        if (isReady) IFRAME.contentWindow.postMessage(message, '*');
+        if (isReady) getFrameWindow().postMessage(message, '*');
         else queuedMessages.push(message);
       }
       var callableFrame = {
@@ -429,7 +561,12 @@
         call: function(funcName) {
           postToFrame({funcName: funcName, args: Array.prototype.slice.call(arguments, 1)});
         },
-        iframe: IFRAME
+        iframe: IFRAME,
+        window: TARGET_WINDOW,
+        // Stops listening for messages from the frame.
+        dispose: function() {
+          removeEventListener('message', onWindowMessage);
+        }
       };
       return callableFrame;
     };
@@ -437,7 +574,9 @@
      * @typedef {Object} createCallableFrame_Return
      * @property {(funcName: string, args: any[]) => void} apply
      * @property {(funcName: string, ...args: any[]) => void} call
-     * @property {HTMLIFrameElement} iframe
+     * @property {HTMLIFrameElement?} iframe
+     * @property {Window=} window
+     * @property {() => void} dispose
      */
 
     /**

@@ -19,6 +19,37 @@ Prism?.plugins.autoloader.loadLanguages('javascript');
 const MIN_LOADING_TIME = 1000;
 
 /**
+ * The name of the function that the page adds to a pop-out window so that the
+ * window can send its state back to the page (see bringBack()).
+ */
+const POP_IN_FUNCTION_NAME = 'yourjsBoxPopIn';
+
+/**
+ * The text sizes (as a multiple of the normal size) that can be chosen.
+ */
+const TEXT_SCALES = [0.75, 0.9, 1, 1.15, 1.3, 1.5, 1.75, 2];
+
+/**
+ * Where the chosen text size is remembered.  It applies to every console on
+ * the same site.
+ */
+const TEXT_SCALE_STORAGE_KEY = 'yourjs-box.textScale';
+
+/**
+ * @returns {number}
+ *   The remembered text size or `1` if there isn't one.
+ */
+function loadTextScale() {
+  try {
+    const textScale = +localStorage.getItem(TEXT_SCALE_STORAGE_KEY);
+    return TEXT_SCALES.includes(textScale) ? textScale : 1;
+  }
+  catch (e) {
+    return 1;
+  }
+}
+
+/**
  * If the orientation isn't specified, the editor is shown below the console
  * instead of beside it when the console is narrower than this (in pixels).
  */
@@ -91,6 +122,17 @@ function init(jsCode, dataset, meta) {
           dividerPct: '50%',
           dividerSize: '8px',
           tempDividerPct: null,
+          isMenuOpen: false,
+          textScale: loadTextScale(),
+          isFullscreen: false,
+          // Set when full screen isn't allowed so the console fills the page.
+          isMaximized: false,
+          // Indicates if this is the viewer in a pop-out window.
+          isPopOut: meta.isPopOut,
+          // Indicates if this viewer (in the page) has been popped out.
+          isPoppedOut: false,
+          // When popped out, the state of the console that was in the page.
+          ...(meta.popOutState ?? {}),
         };
       },
       computed: {
@@ -190,6 +232,7 @@ function init(jsCode, dataset, meta) {
           });
         },
         bottomButtons() {
+          const isFullscreen = this.isFullscreen || this.isMaximized;
           return [
             {
               iconName: 'clear',
@@ -197,24 +240,15 @@ function init(jsCode, dataset, meta) {
               callback() { this.clearConsole(); },
             },
             {
-              iconName: 'refresh',
-              title: this.runnerMode === 'worker'
-                ? 'Reset (also stops any code that is still running)'
-                : 'Reset',
-              callback() { this.resetConsole(); },
-            },
-            { isSeparator: true },
-            {
-              iconName: 'horizontalView',
-              title: 'Show the editor below the console',
-              callback() { this.setDividerOrient('horizontal'); },
-              showIf() { return this.dividerOrient !== 'horizontal'; }
+              iconName: isFullscreen ? 'exitFullscreen' : 'fullscreen',
+              title: isFullscreen ? 'Exit full screen' : 'Full screen',
+              callback() { this.toggleFullscreen(); },
             },
             {
-              iconName: 'verticalView',
-              title: 'Show the editor beside the console',
-              callback() { this.setDividerOrient('vertical'); },
-              showIf() { return this.dividerOrient !== 'vertical'; }
+              iconName: 'more',
+              title: 'More',
+              className: 'more-button',
+              callback() { this.toggleMenu(); },
             },
             {
               iconName: this.runningCount ? 'spinner' : 'play',
@@ -224,7 +258,13 @@ function init(jsCode, dataset, meta) {
               callback() { this.runCode(); },
               disableIf() { return !this.canRunCode; }
             },
-          ].filter(btn => !btn.showIf || btn.showIf.call(this));
+          ];
+        },
+        canShrinkText() {
+          return this.textScale > TEXT_SCALES[0];
+        },
+        canGrowText() {
+          return this.textScale < TEXT_SCALES[TEXT_SCALES.length - 1];
         },
         canRunCode() {
           return this.jsCode.trim();
@@ -416,6 +456,144 @@ function init(jsCode, dataset, meta) {
           const {collapsedGroupIds} = this;
           return !!collapsedGroupIds.size && !!display.groupIds?.some(id => collapsedGroupIds.has(id));
         },
+        /**
+         * @returns {*}
+         *   A copy of the parts of the console's state that are moved between
+         *   the page and a pop-out window.
+         */
+        getState() {
+          return JSON.parse(JSON.stringify({
+            displays: this.displays,
+            jsCode: this.jsCode,
+            runHistory: this.runHistory,
+            hiddenGroups: this.hiddenGroups,
+            runCount: this.runCount,
+            runningCount: this.runningCount,
+            dividerOrient: this.dividerOrient,
+            isDividerOrientAuto: this.isDividerOrientAuto,
+            dividerPct: this.dividerPct,
+          }));
+        },
+        /**
+         * @param {ReturnType<this['getState']>} state
+         */
+        restoreState(state) {
+          Object.assign(this, state);
+          this.isDisplaysScrolledToBottom = true;
+        },
+        toggleMenu() {
+          if (this.isMenuOpen) {
+            this.closeMenu();
+          }
+          else {
+            this.isMenuOpen = true;
+            this.$nextTick(() => this.$refs.moreMenu?.querySelector('.menu-item:not(:disabled)')?.focus());
+          }
+        },
+        closeMenu(shouldFocusButton) {
+          this.isMenuOpen = false;
+          if (shouldFocusButton) document.querySelector('#bottomNav .more-button')?.focus();
+        },
+        /**
+         * Lets the arrow keys move between the menu's items.
+         * @param {KeyboardEvent} evt
+         */
+        onMenuKeyDown(evt) {
+          if (evt.key === 'Escape') {
+            evt.stopPropagation();
+            this.closeMenu(true);
+          }
+          else if (evt.key === 'ArrowDown' || evt.key === 'ArrowUp') {
+            evt.preventDefault();
+            const items = [...this.$refs.moreMenu.querySelectorAll('.menu-item:not(:disabled)')];
+            const index = items.indexOf(document.activeElement);
+            const next = items[(index + (evt.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length];
+            next?.focus();
+          }
+        },
+        /**
+         * @param {number} direction
+         *   `1` to make the text bigger or `-1` to make it smaller.
+         */
+        changeTextScale(direction) {
+          const index = TEXT_SCALES.indexOf(this.textScale) + direction;
+          if (index >= 0 && index < TEXT_SCALES.length) this.setTextScale(TEXT_SCALES[index]);
+        },
+        setTextScale(textScale) {
+          this.textScale = textScale;
+          try {
+            localStorage.setItem(TEXT_SCALE_STORAGE_KEY, `${textScale}`);
+          }
+          catch (e) {}
+        },
+        /**
+         * Uses the browser's full screen if it's allowed, otherwise the
+         * console is made to fill the page.
+         */
+        async toggleFullscreen() {
+          if (this.isMaximized) {
+            this.setMaximized(false);
+          }
+          else if (document.fullscreenElement) {
+            await document.exitFullscreen();
+          }
+          else {
+            try {
+              await document.documentElement.requestFullscreen();
+            }
+            catch (e) {
+              // A pop-out window can't be made to fill anything else.
+              if (!this.isPopOut) this.setMaximized(true);
+            }
+          }
+        },
+        setMaximized(isMaximized) {
+          this.isMaximized = isMaximized;
+          messageParent({target: 'host', func: 'setMaximized', args: [isMaximized]});
+        },
+        /**
+         * Moves the console into a separate window.  The code still runs in
+         * the page.
+         */
+        popOut() {
+          this.closeMenu();
+          if (this.isMaximized) this.setMaximized(false);
+          messageParent({target: 'host', func: 'popOut', args: [this.getState()]});
+        },
+        /**
+         * Moves the console from the pop-out window back into the page.
+         */
+        bringBack() {
+          this.hasSentState = true;
+          // The page provides a function to call directly because a message
+          // sent while this window is closing can't be traced back to it.
+          const popIn = window[POP_IN_FUNCTION_NAME];
+          if ('function' === typeof popIn) popIn(this.getState());
+          else messageParent({target: 'host', func: 'popIn', args: [this.getState()]});
+        },
+        focusPopOut() {
+          messageParent({target: 'host', func: 'focusPopOut', args: []});
+        },
+        requestPopIn() {
+          messageParent({target: 'host', func: 'requestPopIn', args: []});
+        },
+        /**
+         * Closes the menu when clicking outside of it.
+         * @param {MouseEvent} evt
+         */
+        onWindowMouseDown(evt) {
+          if (this.isMenuOpen && !evt.target.closest('.more-menu, .more-button')) {
+            this.closeMenu();
+          }
+        },
+        /**
+         * @param {KeyboardEvent} evt
+         */
+        onWindowKeyDown(evt) {
+          if (evt.key === 'Escape' && this.isMaximized && !this.isMenuOpen && !this.dialog && !this.isAboutOpen) {
+            this.setMaximized(false);
+          }
+        },
         closeDialog(isConfirmed) {
           const {dialog} = this;
           this.dialog = null;
@@ -482,6 +660,13 @@ function init(jsCode, dataset, meta) {
         }
       },
       watch: {
+        // Used by the CSS to size the text.
+        textScale: {
+          handler(textScale) {
+            document.documentElement.style.setProperty('--text-scale', textScale);
+          },
+          immediate: true,
+        },
         theme: {
           handler(theme) {
             document.documentElement.dataset.theme = theme;
@@ -501,18 +686,28 @@ function init(jsCode, dataset, meta) {
       },
       mounted() {
         addEventListener('mousemove', this.onWindowMouseMove);
+        addEventListener('mousedown', this.onWindowMouseDown);
+        addEventListener('keydown', this.onWindowKeyDown);
         addEventListener('resize', this.onWindowResize);
         addEventListener('mouseup', this.onWindowMouseUp);
         addEventListener('error', this.onWindowError);
         darkSchemeQuery.addEventListener('change', e => this.prefersDark = e.matches);
+        document.addEventListener('fullscreenchange', () => this.isFullscreen = !!document.fullscreenElement);
 
-        // Hidden code that came before all visible code gets run immediately.
-        this.runHiddenGroups();
+        // A pop-out window sends its state back to the page when it is closed.
+        if (this.isPopOut) {
+          addEventListener('pagehide', () => this.hasSentState || this.bringBack());
+        }
 
-        // Shows the loading screen for at least a moment and then fades it out.
+        // Hidden code that came before all visible code gets run immediately
+        // (unless this is a pop-out window still waiting for code to finish).
+        if (!this.runningCount) this.runHiddenGroups();
+
+        // Shows the loading screen for at least a moment and then fades it out
+        // (but not in a pop-out window which should appear right away).
         setTimeout(
           () => document.querySelector('#splash').classList.add('hidden'),
-          Math.max(0, MIN_LOADING_TIME - performance.now())
+          Math.max(0, (this.isPopOut ? 0 : MIN_LOADING_TIME) - performance.now())
         );
       }
     })
@@ -531,6 +726,7 @@ function getAceComponentProps() {
       };
     },
     props: [
+      'fontSize',
       'height',
       'keybinding',
       'language',
@@ -578,6 +774,9 @@ function getAceComponentProps() {
       themeSig(newValue) {
         this.editor.setTheme(newValue);
       },
+      fontSize(newValue) {
+        if (newValue) this.editor.setFontSize(newValue);
+      },
       modelValue(newValue) {
         if (newValue !== this.editor.getValue()) {
           // -1 puts the cursor at the start instead of selecting everything.
@@ -595,6 +794,8 @@ function getAceComponentProps() {
       this.editor = editor;
 
       // Read-only editors don't need syntax checking (eg. hints in the gutter).
+      if (this.fontSize) editor.setFontSize(this.fontSize);
+
       if (this.readOnly) {
         editor.setReadOnly(true);
         editor.setHighlightActiveLine(false);
@@ -736,6 +937,14 @@ function getIconComponentProps() {
           // https://icon-sets.iconify.design/mdi/error-outline/
           error: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm1-5C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18a8 8 0 0 1-8-8a8 8 0 0 1 8-8a8 8 0 0 1 8 8a8 8 0 0 1-8 8"/></svg>',
           // Icons similar to those in the browser's console.
+          fullscreen: '<svg viewBox="0 0 16 16"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+          exitFullscreen: '<svg viewBox="0 0 16 16"><path d="M6 2.5V6H2.5M13.5 6H10V2.5M10 13.5V10h3.5M2.5 10H6v3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+          more: '<svg viewBox="0 0 16 16"><circle cx="3.5" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="12.5" cy="8" r="1.4" fill="currentColor"/></svg>',
+          check: '<svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+          popOut: '<svg viewBox="0 0 16 16"><path d="M9.5 2.5h4v4M13.5 2.5L8 8M12 9.5v3a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+          popIn: '<svg viewBox="0 0 16 16"><path d="M12 8.5H8V4.5M8 8.5l5.5-5.5M12 10.5v2a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+          code: '<svg viewBox="0 0 16 16"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+          info: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.25v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="5" r="1" fill="currentColor"/></svg>',
           result: '<svg viewBox="0 0 16 16"><path d="M9 4.5L5.5 8 9 11.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="8" r="1.1" fill="currentColor"/></svg>',
           close: '<svg viewBox="0 0 16 16"><path d="M4 4l8 8m0-8l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
           clear: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.75 12.25l8.5-8.5" stroke="currentColor" stroke-width="1.5"/></svg>',
@@ -1175,6 +1384,36 @@ function updateDescriptionFor(path, description) {
 function onCodeRan() {
   mountedApp.runningCount = Math.max(0, mountedApp.runningCount - 1);
   mountedApp.runHiddenGroups();
+}
+
+/**
+ * NOTE:  Called by main when the console is popped out into a separate window
+ * or brought back into the page.
+ * @param {boolean} isPoppedOut
+ * @param {*=} state
+ *   When brought back, the state of the pop-out window's viewer (if it sent
+ *   it).
+ */
+function setPoppedOut(isPoppedOut, state) {
+  mountedApp.isPoppedOut = isPoppedOut;
+  if (state) mountedApp.restoreState(state);
+}
+
+/**
+ * NOTE:  Called by main to ask the pop-out window to send its state back.
+ */
+function popIn() {
+  mountedApp.bringBack();
+}
+
+/**
+ * NOTE:  Called by main if the browser blocked the pop-out window.
+ */
+function onPopOutFailed() {
+  mountedApp.displays.push({
+    type: 'notice',
+    message: 'The pop-out window was blocked by the browser.  Allow pop-ups for this site and try again.',
+  });
 }
 
 /**

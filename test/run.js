@@ -78,6 +78,14 @@ class TestContext {
       this.dialogs.push(dialog.message());
       dialog.dismiss();
     });
+    return this.load(code, attributes);
+  }
+
+  /**
+   * Replaces the page's content with a new console (in the same browser
+   * context so things like localStorage are kept).
+   */
+  async load(code, attributes = {}) {
     const attrs = Object.entries(attributes)
       .map(([name, value]) => ` data-${name.replace(/[A-Z]/g, c => '-' + c.toLowerCase())}="${value}"`)
       .join('');
@@ -131,11 +139,28 @@ class TestContext {
   }
 
   /**
+   * Opens the "More" menu and clicks the item that starts with the text.
+   */
+  async menu(text) {
+    await this.click('#bottomNav .more-button');
+    await this.inViewer(t => [...document.querySelectorAll('.more-menu .menu-item')].find(item => item.textContent.trim().startsWith(t)).click(), text);
+  }
+
+  /**
+   * Waits for the console in a page or frame (eg. a pop-out window) to load.
+   */
+  async waitForConsole(frame) {
+    await frame.waitForFunction(() => document.querySelector('#splash')?.classList.contains('hidden'), null, { timeout: 20000 });
+  }
+
+  /**
    * The text of each message in the console (not including code that ran),
    * prefixed with its type (eg. "error: ...").
+   * @param {import('playwright-core').Frame=} frame
+   *   Optional, defaults to the console's IFRAME.
    */
-  messages() {
-    return this.inViewer(() => [...document.querySelectorAll('.console-row:not(.code-row)')].map(row => {
+  messages(frame = this.viewer) {
+    return frame.evaluate(() => [...document.querySelectorAll('.console-row:not(.code-row)')].map(row => {
       const type = (row.className.match(/\blog-(\w+)/) || [, row.classList.contains('notice') ? 'notice' : 'log'])[1];
       return `${type}: ${row.innerText.trim().replace(/\s*\n\s*/g, ' | ')}`;
     }));
@@ -331,7 +356,7 @@ test('Reset stops an infinite loop and restores the code', async t => {
   await t.click('#bottomNav button.primary');
   await t.page.waitForTimeout(500);
   assert.ok(await t.inViewer(() => !!document.querySelector('#bottomNav .spin')));
-  await t.click('#bottomNav button[title^="Reset"]');
+  await t.menu('Reset');
   await t.click('.dialog-button.primary');
   await t.viewer.waitForFunction(() => !document.querySelector('#bottomNav .spin'));
   assert.ok((await t.editorCode()).includes('while (true)'));
@@ -425,6 +450,91 @@ test('About lists the library versions and Copy as HTML leaves out data-librarie
   const html = await t.inViewer(() => ace.edit(document.querySelector('.export-preview .ace_editor')).getValue());
   assert.ok(html.includes('data-theme="dark"'));
   assert.ok(!html.includes('data-libraries-url'));
+});
+
+test('the More menu changes the text size and remembers it', async t => {
+  await t.open(`console.log('hi')`);
+  await t.run();
+  await t.click('#bottomNav .more-button');
+  for (let i = 0; i < 2; i++) await t.inViewer(() => document.querySelector('.menu-item[title="Bigger text"]').click());
+  assert.equal(await t.inViewer(() => document.querySelector('.menu-percent').textContent.trim()), '130%');
+  assert.equal(await t.inViewer(() => getComputedStyle(document.querySelector('#displays > div')).fontSize), '15.6px');
+  assert.equal(await t.inViewer(() => ace.edit(document.querySelector('#editor .ace_editor')).getFontSize()), 16);
+  // Escape closes the menu.
+  await t.inViewer(() => document.querySelector('.more-menu').dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})));
+  assert.ok(await t.inViewer(() => !document.querySelector('.more-menu')));
+  // Another console on the same site uses the same text size.
+  await t.load(`1`);
+  assert.equal(await t.inViewer(() => getComputedStyle(document.querySelector('#displays > div')).fontSize), '15.6px');
+});
+
+test('the More menu changes the layout', async t => {
+  await t.open(`1`, {}, { width: 1200 });
+  assert.ok(await t.inViewer(() => document.querySelector('#main').classList.contains('col-orient')));
+  await t.menu('Editor below');
+  assert.ok(await t.inViewer(() => document.querySelector('#main').classList.contains('row-orient')));
+});
+
+test('full screen uses the browser\'s full screen', async t => {
+  await t.open(`1`);
+  await t.click('#bottomNav button[title="Full screen"]');
+  await t.viewer.waitForFunction(() => !!document.fullscreenElement);
+  await t.viewer.waitForSelector('#bottomNav button[title="Exit full screen"]');
+  await t.click('#bottomNav button[title="Exit full screen"]');
+  await t.viewer.waitForFunction(() => !document.fullscreenElement);
+});
+
+test('full screen fills the page if the browser\'s full screen is not allowed', async t => {
+  await t.open(`1`);
+  await t.inViewer(() => document.documentElement.requestFullscreen = () => Promise.reject(new Error('Not allowed')));
+  await t.click('#bottomNav button[title="Full screen"]');
+  await t.page.waitForTimeout(200);
+  const iframeBox = () => t.page.evaluate(() => {
+    const {position} = document.querySelector('iframe').style;
+    const {width, height} = document.querySelector('iframe').getBoundingClientRect();
+    return {position, width, height};
+  });
+  assert.deepEqual(await iframeBox(), {position: 'fixed', width: 1200, height: 800});
+  await t.inViewer(() => dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape'})));
+  await t.page.waitForTimeout(200);
+  assert.equal((await iframeBox()).position, '');
+});
+
+test('pop out keeps running code in the page (window mode)', async t => {
+  await t.open(String.raw`
+    // Before \\
+    console.log('before');
+    // In the pop-out window \\
+    document.querySelector('#title').textContent = 'Changed from the pop-out';
+  `, { runner: 'window' });
+  await t.run();
+  const [popOut] = await Promise.all([t.context.waitForEvent('page'), t.menu('Pop out')]);
+  await t.waitForConsole(popOut.mainFrame());
+  assert.ok(await t.inViewer(() => !!document.querySelector('.popped-out')));
+  assert.deepEqual(await t.messages(popOut.mainFrame()), ['log: before']);
+  await popOut.evaluate(() => document.querySelector('#bottomNav button.primary').click());
+  await popOut.waitForTimeout(500);
+  assert.equal(await t.page.textContent('#title'), 'Changed from the pop-out');
+  // Closing the window brings the console (including the new output) back.
+  await popOut.close({ runBeforeUnload: true });
+  await t.viewer.waitForFunction(() => !document.querySelector('.popped-out'));
+  assert.deepEqual(await t.messages(), ['log: before', "result: 'Changed from the pop-out'"]);
+});
+
+test('pop out keeps the worker\'s variables and can be brought back', async t => {
+  await t.open(`let x = 5`);
+  await t.run();
+  const [popOut] = await Promise.all([t.context.waitForEvent('page'), t.menu('Pop out')]);
+  await t.waitForConsole(popOut.mainFrame());
+  await popOut.evaluate(() => ace.edit(document.querySelector('#editor .ace_editor')).setValue('x * 2', -1));
+  await popOut.evaluate(() => document.querySelector('#bottomNav button.primary').click());
+  await popOut.waitForTimeout(500);
+  assert.deepEqual(await t.messages(popOut.mainFrame()), ['result: 10']);
+  await t.inViewer(() => [...document.querySelectorAll('.popped-out button')].find(b => b.textContent.includes('Bring it back')).click());
+  await t.viewer.waitForFunction(() => !document.querySelector('.popped-out'));
+  await popOut.waitForEvent('close', { timeout: 5000 }).catch(() => {});
+  assert.ok(popOut.isClosed());
+  assert.deepEqual(await t.messages(), ['result: 10']);
 });
 
 test('explains when the libraries fail to load', async t => {

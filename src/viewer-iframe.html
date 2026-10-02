@@ -61,6 +61,7 @@
         v-model="jsCode"
         language="javascript"
         :theme="theme"
+        :font-size="Math.round(12 * textScale)"
         @key-combo="onEditorKeyCombo"
         height="100%">
       </ace-editor>
@@ -78,6 +79,49 @@
           <icon :name="bottomButton.iconName"></icon><span v-if="bottomButton.label" class="label">{{ bottomButton.label }}</span>
         </button>
       </template>
+    </div>
+  </div>
+  <div v-if="isMenuOpen" class="more-menu" role="menu" aria-label="More" ref="moreMenu" @keydown="onMenuKeyDown">
+    <div class="menu-row" role="group" aria-label="Text size">
+      <span class="menu-row-label">Text size</span>
+      <button class="menu-item menu-step" role="menuitem" title="Smaller text" aria-label="Smaller text" :disabled="!canShrinkText" @click="changeTextScale(-1)">A&minus;</button>
+      <button class="menu-item menu-step menu-percent" role="menuitem" title="Reset the text size" aria-label="Reset the text size" @click="setTextScale(1)">{{ Math.round(textScale * 100) }}%</button>
+      <button class="menu-item menu-step" role="menuitem" title="Bigger text" aria-label="Bigger text" :disabled="!canGrowText" @click="changeTextScale(1)">A+</button>
+    </div>
+    <div class="menu-separator"></div>
+    <button class="menu-item" role="menuitemradio" :aria-checked="dividerOrient === 'vertical'" @click="setDividerOrient('vertical'); closeMenu(true)">
+      <span class="menu-icon"><icon v-if="dividerOrient === 'vertical'" name="check"></icon></span>Editor beside the console
+    </button>
+    <button class="menu-item" role="menuitemradio" :aria-checked="dividerOrient === 'horizontal'" @click="setDividerOrient('horizontal'); closeMenu(true)">
+      <span class="menu-icon"><icon v-if="dividerOrient === 'horizontal'" name="check"></icon></span>Editor below the console
+    </button>
+    <div class="menu-separator"></div>
+    <button v-if="isPopOut" class="menu-item" role="menuitem" @click="closeMenu(); bringBack()">
+      <span class="menu-icon"><icon name="popIn"></icon></span>Bring back into the page
+    </button>
+    <button v-else class="menu-item" role="menuitem" @click="popOut()">
+      <span class="menu-icon"><icon name="popOut"></icon></span>Pop out into a window
+    </button>
+    <button class="menu-item" role="menuitem" @click="closeMenu(); openAbout('html')">
+      <span class="menu-icon"><icon name="code"></icon></span>Copy as HTML&hellip;
+    </button>
+    <button class="menu-item" role="menuitem" @click="closeMenu(); resetConsole()">
+      <span class="menu-icon"><icon name="refresh"></icon></span>Reset&hellip;
+    </button>
+    <div class="menu-separator"></div>
+    <button class="menu-item" role="menuitem" @click="closeMenu(); openAbout('about')">
+      <span class="menu-icon"><icon name="info"></icon></span>About JS Box
+    </button>
+  </div>
+  <div v-if="isPoppedOut" class="popped-out">
+    <div class="popped-out-content">
+      <span class="logo logo-medium"><span class="logo-mark">JS</span><span class="logo-text">Box</span></span>
+      <div class="popped-out-title">This console is open in a separate window</div>
+      <div class="popped-out-text">Its code still runs in this page.</div>
+      <div class="dialog-buttons">
+        <button class="dialog-button" @click="focusPopOut">Show the window</button>
+        <button class="dialog-button primary" @click="requestPopIn">Bring it back</button>
+      </div>
     </div>
   </div>
   <div v-if="isAboutOpen" class="dialog-backdrop" @mousedown.self="closeAbout" @keydown.esc="closeAbout">
@@ -115,7 +159,7 @@
         <h3>Keyboard shortcuts</h3>
         <dl class="about-details">
           <dt><kbd>{{ modKey }}</kbd> + <kbd>Enter</kbd></dt><dd>Run the next block of code</dd>
-          <dt><kbd>Esc</kbd></dt><dd>Close this window</dd>
+          <dt><kbd>Esc</kbd></dt><dd>Close this window, the menu or full screen</dd>
         </dl>
         <div class="about-footer">
           MIT License &copy; 2023-present Christopher West &middot;
