@@ -60,6 +60,7 @@ If the editor already has code in it you are asked before it is replaced.
 | --- | --- |
 | `data-block-type` | `"classic"` (default) runs each block like a regular `<script>` so top-level declarations are shared between blocks.  `"module"` runs each block like a `<script type="module">`.  See below. |
 | `data-show-results` | `"false"` stops the value of the last expression in each block from being shown. |
+| `data-libraries-url` | Where to load Vue, Ace, Prism and Acorn from.  See "Self-Hosting the Libraries" below. |
 | `data-runner` | `"worker"` (default) runs the code in a Web Worker.  `"window"` runs it directly in the page.  See below. |
 | `data-divider-orient` | `"vertical"` puts the editor beside the output and `"horizontal"` puts it below.  If not specified the editor is beside the output unless the console is narrower than 600px. |
 | `data-hide-prefix` | Any block whose header starts with this prefix is hidden. See below. |
@@ -83,6 +84,35 @@ one block can be used in the next, but `await` can only be used inside of
 - `import` works (eg. `import {camelCase} from 'https://cdn.jsdelivr.net/npm/lodash-es/+esm';`).
 - Top-level declarations stay inside of their block, just like in a module.
   Use `globalThis` to share values between blocks.
+
+### Self-Hosting the Libraries
+
+The console's interface uses [Vue](https://vuejs.org/),
+[Ace](https://ace.c9.io/), [Prism](https://prismjs.com/) and
+[Acorn](https://github.com/acornjs/acorn), which are loaded from unpkg by
+default.  Exact versions are always used so that a new release of one of them
+can't change how the console works.
+
+To load them from somewhere else (eg. your own site, an intranet or another
+CDN) set `data-libraries-url` to a URL where `{name}` and `{version}` are
+replaced with each library's package name and version.  Relative URLs are
+relative to the page.
+
+| Where | `data-libraries-url` |
+| --- | --- |
+| unpkg (the default) | `https://unpkg.com/{name}@{version}/` |
+| jsDelivr | `https://cdn.jsdelivr.net/npm/{name}@{version}/` |
+| Your own copy of `node_modules` | `/node_modules/{name}/` |
+
+To host them yourself, install these exact versions and serve the whole
+package folders (Ace and Prism load other files, such as language modes, from
+next to their main files):
+
+```bash
+npm install vue@3.5.43 ace-builds@1.44.0 prismjs@1.30.0 prism-themes@1.9.0 acorn@8.18.0
+```
+
+The About window lists the versions that each version of JS Box uses.
 
 ### Console Functions
 

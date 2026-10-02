@@ -28,6 +28,40 @@
   const ORIGINAL_CONSOLE = window[Symbol.for('yourjs-box.originalConsole')] ??= {...console};
 
   /**
+   * The libraries that the viewer loads along with the exact versions that it
+   * was tested with.
+   */
+  const LIBRARY_VERSIONS = {
+    'ace-builds': '1.44.0',
+    'acorn': '8.18.0',
+    'prism-themes': '1.9.0',
+    'prismjs': '1.30.0',
+    'vue': '3.5.43',
+  };
+
+  /**
+   * Where the libraries are loaded from unless data-libraries-url is given.
+   * `{name}` and `{version}` are replaced with each library's name and version.
+   */
+  const DEFAULT_LIBRARIES_URL = 'https://unpkg.com/{name}@{version}/';
+
+  /**
+   * @param {string} librariesUrl
+   *   The URL template (see DEFAULT_LIBRARIES_URL).  Relative URLs are relative
+   *   to the page.
+   * @param {keyof LIBRARY_VERSIONS} name
+   * @param {string} path
+   *   The path of the file within the library's package.
+   * @returns {string}
+   */
+  function getLibraryFileUrl(librariesUrl, name, path) {
+    const baseUrl = librariesUrl
+      .replace(/\{(name|version)\}/g, (_, key) => key === 'name' ? name : LIBRARY_VERSIONS[name])
+      .replace(/\/?$/, '/');
+    return new URL(baseUrl + path, document.baseURI).href;
+  }
+
+  /**
    * The only functions that may be relayed to the viewer and to the runner.
    * The runner executes the user's code so anything it sends must be limited
    * to these calls.
@@ -165,6 +199,7 @@
     const runnerMode = dataset.runner === 'window' ? 'window' : 'worker';
     const blockType = dataset.blockType === 'module' ? 'module' : 'classic';
     const showResults = dataset.showResults !== 'false';
+    const libraryUrl = getLibraryFileUrl.bind(null, dataset.librariesUrl || DEFAULT_LIBRARIES_URL);
 
     /** @type {ReturnType<createCallableFrame>} */
     let callableViewerFrame;
@@ -183,21 +218,22 @@
         [[JS_VIEWER_IFRAME_FILE_PLACEHOLDER]]
       },
       // Exact versions are used so that a new release of a library can never
-      // change how an existing version of this console works.
+      // change how an existing version of this console works.  Ace and Prism
+      // load other files (eg. language modes) from next to these files.
       jsUrls: [
-        'https://unpkg.com/vue@3.5.43/dist/vue.global.prod.js',
-        'https://unpkg.com/ace-builds@1.44.0/src-noconflict/ace.js',
-        'https://unpkg.com/prismjs@1.30.0/components/prism-core.min.js',
-        'https://unpkg.com/prismjs@1.30.0/plugins/autoloader/prism-autoloader.min.js',
-        'https://unpkg.com/prismjs@1.30.0/plugins/match-braces/prism-match-braces.min.js',
+        libraryUrl('vue', 'dist/vue.global.prod.js'),
+        libraryUrl('ace-builds', 'src-noconflict/ace.js'),
+        libraryUrl('prismjs', 'components/prism-core.min.js'),
+        libraryUrl('prismjs', 'plugins/autoloader/prism-autoloader.min.js'),
+        libraryUrl('prismjs', 'plugins/match-braces/prism-match-braces.min.js'),
         // Used to find the last expression in each block of code so that its
         // value can be shown.
-        ...(showResults ? ['https://cdn.jsdelivr.net/npm/acorn@8.18.0/dist/acorn.min.js'] : []),
+        ...(showResults ? [libraryUrl('acorn', 'dist/acorn.js')] : []),
       ],
       cssUrls: [
         'data:text/css,' + encodeURIComponent(VIEWER_IFRAME_CSS),
-        'https://unpkg.com/prism-themes@1.9.0/themes/prism-vsc-dark-plus.min.css',
-        'https://unpkg.com/prismjs@1.30.0/plugins/match-braces/prism-match-braces.min.css',
+        libraryUrl('prism-themes', 'themes/prism-vsc-dark-plus.min.css'),
+        libraryUrl('prismjs', 'plugins/match-braces/prism-match-braces.min.css'),
       ],
       htmlAttributes: 'data-theme="' + theme + '"',
       onMessage(message) {
@@ -206,7 +242,7 @@
       async onReady() {
         // The dataset is passed as is so that the viewer knows which options
         // were actually specified (eg. when copying the console as HTML).
-        this.call('init', script.textContent, dataset, {runnerMode, blockType, showResults, packageInfo: PACKAGE_INFO});
+        this.call('init', script.textContent, dataset, {runnerMode, blockType, showResults, packageInfo: PACKAGE_INFO, libraryVersions: LIBRARY_VERSIONS});
       },
       body: VIEWER_IFRAME_HTML,
       style: {

@@ -27,7 +27,13 @@ const test = (name, fn) => TESTS.push({ name, fn });
  */
 function startServer() {
   const server = http.createServer((req, res) => {
-    const filePath = path.join(ROOT, decodeURIComponent(new URL(req.url, 'http://x').pathname));
+    const pathname = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+    // Folders are served as empty pages which the tests use as a starting point.
+    if (pathname.endsWith('/')) {
+      res.writeHead(200, { 'Content-Type': 'text/html' }).end('<!DOCTYPE html>');
+      return;
+    }
+    const filePath = path.join(ROOT, pathname);
     if (!filePath.startsWith(ROOT) || !fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
       res.writeHead(404).end();
       return;
@@ -62,6 +68,11 @@ class TestContext {
     });
     for (const [url, handler] of options.routes ?? []) await this.context.route(url, handler);
     this.page = await this.context.newPage();
+    // Every URL requested by the page (including the console's IFRAME).
+    this.requestedUrls = [];
+    this.page.on('request', request => this.requestedUrls.push(request.url()));
+    // Gives the page a real URL so that relative URLs work.
+    await this.page.goto(`${this.baseUrl}/test/`);
     this.dialogs = [];
     this.page.on('dialog', dialog => {
       this.dialogs.push(dialog.message());
@@ -137,6 +148,15 @@ class TestContext {
 }
 
 // ---------------------------------------------------------------------------
+
+test('built files only contain ASCII characters', async () => {
+  // Keeps them working when served without a charset on a page that isn't UTF-8.
+  for (const file of fs.readdirSync(path.join(ROOT, 'dist'))) {
+    const text = fs.readFileSync(path.join(ROOT, 'dist', file), 'utf8');
+    const index = text.search(/[^\x00-\x7F]/);
+    assert.equal(index, -1, `${file} has a non-ASCII character: ${JSON.stringify(text.slice(index - 20, index + 20))}`);
+  }
+});
 
 test('logs values with browser-style previews', async t => {
   await t.open(String.raw`
@@ -363,6 +383,48 @@ test('stacks the editor below the console when narrow', async t => {
   await t.page.setViewportSize({ width: 1200, height: 800 });
   await t.page.waitForTimeout(200);
   assert.ok(await t.inViewer(() => document.querySelector('#main').classList.contains('col-orient')));
+});
+
+test('data-libraries-url can point to another CDN', async t => {
+  await t.open(`2 + 2`, { librariesUrl: 'https://cdn.jsdelivr.net/npm/{name}@{version}/' });
+  await t.run();
+  assert.deepEqual(await t.messages(), ['result: 4']);
+  assert.equal(t.requestedUrls.filter(url => url.startsWith('https://unpkg.com/')).length, 0);
+  assert.ok(t.requestedUrls.some(url => url.startsWith('https://cdn.jsdelivr.net/npm/acorn@')));
+});
+
+test('data-libraries-url can point to files on the same site', async t => {
+  // Serves /vendor/{name}/... (like a copy of node_modules) from the real
+  // packages using the versions in src/main.js.
+  const versions = Object.fromEntries(
+    [...fs.readFileSync(path.join(ROOT, 'src/main.js'), 'utf8').matchAll(/'([\w-]+)': '(\d+\.\d+\.\d+)'/g)]
+      .map(([, name, version]) => [name, version])
+  );
+  const vendorRoute = async route => {
+    const [, name, filePath] = new URL(route.request().url()).pathname.match(/^\/vendor\/([^/]+)\/(.+)$/);
+    route.fulfill({ response: await route.fetch({ url: `https://unpkg.com/${name}@${versions[name]}/${filePath}` }) });
+  };
+  await t.open(`console.log('hi'); 1 + 1`, { librariesUrl: '/vendor/{name}/' }, { routes: [['**/vendor/**', vendorRoute]] });
+  await t.run();
+  assert.deepEqual(await t.messages(), ['log: hi', 'result: 2']);
+  // Ace's mode and Prism's language are loaded from next to the main files.
+  await t.viewer.waitForFunction(() => ace.edit(document.querySelector('#editor .ace_editor')).session.getMode().$id === 'ace/mode/javascript');
+  const vendorFiles = t.requestedUrls.filter(url => url.includes('/vendor/')).map(url => url.replace(/^.*\/vendor\//, ''));
+  for (const file of ['vue/dist/vue.global.prod.js', 'ace-builds/src-noconflict/mode-javascript.js', 'prismjs/components/prism-javascript.min.js', 'acorn/dist/acorn.js']) {
+    assert.ok(vendorFiles.includes(file), `${file} was not loaded from /vendor/`);
+  }
+  assert.equal(t.requestedUrls.filter(url => /unpkg|jsdelivr/.test(url)).length, 0);
+});
+
+test('About lists the library versions and Copy as HTML leaves out data-libraries-url', async t => {
+  await t.open(`1`, { librariesUrl: 'https://cdn.jsdelivr.net/npm/{name}@{version}/', theme: 'dark' });
+  await t.click('#bottomNav .logo-button');
+  assert.match(await t.inViewer(() => document.querySelector('.about-footer').innerText), /Vue \d+\.\d+\.\d+, Ace \d+\.\d+\.\d+,\s+Prism \d+\.\d+\.\d+ and Acorn \d+\.\d+\.\d+/);
+  await t.inViewer(() => [...document.querySelectorAll('.tab')].find(tab => tab.textContent === 'Copy as HTML').click());
+  await t.viewer.waitForFunction(() => document.querySelector('.export-preview .ace_editor'));
+  const html = await t.inViewer(() => ace.edit(document.querySelector('.export-preview .ace_editor')).getValue());
+  assert.ok(html.includes('data-theme="dark"'));
+  assert.ok(!html.includes('data-libraries-url'));
 });
 
 test('explains when the libraries fail to load', async t => {

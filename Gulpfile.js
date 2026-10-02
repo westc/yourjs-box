@@ -87,10 +87,19 @@ async function definePlaceholderValues() {
   });
 }
 
+// Escapes every non-ASCII character (eg. "…" becomes "\\u2026") so that the
+// files work even if they are served without a charset on a page that isn't
+// UTF-8.  This is safe because the only non-ASCII characters are in strings,
+// template literals, regular expressions and comments.
+function escapeNonAscii() {
+  return replace(/[^\x00-\x7F]/g, c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
+}
+
 // Builds yourjs-box.js with the minified IFRAME code.
 function buildMiniJS() {
   return gulp.src(jsSrc)
     .pipe(getReplacer(true))
+    .pipe(escapeNonAscii())
     .pipe(replace(/^/, () => BANNER))
     .pipe(rename({ basename: outName }))
     .pipe(gulp.dest(dirDest));
@@ -100,6 +109,7 @@ function buildMiniJS() {
 function buildJS() {
   return gulp.src(jsSrc)
     .pipe(getReplacer())
+    .pipe(escapeNonAscii())
     .pipe(replace(/^/, () => BANNER))
     .pipe(rename({ basename: outName, suffix: '.full' }))
     .pipe(gulp.dest(dirDest));
@@ -115,6 +125,8 @@ function minifyJS() {
       // Keeps the license banner.
       output: { comments: /^!/ }
     }))
+    // Minifying turns escapes back into characters so escape them again.
+    .pipe(escapeNonAscii())
     .pipe(rename({ suffix: '.min' }))
     .pipe(gulp.dest(dirDest));
 }

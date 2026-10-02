@@ -117,7 +117,11 @@
           <dt><kbd>{{ modKey }}</kbd> + <kbd>Enter</kbd></dt><dd>Run the next block of code</dd>
           <dt><kbd>Esc</kbd></dt><dd>Close this window</dd>
         </dl>
-        <div class="about-footer">MIT License &copy; 2023-present Christopher West &middot; Built with Vue, Ace and Prism</div>
+        <div class="about-footer">
+          MIT License &copy; 2023-present Christopher West &middot;
+          Built with Vue {{ libraryVersions.vue }}, Ace {{ libraryVersions['ace-builds'] }},
+          Prism {{ libraryVersions.prismjs }} and Acorn {{ libraryVersions.acorn }}
+        </div>
       </div>
       <div v-else class="about-body export-body">
         <div class="export-options">

@@ -59,6 +59,7 @@ function init(jsCode, dataset, meta) {
           blockType: meta.blockType,
           showResults: meta.showResults,
           packageInfo: meta.packageInfo,
+          libraryVersions: meta.libraryVersions,
           // Every group of code that was run (in order) which is used when
           // copying the console as HTML.  Unlike the displays this is only
           // cleared by a reset.
@@ -171,10 +172,19 @@ function init(jsCode, dataset, meta) {
           blocks.push(...pendingHiddenGroups.map(group => group.allLines));
           return joinCodeBlocks(blocks);
         },
+        /**
+         * The data attributes for the copied console.  data-libraries-url is
+         * left out because it usually points to files on this site while the
+         * copied console loads JS Box from a CDN.
+         */
+        exportDataset() {
+          const {librariesUrl, ...exportDataset} = dataset;
+          return exportDataset;
+        },
         exportHtml() {
           return buildConsoleHtml({
             code: this.exportJsCode,
-            dataset,
+            dataset: this.exportDataset,
             packageInfo: this.packageInfo,
             isFullPage: this.exportFormat === 'page',
           });
@@ -380,7 +390,7 @@ function init(jsCode, dataset, meta) {
         downloadExport() {
           const html = buildConsoleHtml({
             code: this.exportJsCode,
-            dataset,
+            dataset: this.exportDataset,
             packageInfo: this.packageInfo,
             isFullPage: true,
           });
