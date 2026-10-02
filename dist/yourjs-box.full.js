@@ -753,7 +753,7 @@
                   prefersDark: darkSchemeQuery.matches,
                   runCount: 0,
                   jsCode: visibleCode,
-                  dividerOrient: dataset.dividerOrient === 'vertical' ? 'vertical' : 'horizontal',
+                  dividerOrient: dataset.dividerOrient === 'horizontal' ? 'horizontal' : 'vertical',
                   isMovingDivider: false,
                   dividerPct: '50%',
                   dividerSize: '8px',

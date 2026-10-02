@@ -82,7 +82,7 @@
     <section>
       <h2>console.table</h2>
       <div class="console">
-        <script type="text/x-console" data-divider-orient="vertical">
+        <script type="text/x-console">
           // Array of objects \\
           console.table([{name: 'Ada', born: 1815}, {name: 'Grace', born: 1906, navy: true}]);
 
@@ -132,9 +132,9 @@
     </section>
 
     <section>
-      <h2>Errors &amp; async code</h2>
+      <h2>Errors &amp; async code (<code>data-divider-orient="horizontal"</code>)</h2>
       <div class="console">
-        <script type="text/x-console">
+        <script type="text/x-console" data-divider-orient="horizontal">
           // Thrown error \\
           throw new Error('Something went wrong');
 
@@ -162,7 +162,7 @@
       <h2>Web Worker (the default)</h2>
       <p>Code runs in a Web Worker so it can't touch the page.  Reset stops code that never finishes.</p>
       <div class="console">
-        <script type="text/x-console" data-divider-orient="vertical">
+        <script type="text/x-console">
           // Top-level declarations are shared between blocks \\
           let counter = 0;
           var total = 10;
