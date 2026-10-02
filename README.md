@@ -41,6 +41,8 @@ If the editor already has code in it you are asked before it is replaced.
 
 - **Clear** removes everything from the console.  Code can also call
   `console.clear()`.
+- The **layout** button switches between showing the editor beside or below
+  the console.
 - **Full screen** shows the console using the whole screen.  If the browser
   doesn't allow that (eg. on an iPhone) the console fills the browser window
   instead.  Press <kbd>Esc</kbd> to exit.
@@ -49,7 +51,6 @@ If the editor already has code in it you are asked before it is replaced.
   console's settings and keyboard shortcuts.
 - The **&#8943;** button opens a menu with:
   - **Text size**, which is remembered for every console on the same site.
-  - **Editor beside / below the console** to change the layout.
   - **Pop out into a window**, which moves the console into a separate window
     while the code keeps running in the page (so in window mode the code can
     still change the page).  Close the window or click **Bring it back** to

@@ -240,6 +240,18 @@ function init(jsCode, dataset, meta) {
               callback() { this.clearConsole(); },
             },
             {
+              iconName: 'horizontalView',
+              title: 'Show the editor below the console',
+              callback() { this.setDividerOrient('horizontal'); },
+              showIf() { return this.dividerOrient !== 'horizontal'; }
+            },
+            {
+              iconName: 'verticalView',
+              title: 'Show the editor beside the console',
+              callback() { this.setDividerOrient('vertical'); },
+              showIf() { return this.dividerOrient !== 'vertical'; }
+            },
+            {
               iconName: isFullscreen ? 'exitFullscreen' : 'fullscreen',
               title: isFullscreen ? 'Exit full screen' : 'Full screen',
               callback() { this.toggleFullscreen(); },
@@ -258,7 +270,7 @@ function init(jsCode, dataset, meta) {
               callback() { this.runCode(); },
               disableIf() { return !this.canRunCode; }
             },
-          ];
+          ].filter(btn => !btn.showIf || btn.showIf.call(this));
         },
         canShrinkText() {
           return this.textScale > TEXT_SCALES[0];
@@ -940,7 +952,6 @@ function getIconComponentProps() {
           fullscreen: '<svg viewBox="0 0 16 16"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
           exitFullscreen: '<svg viewBox="0 0 16 16"><path d="M6 2.5V6H2.5M13.5 6H10V2.5M10 13.5V10h3.5M2.5 10H6v3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
           more: '<svg viewBox="0 0 16 16"><circle cx="3.5" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="12.5" cy="8" r="1.4" fill="currentColor"/></svg>',
-          check: '<svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
           popOut: '<svg viewBox="0 0 16 16"><path d="M9.5 2.5h4v4M13.5 2.5L8 8M12 9.5v3a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
           popIn: '<svg viewBox="0 0 16 16"><path d="M12 8.5H8V4.5M8 8.5l5.5-5.5M12 10.5v2a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
           code: '<svg viewBox="0 0 16 16"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',

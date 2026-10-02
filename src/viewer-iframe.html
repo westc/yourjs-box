@@ -88,13 +88,7 @@
       <button class="menu-item menu-step menu-percent" role="menuitem" title="Reset the text size" aria-label="Reset the text size" @click="setTextScale(1)">{{ Math.round(textScale * 100) }}%</button>
       <button class="menu-item menu-step" role="menuitem" title="Bigger text" aria-label="Bigger text" :disabled="!canGrowText" @click="changeTextScale(1)">A+</button>
     </div>
-    <div class="menu-separator"></div>
-    <button class="menu-item" role="menuitemradio" :aria-checked="dividerOrient === 'vertical'" @click="setDividerOrient('vertical'); closeMenu(true)">
-      <span class="menu-icon"><icon v-if="dividerOrient === 'vertical'" name="check"></icon></span>Editor beside the console
-    </button>
-    <button class="menu-item" role="menuitemradio" :aria-checked="dividerOrient === 'horizontal'" @click="setDividerOrient('horizontal'); closeMenu(true)">
-      <span class="menu-icon"><icon v-if="dividerOrient === 'horizontal'" name="check"></icon></span>Editor below the console
-    </button>
+
     <div class="menu-separator"></div>
     <button v-if="isPopOut" class="menu-item" role="menuitem" @click="closeMenu(); bringBack()">
       <span class="menu-icon"><icon name="popIn"></icon></span>Bring back into the page

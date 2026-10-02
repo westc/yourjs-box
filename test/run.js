@@ -468,11 +468,14 @@ test('the More menu changes the text size and remembers it', async t => {
   assert.equal(await t.inViewer(() => getComputedStyle(document.querySelector('#displays > div')).fontSize), '15.6px');
 });
 
-test('the More menu changes the layout', async t => {
+test('the layout button switches where the editor is', async t => {
   await t.open(`1`, {}, { width: 1200 });
   assert.ok(await t.inViewer(() => document.querySelector('#main').classList.contains('col-orient')));
-  await t.menu('Editor below');
+  await t.click('#bottomNav button[title="Show the editor below the console"]');
   assert.ok(await t.inViewer(() => document.querySelector('#main').classList.contains('row-orient')));
+  await t.viewer.waitForSelector('#bottomNav button[title="Show the editor beside the console"]');
+  await t.click('#bottomNav button[title="Show the editor beside the console"]');
+  assert.ok(await t.inViewer(() => document.querySelector('#main').classList.contains('col-orient')));
 });
 
 test('full screen uses the browser\'s full screen', async t => {
