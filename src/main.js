@@ -163,6 +163,8 @@
   function main(script) {
     const dataset = JSON.parse(JSON.stringify(script.dataset));
     const runnerMode = dataset.runner === 'window' ? 'window' : 'worker';
+    const blockType = dataset.blockType === 'module' ? 'module' : 'classic';
+    const showResults = dataset.showResults !== 'false';
 
     /** @type {ReturnType<createCallableFrame>} */
     let callableViewerFrame;
@@ -180,17 +182,22 @@
       jsCode() {
         [[JS_VIEWER_IFRAME_FILE_PLACEHOLDER]]
       },
+      // Exact versions are used so that a new release of a library can never
+      // change how an existing version of this console works.
       jsUrls: [
-        'https://unpkg.com/vue@3/dist/vue.global.prod.js',
-        'https://unpkg.com/ace-builds@1/src-noconflict/ace.js',
-        'https://unpkg.com/prismjs@1/components/prism-core.min.js',
-        'https://unpkg.com/prismjs@1/plugins/autoloader/prism-autoloader.min.js',
-        'https://unpkg.com/prismjs@1/plugins/match-braces/prism-match-braces.min.js',
+        'https://unpkg.com/vue@3.5.43/dist/vue.global.prod.js',
+        'https://unpkg.com/ace-builds@1.44.0/src-noconflict/ace.js',
+        'https://unpkg.com/prismjs@1.30.0/components/prism-core.min.js',
+        'https://unpkg.com/prismjs@1.30.0/plugins/autoloader/prism-autoloader.min.js',
+        'https://unpkg.com/prismjs@1.30.0/plugins/match-braces/prism-match-braces.min.js',
+        // Used to find the last expression in each block of code so that its
+        // value can be shown.
+        ...(showResults ? ['https://cdn.jsdelivr.net/npm/acorn@8.18.0/dist/acorn.min.js'] : []),
       ],
       cssUrls: [
         'data:text/css,' + encodeURIComponent(VIEWER_IFRAME_CSS),
-        'https://unpkg.com/prism-themes@1/themes/prism-vsc-dark-plus.min.css',
-        'https://unpkg.com/prismjs@1/plugins/match-braces/prism-match-braces.min.css',
+        'https://unpkg.com/prism-themes@1.9.0/themes/prism-vsc-dark-plus.min.css',
+        'https://unpkg.com/prismjs@1.30.0/plugins/match-braces/prism-match-braces.min.css',
       ],
       htmlAttributes: 'data-theme="' + theme + '"',
       onMessage(message) {
@@ -199,7 +206,7 @@
       async onReady() {
         // The dataset is passed as is so that the viewer knows which options
         // were actually specified (eg. when copying the console as HTML).
-        this.call('init', script.textContent, dataset, {runnerMode, packageInfo: PACKAGE_INFO});
+        this.call('init', script.textContent, dataset, {runnerMode, blockType, showResults, packageInfo: PACKAGE_INFO});
       },
       body: VIEWER_IFRAME_HTML,
       style: {

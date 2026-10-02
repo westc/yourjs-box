@@ -1,8 +1,17 @@
 let mountedApp;
 
+/**
+ * Indicates if any of the libraries that the viewer needs failed to load (eg.
+ * because the CDN is blocked or the user is offline).
+ */
+const IS_MISSING_LIBRARIES = !window.Vue || !window.ace || !window.Prism;
+if (IS_MISSING_LIBRARIES) {
+  document.querySelector('#splash').classList.add('failed');
+}
+
 const Prism = window.Prism;
 delete window.Prism;
-Prism.plugins.autoloader.loadLanguages('javascript');
+Prism?.plugins.autoloader.loadLanguages('javascript');
 
 /**
  * The minimum amount of time (in milliseconds) that the loading screen is shown.
@@ -30,6 +39,8 @@ function getAutoDividerOrient() {
  * @param {{runnerMode: "worker"|"window", packageInfo: {name: string, version: string, homepage: string, repoUrl: string, bugsUrl: string}}} meta
  */
 function init(jsCode, dataset, meta) {
+  if (IS_MISSING_LIBRARIES) return;
+
   const hidePrefix = dataset.hidePrefix ?? '';
   const darkSchemeQuery = matchMedia('(prefers-color-scheme: dark)');
   const originalCode = unindentMin(jsCode);
@@ -45,6 +56,8 @@ function init(jsCode, dataset, meta) {
           hidePrefix,
           hiddenGroups: copyHiddenGroups(),
           runnerMode: meta.runnerMode,
+          blockType: meta.blockType,
+          showResults: meta.showResults,
           packageInfo: meta.packageInfo,
           // Every group of code that was run (in order) which is used when
           // copying the console as HTML.  Unlike the displays this is only
@@ -94,6 +107,22 @@ function init(jsCode, dataset, meta) {
         themeDescription() {
           const name = this.theme === 'dark' ? 'Dark' : 'Light';
           return `${name} (${this.forcedTheme ? 'set by data-theme' : 'follows your system'})`;
+        },
+        blockTypeDescription() {
+          return this.blockType === 'module'
+            ? 'Modules (top-level await and imports work, declarations stay in each block)'
+            : 'Classic scripts (top-level declarations are shared between blocks)';
+        },
+        /**
+         * The IDs of the groups (from console.groupCollapsed() or a group that
+         * the user collapsed) whose messages should be hidden.
+         */
+        collapsedGroupIds() {
+          return new Set(
+            this.displays
+              .filter(d => d.groupId && d.isCollapsed)
+              .map(d => d.groupId)
+          );
         },
         layoutDescription() {
           return (this.dividerOrient === 'vertical' ? 'Editor beside the console' : 'Editor below the console')
@@ -251,7 +280,18 @@ function init(jsCode, dataset, meta) {
           });
           this.runningCount++;
           this.runHistory.push(group.allLines);
-          messageParent({target: 'runner', func: 'runCode', args: [group.lines]});
+          messageParent({
+            target: 'runner',
+            func: 'runCode',
+            args: [group.lines, {
+              blockType: this.blockType,
+              // Like the browser's console, show the value of the last
+              // expression (except for hidden code).
+              resultRange: this.showResults && !isHidden
+                ? findLastExpression(group.lines, this.blockType)
+                : null,
+            }],
+          });
         },
         clearConsole() {
           this.displays = [];
@@ -347,6 +387,24 @@ function init(jsCode, dataset, meta) {
           const url = URL.createObjectURL(new Blob([html], {type: 'text/html'}));
           Object.assign(document.createElement('a'), {href: url, download: 'js-box.html'}).click();
           setTimeout(() => URL.revokeObjectURL(url), 1000);
+        },
+        /**
+         * Clicking a group's header (from console.group()) collapses or expands
+         * the group unless a value in the header was clicked.
+         * @param {*} display
+         * @param {MouseEvent} evt
+         */
+        onLogRowClick(display, evt) {
+          if (display.groupId && !evt.target.closest('.js-value-header.expandable')) {
+            display.isCollapsed = !display.isCollapsed;
+          }
+        },
+        /**
+         * Indicates if a display is inside of a collapsed group.
+         */
+        isInCollapsedGroup(display) {
+          const {collapsedGroupIds} = this;
+          return !!collapsedGroupIds.size && !!display.groupIds?.some(id => collapsedGroupIds.has(id));
         },
         closeDialog(isConfirmed) {
           const {dialog} = this;
@@ -668,6 +726,7 @@ function getIconComponentProps() {
           // https://icon-sets.iconify.design/mdi/error-outline/
           error: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm1-5C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18a8 8 0 0 1-8-8a8 8 0 0 1 8-8a8 8 0 0 1 8 8a8 8 0 0 1-8 8"/></svg>',
           // Icons similar to those in the browser's console.
+          result: '<svg viewBox="0 0 16 16"><path d="M9 4.5L5.5 8 9 11.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="8" r="1.1" fill="currentColor"/></svg>',
           close: '<svg viewBox="0 0 16 16"><path d="M4 4l8 8m0-8l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
           clear: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.75 12.25l8.5-8.5" stroke="currentColor" stroke-width="1.5"/></svg>',
           copyToEditor: '<svg viewBox="0 0 16 16"><path d="M6 3.5L2.5 7 6 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 7h6.5a4 4 0 0 1 4 4v1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
@@ -852,6 +911,33 @@ function extractHiddenGroups(jsCode, hidePrefix) {
 }
 
 /**
+ * Finds the last statement in the code if it is an expression so that its
+ * value can be shown.
+ * @param {string} code
+ * @param {"classic"|"module"} blockType
+ * @returns {[number, number]|null}
+ *   The start and end index of the expression or `null` if the last statement
+ *   isn't an expression (or the code can't be parsed, in which case running
+ *   it will show the syntax error).
+ */
+function findLastExpression(code, blockType) {
+  if (!window.acorn) return null;
+  try {
+    const {body} = acorn.parse(code, {
+      ecmaVersion: 'latest',
+      sourceType: blockType === 'module' ? 'module' : 'script',
+      allowHashBang: true,
+    });
+    const last = body[body.length - 1];
+    if (last?.type === 'ExpressionStatement' && !last.directive) {
+      return [last.expression.start, last.expression.end];
+    }
+  }
+  catch (e) {}
+  return null;
+}
+
+/**
  * Joins groups of code back together making sure that each one (other than
  * the first) starts with a header so that they stay separate groups.
  * @param {string[]} blocks
@@ -1011,12 +1097,12 @@ function sanitizeEntries(description) {
  * @param {any[]} options.descriptions
  * @param {{headers: string[], rows: {index: string, cells: any[]}[]}|null} options.table
  */
-function appendLog({logId, key, descriptions, table}) {
+function appendLog({logId, key, descriptions, table, groupIds, groupId, isCollapsed, stack}) {
   key = `${key}`;
   mountedApp.displays.push({
     type: 'log',
     key,
-    name: `console.${key}`,
+    name: key === 'result' ? 'Result' : `console.${key}`,
     descriptions: Array.from(descriptions, sanitizeDescription),
     table: table ? {
       headers: Array.from(table.headers, h => `${h}`),
@@ -1025,6 +1111,12 @@ function appendLog({logId, key, descriptions, table}) {
         cells: Array.from(row.cells, cell => cell && sanitizeDescription(cell)),
       })),
     } : null,
+    // The groups (from console.group()) that this message is in.
+    groupIds: Array.from(groupIds ?? [], id => `${id}`),
+    // Set if this message starts a group.
+    groupId: groupId != null ? `${groupId}` : null,
+    isCollapsed: !!isCollapsed,
+    stack: stack != null ? `${stack}` : null,
     logId: `${logId}`,
   });
 }

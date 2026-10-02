@@ -742,6 +742,65 @@ body {
   color: var(--error-icon);
 }
 
+/* Messages inside of groups (from console.group()) are indented. */
+.console-row {
+  padding-left: calc(24px + var(--depth, 0) * 16px);
+}
+.console-row > .row-icon {
+  left: calc(6px + var(--depth, 0) * 16px);
+}
+.group-header {
+  cursor: pointer;
+  font-weight: bold;
+}
+.group-header > .row-icon.arrow {
+  top: 5px;
+}
+.log-assert {
+  background-color: var(--error-bg);
+  border-bottom-color: var(--error-border);
+  border-top: 1px solid var(--error-border);
+  color: var(--error-text);
+  margin-top: -1px;
+}
+.log-assert > .row-icon {
+  color: var(--error-icon);
+}
+.log-result > .row-icon {
+  color: var(--chevron);
+}
+.trace-stack {
+  color: var(--null);
+  padding-left: 1ch;
+}
+
+/* The loading screen's messages */
+.splash-message {
+  color: var(--muted-text);
+  font-size: 13px;
+  max-width: 280px;
+  text-align: center;
+}
+.splash-slow {
+  animation: show-after-delay 0s 10s both;
+}
+@keyframes show-after-delay {
+  from {
+    visibility: hidden;
+  }
+  to {
+    visibility: visible;
+  }
+}
+.splash-error,
+#splash.failed .splash-slow,
+#splash.failed .splash-progress {
+  display: none;
+}
+#splash.failed .splash-error {
+  display: block;
+}
+
 /* Code that was run */
 .code-header {
   background-color: var(--header-bg);

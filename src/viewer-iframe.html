@@ -2,6 +2,8 @@
   <div class="splash-content">
     <span class="logo logo-large"><span class="logo-mark">JS</span><span class="logo-text">Box</span></span>
     <div class="splash-progress"><div></div></div>
+    <div class="splash-message splash-slow">Still loading&hellip;</div>
+    <div class="splash-message splash-error">JS Box couldn&rsquo;t load.  Please check your connection and reload the page.</div>
   </div>
 </div>
 <div id="vueApp" v-cloak>
@@ -20,9 +22,11 @@
               <button class="copy-to-editor-button" title="Copy to editor" @click="copyToEditor(display.value)"><icon name="copyToEditor"></icon></button>
             </div>
           </div>
-          <div v-if="display.type === 'log'" :class="['console-row', 'log-' + display.key]" :title="display.name">
-            <span v-if="display.key === 'error'" class="row-icon"><icon name="consoleError"></icon></span>
+          <div v-if="display.type === 'log' &amp;&amp; !isInCollapsedGroup(display)" :class="['console-row', 'log-' + display.key, display.groupId ? 'group-header' : '']" :style="{'--depth': display.groupIds.length}" :title="display.name" @click="onLogRowClick(display, $event)">
+            <span v-if="display.key === 'error' || display.key === 'assert'" class="row-icon"><icon name="consoleError"></icon></span>
             <span v-else-if="display.key === 'warn'" class="row-icon"><icon name="consoleWarning"></icon></span>
+            <span v-else-if="display.key === 'result'" class="row-icon"><icon name="result"></icon></span>
+            <span v-else-if="display.groupId" :class="['row-icon', 'arrow', 'expandable', display.isCollapsed ? '' : 'expanded']"></span>
             <div class="row-content">
               <table v-if="display.table" class="console-table">
                 <thead>
@@ -40,6 +44,7 @@
                 :description="description"
                 :path="[display.logId, index]">
               </js-value>
+              <div v-if="display.stack" class="trace-stack">{{ display.stack }}</div>
             </div>
           </div>
           <div v-if="display.type === 'notice'" class="console-row notice">{{ display.message }}</div>
@@ -103,6 +108,8 @@
         <dl class="about-details">
           <dt>Code runs in</dt><dd>{{ runnerDescription }}</dd>
           <dt>Theme</dt><dd>{{ themeDescription }}</dd>
+          <dt>Code blocks run as</dt><dd>{{ blockTypeDescription }}</dd>
+          <dt>Results</dt><dd>{{ showResults ? 'The value of the last expression is shown' : 'Not shown' }}</dd>
           <dt>Layout</dt><dd>{{ layoutDescription }}</dd>
         </dl>
         <h3>Keyboard shortcuts</h3>

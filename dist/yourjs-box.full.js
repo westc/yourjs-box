@@ -4,7 +4,7 @@
    * Viewer IFRAME's CSS code
    * @type {string}
    */
-  const VIEWER_IFRAME_CSS = "[v-cloak]{display:none}body,html{height:100%;margin:0}body{background-color:var(--console-bg);font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}#vueApp{display:flex;flex-direction:column;inset:0;position:fixed}#main{display:grid;flex-grow:1;gap:0;min-height:0;position:relative}#main.is-moving-divider{-webkit-user-select:none;user-select:none}#main.col-orient.is-moving-divider{cursor:col-resize}#main.row-orient.is-moving-divider{cursor:row-resize}#main.is-moving-divider::after{background-color:var(--accent);content:'';position:absolute;z-index:99}#main.col-orient.is-moving-divider::after{bottom:0;left:calc(100% - var(--temp-editor-pct) - var(--divider-size)/ 2 - 1px);top:0;width:2px}#main.row-orient.is-moving-divider::after{height:2px;left:0;right:0;top:calc(100% - var(--temp-editor-pct) - var(--divider-size)/ 2 - 1px)}#main.col-orient{grid-template-columns:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2);grid-template-rows:1fr}#main.row-orient{grid-template-columns:1fr;grid-template-rows:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2)}.divider{background-color:var(--divider-bg);box-sizing:border-box;position:relative;transition:background-color .15s}#main.col-orient .divider{border-left:1px solid var(--toolbar-border);border-right:1px solid var(--toolbar-border);cursor:col-resize}#main.row-orient .divider{border-bottom:1px solid var(--toolbar-border);border-top:1px solid var(--toolbar-border);cursor:row-resize}.divider::after{background-color:var(--divider-grip);border-radius:2px;content:'';left:50%;position:absolute;top:50%;transform:translate(-50%,-50%);transition:background-color .15s}#main.col-orient .divider::after{height:32px;width:2px}#main.row-orient .divider::after{height:2px;width:32px}#main.is-moving-divider .divider,.divider:hover{background-color:var(--divider-hover-bg)}#main.is-moving-divider .divider::after,.divider:hover::after{background-color:var(--accent)}#displays{position:relative}#displays>div{position:absolute;inset:0;overflow:auto}#bottomNav{align-items:center;background-color:var(--toolbar-bg);border-top:1px solid var(--toolbar-border);color:var(--toolbar-text);display:flex;flex:0 0 auto;font-size:12px;gap:8px;height:32px;padding:0 6px 0 8px;-webkit-user-select:none;user-select:none}#bottomNav>.brand{align-items:center;display:flex;flex-grow:1;gap:8px}.runner-badge{border:1px solid var(--toolbar-border);border-radius:999px;color:var(--muted-text);font-size:10px;letter-spacing:.04em;line-height:15px;padding:0 6px;text-transform:uppercase}#bottomNav>.buttons{align-items:center;display:flex;gap:2px}#bottomNav .separator{background-color:var(--toolbar-border);height:16px;margin:0 4px;width:1px}#bottomNav button{align-items:center;background:0 0;border:0;border-radius:4px;color:inherit;cursor:pointer;display:inline-flex;font:inherit;gap:5px;height:24px;justify-content:center;min-width:26px;padding:0 6px}#bottomNav button>span:not(.label){display:inline-flex;font-size:14px}#bottomNav button svg:not(.spin){transform:none!important}#bottomNav button:hover:not(:disabled){background-color:var(--button-hover)}#bottomNav button:disabled{cursor:not-allowed;opacity:.45}#bottomNav button.primary{background-color:var(--accent);color:var(--accent-text);font-weight:600;margin-left:2px;padding:0 10px 0 8px}#bottomNav button.primary>span:not(.label){font-size:11px}#bottomNav button.primary:hover:not(:disabled){background-color:var(--accent-hover)}#bottomNav button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}.spin{animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.logo{align-items:center;color:var(--toolbar-text);display:inline-flex;font-weight:700;gap:5px;letter-spacing:-.01em;line-height:1}.logo-mark{align-items:flex-end;background-color:#f7df1e;border-radius:3px;box-sizing:border-box;color:#1a1a1a;display:inline-flex;font-size:9.5px;font-weight:800;height:18px;justify-content:flex-end;letter-spacing:-.02em;padding:0 2px 2px 0;width:18px}.logo-text{font-size:14px}.logo-large{gap:12px}.logo-large>.logo-mark{border-radius:10px;box-shadow:0 8px 24px rgb(0 0 0 / .18);font-size:24px;height:56px;padding:0 6px 5px 0;width:56px}.logo-large>.logo-text{font-size:36px}#splash{align-items:center;background-color:var(--console-bg);display:flex;inset:0;justify-content:center;position:fixed;transition:opacity .35s ease,visibility .35s;z-index:1000}#splash.hidden{opacity:0;visibility:hidden}.splash-content{align-items:center;animation:splash-in .4s ease-out both;display:flex;flex-direction:column;gap:24px}.splash-progress{background-color:var(--toolbar-border);border-radius:3px;height:3px;overflow:hidden;width:140px}.splash-progress>div{animation:splash-progress 1.1s ease-in-out infinite;background-color:var(--accent);border-radius:inherit;height:100%;width:40%}@keyframes splash-in{from{opacity:0;transform:translateY(6px)}}@keyframes splash-progress{from{transform:translateX(-100%)}to{transform:translateX(250%)}}.dialog-backdrop{align-items:center;animation:fade-in .12s ease-out;background-color:var(--backdrop);display:flex;inset:0;justify-content:center;position:fixed;z-index:900}.dialog{animation:dialog-in .15s ease-out;background-color:var(--dialog-bg);border:1px solid var(--toolbar-border);border-radius:8px;box-shadow:0 12px 40px rgb(0 0 0 / .3);color:var(--console-text);font-size:13px;padding:16px;width:min(360px,calc(100% - 32px))}.dialog-title{font-size:14px;font-weight:600;margin-bottom:6px}.dialog-message{color:var(--muted-text);line-height:1.45}.dialog-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}.dialog-button{background:0 0;border:1px solid var(--toolbar-border);border-radius:4px;color:inherit;cursor:pointer;font:inherit;height:28px;padding:0 12px}.dialog-button:hover{background-color:var(--button-hover)}.dialog-button.primary{background-color:var(--accent);border-color:var(--accent);color:var(--accent-text);font-weight:600}.dialog-button.primary:hover{background-color:var(--accent-hover)}.dialog-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}#bottomNav button.logo-button{margin-left:-4px;padding:0 4px}.about-dialog{display:flex;flex-direction:column;max-height:calc(100% - 24px);padding:0;width:min(620px,calc(100% - 24px))}.about-dialog.is-export{height:min(560px,calc(100% - 24px))}.about-header{align-items:center;border-bottom:1px solid var(--toolbar-border);display:flex;flex:0 0 auto;padding:0 8px 0 12px}.tabs{display:flex;flex-grow:1;gap:4px}.tab{background:0 0;border:0;border-bottom:2px solid transparent;color:var(--muted-text);cursor:pointer;font:inherit;font-weight:600;padding:10px 8px 8px}.tab:hover{color:var(--console-text)}.tab.active{border-bottom-color:var(--accent);color:var(--console-text)}.close-button{align-items:center;background:0 0;border:0;border-radius:4px;color:var(--muted-text);cursor:pointer;display:inline-flex;font-size:16px;height:28px;justify-content:center;width:28px}.close-button:hover{background-color:var(--button-hover);color:var(--console-text)}.close-button:focus-visible,.segmented>button:focus-visible,.tab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}.about-body{flex:1 1 auto;min-height:0;overflow:auto;padding:16px}.about-title{align-items:center;display:flex;gap:12px}.logo-medium>.logo-mark{border-radius:7px;font-size:16px;height:40px;padding:0 4px 4px 0;width:40px}.logo-medium>.logo-text{display:none}.about-name{font-size:17px;font-weight:700}.about-aka{color:var(--muted-text);font-size:13px;font-weight:400;margin-left:4px}.about-version{color:var(--muted-text);font-size:12px}.about-description{line-height:1.5;margin:12px 0}.about-links{display:flex;flex-wrap:wrap;gap:6px 16px}.about-links a{color:var(--accent);font-weight:600;text-decoration:none}.about-links a:hover{text-decoration:underline}.about-body h3{color:var(--muted-text);font-size:11px;letter-spacing:.05em;margin:18px 0 6px;text-transform:uppercase}.about-details{display:grid;gap:4px 16px;grid-template-columns:max-content 1fr;margin:0}.about-details dt{color:var(--muted-text)}.about-details dd{margin:0}.about-details kbd{background-color:var(--toolbar-bg);border:1px solid var(--toolbar-border);border-bottom-width:2px;border-radius:4px;font-family:inherit;font-size:11px;padding:0 4px}.about-footer{border-top:1px solid var(--toolbar-border);color:var(--muted-text);font-size:12px;margin-top:18px;padding-top:12px}.export-body{display:flex;flex-direction:column;gap:10px}.export-options{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between}.segmented{border:1px solid var(--toolbar-border);border-radius:6px;display:inline-flex;overflow:hidden}.segmented>button{background:0 0;border:0;color:var(--muted-text);cursor:pointer;font:inherit;font-size:12px;font-weight:600;padding:5px 10px}.segmented>button+button{border-left:1px solid var(--toolbar-border)}.segmented>button:hover{background-color:var(--button-hover)}.segmented>button.active{background-color:var(--accent);color:var(--accent-text)}.export-note{color:var(--muted-text);font-size:12px}.export-preview{border:1px solid var(--toolbar-border);border-radius:6px;flex:1 1 auto;min-height:120px;overflow:hidden}.export-actions{display:flex;gap:8px;justify-content:flex-end}@keyframes fade-in{from{opacity:0}}@keyframes dialog-in{from{opacity:0;transform:scale(.96)}}.rotated-90deg{transform:rotate(90deg)}.align-top{vertical-align:top!important}.d-inline-block{display:inline-block!important}.d-block{display:block!important}.d-flex{display:flex!important}.d-inline-flex{display:inline-flex!important}.no-select{-webkit-user-select:none;user-select:none}:root{color-scheme:light;--console-font:ui-monospace,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;--console-bg:#fff;--console-text:#1f1f1f;--row-border:#f0f0f0;--arrow:#727272;--chevron:#9aa0a6;--entry-key:#881391;--preview-key:#5f6368;--string:#c41a16;--number:#1a1aa6;--null:#80868b;--header-bg:#f1f3f4;--header-text:#3c4043;--warn-bg:#fffbe5;--warn-border:#fff5c2;--warn-text:#5c3c00;--warn-icon:#e8a600;--error-bg:#fff0f0;--error-border:#ffd6d6;--error-text:#dc362e;--error-icon:#dc362e;--table-header-bg:#f3f3f3;--table-border:#d0d0d0;--toolbar-bg:#f3f3f3;--toolbar-border:#d6d6d6;--toolbar-text:#333;--muted-text:#5f6368;--button-hover:rgb(0 0 0 / 0.08);--accent:#1a73e8;--accent-hover:#1765cc;--accent-text:#fff;--divider-bg:#f3f3f3;--divider-hover-bg:#e8eaed;--divider-grip:#b0b0b0;--dialog-bg:#fff;--backdrop:rgb(0 0 0 / 0.25)}:root[data-theme=dark]{color-scheme:dark;--console-bg:#242424;--console-text:#e3e3e3;--row-border:#3a3a3a;--arrow:#9aa0a6;--chevron:#80868b;--entry-key:#5db0d7;--preview-key:#9aa0a6;--string:#f28b54;--number:#9980ff;--null:#8e8e8e;--header-bg:#2d2e30;--header-text:#c4c7c5;--warn-bg:#332b00;--warn-border:#665500;--warn-text:#ffd17a;--warn-icon:#ffd17a;--error-bg:#290000;--error-border:#5c0000;--error-text:#ff8080;--error-icon:#ff6b6b;--table-header-bg:#2e2e2e;--table-border:#4a4a4a;--toolbar-bg:#2b2b2b;--toolbar-border:#474747;--toolbar-text:#e3e3e3;--muted-text:#9aa0a6;--button-hover:rgb(255 255 255 / 0.1);--accent:#8ab4f8;--accent-hover:#aecbfa;--accent-text:#202124;--divider-bg:#2b2b2b;--divider-hover-bg:#333;--divider-grip:#6b6b6b;--dialog-bg:#2d2e30;--backdrop:rgb(0 0 0 / 0.5)}#displays{background-color:var(--console-bg);color:var(--console-text)}#displays>div{font-family:var(--console-font);font-size:12px;line-height:16px}.console-row{border-bottom:1px solid var(--row-border);padding:2px 8px 2px 24px;position:relative;white-space:pre-wrap;word-break:break-word}.console-row>.row-icon{left:6px;line-height:0;position:absolute;top:4px}.log-error,.log-warn{margin-top:-1px}.log-warn{background-color:var(--warn-bg);border-bottom-color:var(--warn-border);border-top:1px solid var(--warn-border);color:var(--warn-text)}.log-warn>.row-icon{color:var(--warn-icon)}.log-error{background-color:var(--error-bg);border-bottom-color:var(--error-border);border-top:1px solid var(--error-border);color:var(--error-text)}.log-error>.row-icon{color:var(--error-icon)}.code-header{background-color:var(--header-bg);border-bottom:1px solid var(--row-border);color:var(--header-text);font-weight:700;padding:2px 8px;white-space:pre-wrap}.code-header.toggleable{cursor:pointer}.code-row .copy-to-editor-button{align-items:center;background-color:var(--console-bg);border:1px solid var(--toolbar-border);border-radius:4px;color:var(--toolbar-text);cursor:pointer;display:inline-flex;height:22px;justify-content:center;opacity:0;padding:0;position:absolute;right:6px;top:2px;transition:opacity .15s;width:22px}.code-row .copy-to-editor-button:focus-visible,.code-row:hover .copy-to-editor-button{opacity:1}.code-row .copy-to-editor-button:hover{background-color:var(--toolbar-bg)}@media (hover:none){.code-row .copy-to-editor-button{opacity:.8}}.notice{color:var(--null);font-style:italic}.code-row>.row-icon{color:var(--chevron)}.code-row code,.code-row pre{background:0 0!important;font-family:var(--console-font)!important;font-size:12px!important;line-height:16px!important;padding:0!important;text-shadow:none!important}.js-value{max-width:100%;vertical-align:top}.row-content>.js-value+.js-value{margin-left:1ch}.js-value-header.expandable{cursor:default}.js-value .expansion{padding-left:12px}.js-value .loading{color:var(--null);padding-left:12px}.arrow{display:inline-block;height:10px;position:relative;width:12px}.arrow.expandable::before{border-color:transparent transparent transparent var(--arrow);border-style:solid;border-width:4px 0 4px 6px;content:'';left:2px;position:absolute;top:1px;transform-origin:3px 4px;transition:transform .1s}.arrow.expandable.expanded::before{transform:rotate(90deg)}.entry-key{color:var(--entry-key)}.entry-key.dim{opacity:.6}.t-key{color:var(--preview-key)}.t-regexp,.t-string,.t-symbol{color:var(--string)}.t-number{color:var(--number)}.t-null{color:var(--null)}.t-function{font-style:italic}.t-node{color:var(--entry-key)}.console-table{border:1px solid var(--table-border);border-collapse:collapse;margin:2px 0 4px;white-space:nowrap}.console-table td,.console-table th{border-left:1px solid var(--table-border);max-width:300px;overflow:hidden;padding:1px 4px;text-align:left;text-overflow:ellipsis}.console-table th{background-color:var(--table-header-bg);border-bottom:1px solid var(--table-border);font-weight:400}";
+  const VIEWER_IFRAME_CSS = "[v-cloak]{display:none}body,html{height:100%;margin:0}body{background-color:var(--console-bg);font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}#vueApp{display:flex;flex-direction:column;inset:0;position:fixed}#main{display:grid;flex-grow:1;gap:0;min-height:0;position:relative}#main.is-moving-divider{-webkit-user-select:none;user-select:none}#main.col-orient.is-moving-divider{cursor:col-resize}#main.row-orient.is-moving-divider{cursor:row-resize}#main.is-moving-divider::after{background-color:var(--accent);content:'';position:absolute;z-index:99}#main.col-orient.is-moving-divider::after{bottom:0;left:calc(100% - var(--temp-editor-pct) - var(--divider-size)/ 2 - 1px);top:0;width:2px}#main.row-orient.is-moving-divider::after{height:2px;left:0;right:0;top:calc(100% - var(--temp-editor-pct) - var(--divider-size)/ 2 - 1px)}#main.col-orient{grid-template-columns:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2);grid-template-rows:1fr}#main.row-orient{grid-template-columns:1fr;grid-template-rows:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2)}.divider{background-color:var(--divider-bg);box-sizing:border-box;position:relative;transition:background-color .15s}#main.col-orient .divider{border-left:1px solid var(--toolbar-border);border-right:1px solid var(--toolbar-border);cursor:col-resize}#main.row-orient .divider{border-bottom:1px solid var(--toolbar-border);border-top:1px solid var(--toolbar-border);cursor:row-resize}.divider::after{background-color:var(--divider-grip);border-radius:2px;content:'';left:50%;position:absolute;top:50%;transform:translate(-50%,-50%);transition:background-color .15s}#main.col-orient .divider::after{height:32px;width:2px}#main.row-orient .divider::after{height:2px;width:32px}#main.is-moving-divider .divider,.divider:hover{background-color:var(--divider-hover-bg)}#main.is-moving-divider .divider::after,.divider:hover::after{background-color:var(--accent)}#displays{position:relative}#displays>div{position:absolute;inset:0;overflow:auto}#bottomNav{align-items:center;background-color:var(--toolbar-bg);border-top:1px solid var(--toolbar-border);color:var(--toolbar-text);display:flex;flex:0 0 auto;font-size:12px;gap:8px;height:32px;padding:0 6px 0 8px;-webkit-user-select:none;user-select:none}#bottomNav>.brand{align-items:center;display:flex;flex-grow:1;gap:8px}.runner-badge{border:1px solid var(--toolbar-border);border-radius:999px;color:var(--muted-text);font-size:10px;letter-spacing:.04em;line-height:15px;padding:0 6px;text-transform:uppercase}#bottomNav>.buttons{align-items:center;display:flex;gap:2px}#bottomNav .separator{background-color:var(--toolbar-border);height:16px;margin:0 4px;width:1px}#bottomNav button{align-items:center;background:0 0;border:0;border-radius:4px;color:inherit;cursor:pointer;display:inline-flex;font:inherit;gap:5px;height:24px;justify-content:center;min-width:26px;padding:0 6px}#bottomNav button>span:not(.label){display:inline-flex;font-size:14px}#bottomNav button svg:not(.spin){transform:none!important}#bottomNav button:hover:not(:disabled){background-color:var(--button-hover)}#bottomNav button:disabled{cursor:not-allowed;opacity:.45}#bottomNav button.primary{background-color:var(--accent);color:var(--accent-text);font-weight:600;margin-left:2px;padding:0 10px 0 8px}#bottomNav button.primary>span:not(.label){font-size:11px}#bottomNav button.primary:hover:not(:disabled){background-color:var(--accent-hover)}#bottomNav button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}.spin{animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.logo{align-items:center;color:var(--toolbar-text);display:inline-flex;font-weight:700;gap:5px;letter-spacing:-.01em;line-height:1}.logo-mark{align-items:flex-end;background-color:#f7df1e;border-radius:3px;box-sizing:border-box;color:#1a1a1a;display:inline-flex;font-size:9.5px;font-weight:800;height:18px;justify-content:flex-end;letter-spacing:-.02em;padding:0 2px 2px 0;width:18px}.logo-text{font-size:14px}.logo-large{gap:12px}.logo-large>.logo-mark{border-radius:10px;box-shadow:0 8px 24px rgb(0 0 0 / .18);font-size:24px;height:56px;padding:0 6px 5px 0;width:56px}.logo-large>.logo-text{font-size:36px}#splash{align-items:center;background-color:var(--console-bg);display:flex;inset:0;justify-content:center;position:fixed;transition:opacity .35s ease,visibility .35s;z-index:1000}#splash.hidden{opacity:0;visibility:hidden}.splash-content{align-items:center;animation:splash-in .4s ease-out both;display:flex;flex-direction:column;gap:24px}.splash-progress{background-color:var(--toolbar-border);border-radius:3px;height:3px;overflow:hidden;width:140px}.splash-progress>div{animation:splash-progress 1.1s ease-in-out infinite;background-color:var(--accent);border-radius:inherit;height:100%;width:40%}@keyframes splash-in{from{opacity:0;transform:translateY(6px)}}@keyframes splash-progress{from{transform:translateX(-100%)}to{transform:translateX(250%)}}.dialog-backdrop{align-items:center;animation:fade-in .12s ease-out;background-color:var(--backdrop);display:flex;inset:0;justify-content:center;position:fixed;z-index:900}.dialog{animation:dialog-in .15s ease-out;background-color:var(--dialog-bg);border:1px solid var(--toolbar-border);border-radius:8px;box-shadow:0 12px 40px rgb(0 0 0 / .3);color:var(--console-text);font-size:13px;padding:16px;width:min(360px,calc(100% - 32px))}.dialog-title{font-size:14px;font-weight:600;margin-bottom:6px}.dialog-message{color:var(--muted-text);line-height:1.45}.dialog-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}.dialog-button{background:0 0;border:1px solid var(--toolbar-border);border-radius:4px;color:inherit;cursor:pointer;font:inherit;height:28px;padding:0 12px}.dialog-button:hover{background-color:var(--button-hover)}.dialog-button.primary{background-color:var(--accent);border-color:var(--accent);color:var(--accent-text);font-weight:600}.dialog-button.primary:hover{background-color:var(--accent-hover)}.dialog-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}#bottomNav button.logo-button{margin-left:-4px;padding:0 4px}.about-dialog{display:flex;flex-direction:column;max-height:calc(100% - 24px);padding:0;width:min(620px,calc(100% - 24px))}.about-dialog.is-export{height:min(560px,calc(100% - 24px))}.about-header{align-items:center;border-bottom:1px solid var(--toolbar-border);display:flex;flex:0 0 auto;padding:0 8px 0 12px}.tabs{display:flex;flex-grow:1;gap:4px}.tab{background:0 0;border:0;border-bottom:2px solid transparent;color:var(--muted-text);cursor:pointer;font:inherit;font-weight:600;padding:10px 8px 8px}.tab:hover{color:var(--console-text)}.tab.active{border-bottom-color:var(--accent);color:var(--console-text)}.close-button{align-items:center;background:0 0;border:0;border-radius:4px;color:var(--muted-text);cursor:pointer;display:inline-flex;font-size:16px;height:28px;justify-content:center;width:28px}.close-button:hover{background-color:var(--button-hover);color:var(--console-text)}.close-button:focus-visible,.segmented>button:focus-visible,.tab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}.about-body{flex:1 1 auto;min-height:0;overflow:auto;padding:16px}.about-title{align-items:center;display:flex;gap:12px}.logo-medium>.logo-mark{border-radius:7px;font-size:16px;height:40px;padding:0 4px 4px 0;width:40px}.logo-medium>.logo-text{display:none}.about-name{font-size:17px;font-weight:700}.about-aka{color:var(--muted-text);font-size:13px;font-weight:400;margin-left:4px}.about-version{color:var(--muted-text);font-size:12px}.about-description{line-height:1.5;margin:12px 0}.about-links{display:flex;flex-wrap:wrap;gap:6px 16px}.about-links a{color:var(--accent);font-weight:600;text-decoration:none}.about-links a:hover{text-decoration:underline}.about-body h3{color:var(--muted-text);font-size:11px;letter-spacing:.05em;margin:18px 0 6px;text-transform:uppercase}.about-details{display:grid;gap:4px 16px;grid-template-columns:max-content 1fr;margin:0}.about-details dt{color:var(--muted-text)}.about-details dd{margin:0}.about-details kbd{background-color:var(--toolbar-bg);border:1px solid var(--toolbar-border);border-bottom-width:2px;border-radius:4px;font-family:inherit;font-size:11px;padding:0 4px}.about-footer{border-top:1px solid var(--toolbar-border);color:var(--muted-text);font-size:12px;margin-top:18px;padding-top:12px}.export-body{display:flex;flex-direction:column;gap:10px}.export-options{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between}.segmented{border:1px solid var(--toolbar-border);border-radius:6px;display:inline-flex;overflow:hidden}.segmented>button{background:0 0;border:0;color:var(--muted-text);cursor:pointer;font:inherit;font-size:12px;font-weight:600;padding:5px 10px}.segmented>button+button{border-left:1px solid var(--toolbar-border)}.segmented>button:hover{background-color:var(--button-hover)}.segmented>button.active{background-color:var(--accent);color:var(--accent-text)}.export-note{color:var(--muted-text);font-size:12px}.export-preview{border:1px solid var(--toolbar-border);border-radius:6px;flex:1 1 auto;min-height:120px;overflow:hidden}.export-actions{display:flex;gap:8px;justify-content:flex-end}@keyframes fade-in{from{opacity:0}}@keyframes dialog-in{from{opacity:0;transform:scale(.96)}}.rotated-90deg{transform:rotate(90deg)}.align-top{vertical-align:top!important}.d-inline-block{display:inline-block!important}.d-block{display:block!important}.d-flex{display:flex!important}.d-inline-flex{display:inline-flex!important}.no-select{-webkit-user-select:none;user-select:none}:root{color-scheme:light;--console-font:ui-monospace,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;--console-bg:#fff;--console-text:#1f1f1f;--row-border:#f0f0f0;--arrow:#727272;--chevron:#9aa0a6;--entry-key:#881391;--preview-key:#5f6368;--string:#c41a16;--number:#1a1aa6;--null:#80868b;--header-bg:#f1f3f4;--header-text:#3c4043;--warn-bg:#fffbe5;--warn-border:#fff5c2;--warn-text:#5c3c00;--warn-icon:#e8a600;--error-bg:#fff0f0;--error-border:#ffd6d6;--error-text:#dc362e;--error-icon:#dc362e;--table-header-bg:#f3f3f3;--table-border:#d0d0d0;--toolbar-bg:#f3f3f3;--toolbar-border:#d6d6d6;--toolbar-text:#333;--muted-text:#5f6368;--button-hover:rgb(0 0 0 / 0.08);--accent:#1a73e8;--accent-hover:#1765cc;--accent-text:#fff;--divider-bg:#f3f3f3;--divider-hover-bg:#e8eaed;--divider-grip:#b0b0b0;--dialog-bg:#fff;--backdrop:rgb(0 0 0 / 0.25)}:root[data-theme=dark]{color-scheme:dark;--console-bg:#242424;--console-text:#e3e3e3;--row-border:#3a3a3a;--arrow:#9aa0a6;--chevron:#80868b;--entry-key:#5db0d7;--preview-key:#9aa0a6;--string:#f28b54;--number:#9980ff;--null:#8e8e8e;--header-bg:#2d2e30;--header-text:#c4c7c5;--warn-bg:#332b00;--warn-border:#665500;--warn-text:#ffd17a;--warn-icon:#ffd17a;--error-bg:#290000;--error-border:#5c0000;--error-text:#ff8080;--error-icon:#ff6b6b;--table-header-bg:#2e2e2e;--table-border:#4a4a4a;--toolbar-bg:#2b2b2b;--toolbar-border:#474747;--toolbar-text:#e3e3e3;--muted-text:#9aa0a6;--button-hover:rgb(255 255 255 / 0.1);--accent:#8ab4f8;--accent-hover:#aecbfa;--accent-text:#202124;--divider-bg:#2b2b2b;--divider-hover-bg:#333;--divider-grip:#6b6b6b;--dialog-bg:#2d2e30;--backdrop:rgb(0 0 0 / 0.5)}#displays{background-color:var(--console-bg);color:var(--console-text)}#displays>div{font-family:var(--console-font);font-size:12px;line-height:16px}.console-row{border-bottom:1px solid var(--row-border);padding:2px 8px 2px 24px;position:relative;white-space:pre-wrap;word-break:break-word}.console-row>.row-icon{left:6px;line-height:0;position:absolute;top:4px}.log-error,.log-warn{margin-top:-1px}.log-warn{background-color:var(--warn-bg);border-bottom-color:var(--warn-border);border-top:1px solid var(--warn-border);color:var(--warn-text)}.log-warn>.row-icon{color:var(--warn-icon)}.log-error{background-color:var(--error-bg);border-bottom-color:var(--error-border);border-top:1px solid var(--error-border);color:var(--error-text)}.log-error>.row-icon{color:var(--error-icon)}.console-row{padding-left:calc(24px + var(--depth,0) * 16px)}.console-row>.row-icon{left:calc(6px + var(--depth,0) * 16px)}.group-header{cursor:pointer;font-weight:700}.group-header>.row-icon.arrow{top:5px}.log-assert{background-color:var(--error-bg);border-bottom-color:var(--error-border);border-top:1px solid var(--error-border);color:var(--error-text);margin-top:-1px}.log-assert>.row-icon{color:var(--error-icon)}.log-result>.row-icon{color:var(--chevron)}.trace-stack{color:var(--null);padding-left:1ch}.splash-message{color:var(--muted-text);font-size:13px;max-width:280px;text-align:center}.splash-slow{animation:show-after-delay 0s 10s both}@keyframes show-after-delay{from{visibility:hidden}to{visibility:visible}}#splash.failed .splash-progress,#splash.failed .splash-slow,.splash-error{display:none}#splash.failed .splash-error{display:block}.code-header{background-color:var(--header-bg);border-bottom:1px solid var(--row-border);color:var(--header-text);font-weight:700;padding:2px 8px;white-space:pre-wrap}.code-header.toggleable{cursor:pointer}.code-row .copy-to-editor-button{align-items:center;background-color:var(--console-bg);border:1px solid var(--toolbar-border);border-radius:4px;color:var(--toolbar-text);cursor:pointer;display:inline-flex;height:22px;justify-content:center;opacity:0;padding:0;position:absolute;right:6px;top:2px;transition:opacity .15s;width:22px}.code-row .copy-to-editor-button:focus-visible,.code-row:hover .copy-to-editor-button{opacity:1}.code-row .copy-to-editor-button:hover{background-color:var(--toolbar-bg)}@media (hover:none){.code-row .copy-to-editor-button{opacity:.8}}.notice{color:var(--null);font-style:italic}.code-row>.row-icon{color:var(--chevron)}.code-row code,.code-row pre{background:0 0!important;font-family:var(--console-font)!important;font-size:12px!important;line-height:16px!important;padding:0!important;text-shadow:none!important}.js-value{max-width:100%;vertical-align:top}.row-content>.js-value+.js-value{margin-left:1ch}.js-value-header.expandable{cursor:default}.js-value .expansion{padding-left:12px}.js-value .loading{color:var(--null);padding-left:12px}.arrow{display:inline-block;height:10px;position:relative;width:12px}.arrow.expandable::before{border-color:transparent transparent transparent var(--arrow);border-style:solid;border-width:4px 0 4px 6px;content:'';left:2px;position:absolute;top:1px;transform-origin:3px 4px;transition:transform .1s}.arrow.expandable.expanded::before{transform:rotate(90deg)}.entry-key{color:var(--entry-key)}.entry-key.dim{opacity:.6}.t-key{color:var(--preview-key)}.t-regexp,.t-string,.t-symbol{color:var(--string)}.t-number{color:var(--number)}.t-null{color:var(--null)}.t-function{font-style:italic}.t-node{color:var(--entry-key)}.console-table{border:1px solid var(--table-border);border-collapse:collapse;margin:2px 0 4px;white-space:nowrap}.console-table td,.console-table th{border-left:1px solid var(--table-border);max-width:300px;overflow:hidden;padding:1px 4px;text-align:left;text-overflow:ellipsis}.console-table th{background-color:var(--table-header-bg);border-bottom:1px solid var(--table-border);font-weight:400}";
   /**
    * Information about this package (eg. its version).
    * @type {{name: string, version: string, homepage: string, repoUrl: string, bugsUrl: string}}
@@ -14,7 +14,7 @@
    * Viewer IFRAME's HTML code
    * @type {string}
    */
-  const VIEWER_IFRAME_HTML = "<div id=\"splash\" aria-label=\"Loading\"><div class=\"splash-content\"><span class=\"logo logo-large\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div class=\"splash-progress\"><div></div></div></div></div><div id=\"vueApp\" v-cloak><div id=\"main\" ref=\"main\" :class=\"mainElemClassNames\" :style=\"mainElemStyles\" @mousedown=\"onMainElemMouseDown\"><div id=\"displays\"><div ref=\"displaysScroller\" @scroll=\"onDisplaysScroll\"><template v-for=\"display in displays\"><div v-if=\"display.type === 'prism'\"><div v-if=\"display.isHidden\" class=\"code-header toggleable no-select\" @click=\"display.isCodeShown = !display.isCodeShown\" :title=\"display.isCodeShown ? 'Hide Code' : 'Show Code'\"><span :class=\"['arrow', 'expandable', display.isCodeShown ? 'expanded' : '']\"></span>{{ display.header || 'Hidden code' }}</div><div v-else-if=\"display.header\" class=\"code-header\">{{ display.header }}</div><div v-if=\"display.isCodeShown\" class=\"console-row code-row\"><span class=\"row-icon\"><icon name=\"chevron\"></icon></span><prism language=\"javascript\" :code=\"display.value\" :is-dark=\"theme === 'dark'\" match-braces></prism><button class=\"copy-to-editor-button\" title=\"Copy to editor\" @click=\"copyToEditor(display.value)\"><icon name=\"copyToEditor\"></icon></button></div></div><div v-if=\"display.type === 'log'\" :class=\"['console-row', 'log-' + display.key]\" :title=\"display.name\"><span v-if=\"display.key === 'error'\" class=\"row-icon\"><icon name=\"consoleError\"></icon></span><span v-else-if=\"display.key === 'warn'\" class=\"row-icon\"><icon name=\"consoleWarning\"></icon></span><div class=\"row-content\"><table v-if=\"display.table\" class=\"console-table\"><thead><tr><th v-for=\"header in display.table.headers\">{{ header }}</th></tr></thead><tbody><tr v-for=\"row in display.table.rows\"><td>{{ row.index }}</td><td v-for=\"cell in row.cells\"><template v-if=\"cell\"><span v-for=\"part in cell.parts\" :class=\"'t-' + part[0]\">{{ part[1] }}</span></template></td></tr></tbody></table><js-value v-for=\"(description, index) in display.descriptions\" :description=\"description\" :path=\"[display.logId, index]\"></js-value></div></div><div v-if=\"display.type === 'notice'\" class=\"console-row notice\">{{ display.message }}</div><div v-if=\"display.type === 'error'\" class=\"console-row log-error\"><span class=\"row-icon\"><icon name=\"consoleError\"></icon></span><div class=\"row-content\">{{ display.message }}</div></div></template></div></div><div class=\"divider\" ref=\"mainDivider\"></div><div id=\"editor\"><ace-editor v-model=\"jsCode\" language=\"javascript\" :theme=\"theme\" @key-combo=\"onEditorKeyCombo\" height=\"100%\"></ace-editor></div></div><div id=\"bottomNav\"><div class=\"brand\"><button class=\"logo-button\" title=\"About JS Box\" @click=\"openAbout('about')\"><span class=\"logo\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span></button> <span class=\"runner-badge\" :title=\"runnerMode === 'window' ? 'Code runs directly in this page' : 'Code runs in a Web Worker (no DOM access)'\">{{ runnerMode === 'window' ? 'Window' : 'Worker' }}</span></div><div class=\"buttons\"><template v-for=\"bottomButton in bottomButtons\"><span v-if=\"bottomButton.isSeparator\" class=\"separator\"></span> <button v-else :class=\"bottomButton.className\" @click=\"bottomButton.callback.call(this, $event)\" :title=\"bottomButton.title\" :disabled=\"bottomButton.disableIf &amp;&amp; bottomButton.disableIf.call(this)\"><icon :name=\"bottomButton.iconName\"></icon><span v-if=\"bottomButton.label\" class=\"label\">{{ bottomButton.label }}</span></button></template></div></div><div v-if=\"isAboutOpen\" class=\"dialog-backdrop\" @mousedown.self=\"closeAbout\" @keydown.esc=\"closeAbout\"><div :class=\"['dialog', 'about-dialog', aboutTab === 'html' ? 'is-export' : '']\" role=\"dialog\" aria-modal=\"true\" aria-label=\"About JS Box\"><div class=\"about-header\"><div class=\"tabs\" role=\"tablist\"><button role=\"tab\" :aria-selected=\"aboutTab === 'about'\" :class=\"['tab', aboutTab === 'about' ? 'active' : '']\" @click=\"aboutTab = 'about'\">About</button> <button role=\"tab\" :aria-selected=\"aboutTab === 'html'\" :class=\"['tab', aboutTab === 'html' ? 'active' : '']\" @click=\"aboutTab = 'html'\">Copy as HTML</button></div><button class=\"close-button\" ref=\"aboutCloseButton\" title=\"Close\" @click=\"closeAbout\"><icon name=\"close\"></icon></button></div><div v-if=\"aboutTab === 'about'\" class=\"about-body\"><div class=\"about-title\"><span class=\"logo logo-medium\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div><div class=\"about-name\">YourJS Box <span class=\"about-aka\">aka JS Box</span></div><div class=\"about-version\">Version {{ packageInfo.version }}</div></div></div><p class=\"about-description\">An interactive JavaScript console that can be embedded in any web page with a single script tag.</p><div class=\"about-links\"><a :href=\"packageInfo.homepage\" target=\"_blank\" rel=\"noopener\">Website</a> <a :href=\"packageInfo.repoUrl\" target=\"_blank\" rel=\"noopener\">GitHub</a> <a :href=\"packageInfo.repoUrl + '#readme'\" target=\"_blank\" rel=\"noopener\">Documentation</a> <a :href=\"packageInfo.bugsUrl\" target=\"_blank\" rel=\"noopener\">Report an issue</a></div><h3>This console</h3><dl class=\"about-details\"><dt>Code runs in</dt><dd>{{ runnerDescription }}</dd><dt>Theme</dt><dd>{{ themeDescription }}</dd><dt>Layout</dt><dd>{{ layoutDescription }}</dd></dl><h3>Keyboard shortcuts</h3><dl class=\"about-details\"><dt><kbd>{{ modKey }}</kbd> + <kbd>Enter</kbd></dt><dd>Run the next block of code</dd><dt><kbd>Esc</kbd></dt><dd>Close this window</dd></dl><div class=\"about-footer\">MIT License &copy; 2023-present Christopher West &middot; Built with Vue, Ace and Prism</div></div><div v-else class=\"about-body export-body\"><div class=\"export-options\"><div class=\"segmented\" role=\"radiogroup\" aria-label=\"Code\"><button v-for=\"option in exportCodeOptions\" role=\"radio\" :aria-checked=\"exportCode === option.value\" :class=\"exportCode === option.value ? 'active' : ''\" @click=\"exportCode = option.value\">{{ option.label }}</button></div><div class=\"segmented\" role=\"radiogroup\" aria-label=\"Format\"><button v-for=\"option in exportFormatOptions\" role=\"radio\" :aria-checked=\"exportFormat === option.value\" :class=\"exportFormat === option.value ? 'active' : ''\" @click=\"exportFormat = option.value\">{{ option.label }}</button></div></div><div class=\"export-note\">{{ exportNote }}</div><div class=\"export-preview\"><ace-editor :model-value=\"exportHtml\" language=\"html\" :theme=\"theme\" height=\"100%\" :read-only=\"true\"></ace-editor></div><div class=\"export-actions\"><button class=\"dialog-button\" @click=\"downloadExport\">Download page</button> <button class=\"dialog-button primary\" @click=\"copyExport\">{{ copyLabel }}</button></div></div></div></div><div v-if=\"dialog\" class=\"dialog-backdrop\" @mousedown.self=\"closeDialog(false)\" @keydown.esc=\"closeDialog(false)\"><div class=\"dialog\" role=\"alertdialog\" aria-modal=\"true\" :aria-label=\"dialog.title\"><div class=\"dialog-title\">{{ dialog.title }}</div><div class=\"dialog-message\">{{ dialog.message }}</div><div class=\"dialog-buttons\"><button class=\"dialog-button\" @click=\"closeDialog(false)\">Cancel</button> <button class=\"dialog-button primary\" ref=\"dialogConfirmButton\" @click=\"closeDialog(true)\">{{ dialog.confirmText }}</button></div></div></div></div>";
+  const VIEWER_IFRAME_HTML = "<div id=\"splash\" aria-label=\"Loading\"><div class=\"splash-content\"><span class=\"logo logo-large\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div class=\"splash-progress\"><div></div></div><div class=\"splash-message splash-slow\">Still loading&hellip;</div><div class=\"splash-message splash-error\">JS Box couldn&rsquo;t load. Please check your connection and reload the page.</div></div></div><div id=\"vueApp\" v-cloak><div id=\"main\" ref=\"main\" :class=\"mainElemClassNames\" :style=\"mainElemStyles\" @mousedown=\"onMainElemMouseDown\"><div id=\"displays\"><div ref=\"displaysScroller\" @scroll=\"onDisplaysScroll\"><template v-for=\"display in displays\"><div v-if=\"display.type === 'prism'\"><div v-if=\"display.isHidden\" class=\"code-header toggleable no-select\" @click=\"display.isCodeShown = !display.isCodeShown\" :title=\"display.isCodeShown ? 'Hide Code' : 'Show Code'\"><span :class=\"['arrow', 'expandable', display.isCodeShown ? 'expanded' : '']\"></span>{{ display.header || 'Hidden code' }}</div><div v-else-if=\"display.header\" class=\"code-header\">{{ display.header }}</div><div v-if=\"display.isCodeShown\" class=\"console-row code-row\"><span class=\"row-icon\"><icon name=\"chevron\"></icon></span><prism language=\"javascript\" :code=\"display.value\" :is-dark=\"theme === 'dark'\" match-braces></prism><button class=\"copy-to-editor-button\" title=\"Copy to editor\" @click=\"copyToEditor(display.value)\"><icon name=\"copyToEditor\"></icon></button></div></div><div v-if=\"display.type === 'log' &amp;&amp; !isInCollapsedGroup(display)\" :class=\"['console-row', 'log-' + display.key, display.groupId ? 'group-header' : '']\" :style=\"{'--depth': display.groupIds.length}\" :title=\"display.name\" @click=\"onLogRowClick(display, $event)\"><span v-if=\"display.key === 'error' || display.key === 'assert'\" class=\"row-icon\"><icon name=\"consoleError\"></icon></span><span v-else-if=\"display.key === 'warn'\" class=\"row-icon\"><icon name=\"consoleWarning\"></icon></span><span v-else-if=\"display.key === 'result'\" class=\"row-icon\"><icon name=\"result\"></icon></span><span v-else-if=\"display.groupId\" :class=\"['row-icon', 'arrow', 'expandable', display.isCollapsed ? '' : 'expanded']\"></span><div class=\"row-content\"><table v-if=\"display.table\" class=\"console-table\"><thead><tr><th v-for=\"header in display.table.headers\">{{ header }}</th></tr></thead><tbody><tr v-for=\"row in display.table.rows\"><td>{{ row.index }}</td><td v-for=\"cell in row.cells\"><template v-if=\"cell\"><span v-for=\"part in cell.parts\" :class=\"'t-' + part[0]\">{{ part[1] }}</span></template></td></tr></tbody></table><js-value v-for=\"(description, index) in display.descriptions\" :description=\"description\" :path=\"[display.logId, index]\"></js-value><div v-if=\"display.stack\" class=\"trace-stack\">{{ display.stack }}</div></div></div><div v-if=\"display.type === 'notice'\" class=\"console-row notice\">{{ display.message }}</div><div v-if=\"display.type === 'error'\" class=\"console-row log-error\"><span class=\"row-icon\"><icon name=\"consoleError\"></icon></span><div class=\"row-content\">{{ display.message }}</div></div></template></div></div><div class=\"divider\" ref=\"mainDivider\"></div><div id=\"editor\"><ace-editor v-model=\"jsCode\" language=\"javascript\" :theme=\"theme\" @key-combo=\"onEditorKeyCombo\" height=\"100%\"></ace-editor></div></div><div id=\"bottomNav\"><div class=\"brand\"><button class=\"logo-button\" title=\"About JS Box\" @click=\"openAbout('about')\"><span class=\"logo\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span></button> <span class=\"runner-badge\" :title=\"runnerMode === 'window' ? 'Code runs directly in this page' : 'Code runs in a Web Worker (no DOM access)'\">{{ runnerMode === 'window' ? 'Window' : 'Worker' }}</span></div><div class=\"buttons\"><template v-for=\"bottomButton in bottomButtons\"><span v-if=\"bottomButton.isSeparator\" class=\"separator\"></span> <button v-else :class=\"bottomButton.className\" @click=\"bottomButton.callback.call(this, $event)\" :title=\"bottomButton.title\" :disabled=\"bottomButton.disableIf &amp;&amp; bottomButton.disableIf.call(this)\"><icon :name=\"bottomButton.iconName\"></icon><span v-if=\"bottomButton.label\" class=\"label\">{{ bottomButton.label }}</span></button></template></div></div><div v-if=\"isAboutOpen\" class=\"dialog-backdrop\" @mousedown.self=\"closeAbout\" @keydown.esc=\"closeAbout\"><div :class=\"['dialog', 'about-dialog', aboutTab === 'html' ? 'is-export' : '']\" role=\"dialog\" aria-modal=\"true\" aria-label=\"About JS Box\"><div class=\"about-header\"><div class=\"tabs\" role=\"tablist\"><button role=\"tab\" :aria-selected=\"aboutTab === 'about'\" :class=\"['tab', aboutTab === 'about' ? 'active' : '']\" @click=\"aboutTab = 'about'\">About</button> <button role=\"tab\" :aria-selected=\"aboutTab === 'html'\" :class=\"['tab', aboutTab === 'html' ? 'active' : '']\" @click=\"aboutTab = 'html'\">Copy as HTML</button></div><button class=\"close-button\" ref=\"aboutCloseButton\" title=\"Close\" @click=\"closeAbout\"><icon name=\"close\"></icon></button></div><div v-if=\"aboutTab === 'about'\" class=\"about-body\"><div class=\"about-title\"><span class=\"logo logo-medium\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div><div class=\"about-name\">YourJS Box <span class=\"about-aka\">aka JS Box</span></div><div class=\"about-version\">Version {{ packageInfo.version }}</div></div></div><p class=\"about-description\">An interactive JavaScript console that can be embedded in any web page with a single script tag.</p><div class=\"about-links\"><a :href=\"packageInfo.homepage\" target=\"_blank\" rel=\"noopener\">Website</a> <a :href=\"packageInfo.repoUrl\" target=\"_blank\" rel=\"noopener\">GitHub</a> <a :href=\"packageInfo.repoUrl + '#readme'\" target=\"_blank\" rel=\"noopener\">Documentation</a> <a :href=\"packageInfo.bugsUrl\" target=\"_blank\" rel=\"noopener\">Report an issue</a></div><h3>This console</h3><dl class=\"about-details\"><dt>Code runs in</dt><dd>{{ runnerDescription }}</dd><dt>Theme</dt><dd>{{ themeDescription }}</dd><dt>Code blocks run as</dt><dd>{{ blockTypeDescription }}</dd><dt>Results</dt><dd>{{ showResults ? 'The value of the last expression is shown' : 'Not shown' }}</dd><dt>Layout</dt><dd>{{ layoutDescription }}</dd></dl><h3>Keyboard shortcuts</h3><dl class=\"about-details\"><dt><kbd>{{ modKey }}</kbd> + <kbd>Enter</kbd></dt><dd>Run the next block of code</dd><dt><kbd>Esc</kbd></dt><dd>Close this window</dd></dl><div class=\"about-footer\">MIT License &copy; 2023-present Christopher West &middot; Built with Vue, Ace and Prism</div></div><div v-else class=\"about-body export-body\"><div class=\"export-options\"><div class=\"segmented\" role=\"radiogroup\" aria-label=\"Code\"><button v-for=\"option in exportCodeOptions\" role=\"radio\" :aria-checked=\"exportCode === option.value\" :class=\"exportCode === option.value ? 'active' : ''\" @click=\"exportCode = option.value\">{{ option.label }}</button></div><div class=\"segmented\" role=\"radiogroup\" aria-label=\"Format\"><button v-for=\"option in exportFormatOptions\" role=\"radio\" :aria-checked=\"exportFormat === option.value\" :class=\"exportFormat === option.value ? 'active' : ''\" @click=\"exportFormat = option.value\">{{ option.label }}</button></div></div><div class=\"export-note\">{{ exportNote }}</div><div class=\"export-preview\"><ace-editor :model-value=\"exportHtml\" language=\"html\" :theme=\"theme\" height=\"100%\" :read-only=\"true\"></ace-editor></div><div class=\"export-actions\"><button class=\"dialog-button\" @click=\"downloadExport\">Download page</button> <button class=\"dialog-button primary\" @click=\"copyExport\">{{ copyLabel }}</button></div></div></div></div><div v-if=\"dialog\" class=\"dialog-backdrop\" @mousedown.self=\"closeDialog(false)\" @keydown.esc=\"closeDialog(false)\"><div class=\"dialog\" role=\"alertdialog\" aria-modal=\"true\" :aria-label=\"dialog.title\"><div class=\"dialog-title\">{{ dialog.title }}</div><div class=\"dialog-message\">{{ dialog.message }}</div><div class=\"dialog-buttons\"><button class=\"dialog-button\" @click=\"closeDialog(false)\">Cancel</button> <button class=\"dialog-button primary\" ref=\"dialogConfirmButton\" @click=\"closeDialog(true)\">{{ dialog.confirmText }}</button></div></div></div></div>";
   /**
    * The URL of this script which is used to remove this script's lines from the
    * stack traces of errors in window mode.
@@ -76,42 +76,143 @@
     let logCount = 0;
     let snippetCount = 0;
     let canImportDataUrls = true;
+    // The type of the block of code that is running (see runCode()).
+    let runningBlockType;
+    // How wrapping the last expression of each block shifted the columns on its
+    // line so that stack traces can show the original columns.
+    const columnShiftsBySnippet = {};
+  
+    const counts = {};
+    const timers = {};
+    // The IDs of the groups (from console.group()) that are currently open.
+    let groupIds = [];
+    let groupCount = 0;
+  
+    // Called by the code that is run (see runCode()) with the value of the last
+    // expression.  The key is unique to this runner because in window mode more
+    // than one console can be on the same page.
+    const RESULT_KEY = `yourjs-box.result.${Math.random().toString(36).slice(2)}`;
+    globalThis[Symbol.for(RESULT_KEY)] = reportResult;
   
     // Overrides for console functions.  In window mode this also captures
     // anything else that the page logs, just like the browser's console.
-    for (const key of ['clear', 'debug', 'error', 'info', 'log', 'table', 'warn']) {
+    for (const key of [
+      'assert', 'clear', 'count', 'countReset', 'debug', 'dir', 'dirxml', 'error',
+      'group', 'groupCollapsed', 'groupEnd', 'info', 'log', 'table', 'time',
+      'timeEnd', 'timeLog', 'trace', 'warn',
+    ]) {
       const original = console[key];
       if ('function' !== typeof original) continue;
       console[key] = function(...args) {
-        if (key === 'clear') {
-          clearLogs();
-          send({target: 'viewer', func: 'clearDisplays', args: [true]});
-        }
-        else {
-          const table = key === 'table' ? parseTable(args[0], args[1]) : null;
-  
-          // console.table() only shows the data that was tabulated.
-          if (table) args = args.slice(0, 1);
-  
-          // Keep track of the args so that they can be expanded later.
-          const logId = `${++logCount}`;
-          logArgsById[logId] = args.map(value => ({...summarize(value), value}));
-  
-          send({
-            target: 'viewer',
-            func: 'appendLog',
-            args: [{
-              logId,
-              key,
-              descriptions: logArgsById[logId].map(without(['value'])),
-              table,
-            }]
-          });
-        }
+        handleConsoleCall(key, args);
   
         // Calls and returns the original console function.
         return original.apply(this, arguments);
       };
+    }
+  
+    /**
+     * Shows what was passed to a console function in the same way that the
+     * browser's console would.
+     * @param {string} key
+     * @param {any[]} args
+     */
+    function handleConsoleCall(key, args) {
+      const label = args.length && args[0] !== undefined ? `${args[0]}` : 'default';
+  
+      if (key === 'clear') {
+        clearLogs();
+        groupIds = [];
+        send({target: 'viewer', func: 'clearDisplays', args: [true]});
+      }
+      else if (key === 'assert') {
+        if (args[0]) return;
+        const rest = args.slice(1);
+        addLog('assert', !rest.length
+          ? ['Assertion failed: console.assert']
+          : 'string' === typeof rest[0]
+            ? ['Assertion failed: ' + rest[0], ...rest.slice(1)]
+            : ['Assertion failed:', ...rest]);
+      }
+      else if (key === 'count') {
+        counts[label] = (counts[label] || 0) + 1;
+        addLog('count', [`${label}: ${counts[label]}`]);
+      }
+      else if (key === 'countReset') {
+        if (Object.hasOwn(counts, label)) counts[label] = 0;
+        else addLog('warn', [`Count for '${label}' does not exist`]);
+      }
+      else if (key === 'time') {
+        if (Object.hasOwn(timers, label)) addLog('warn', [`Timer '${label}' already exists`]);
+        else timers[label] = performance.now();
+      }
+      else if (key === 'timeLog' || key === 'timeEnd') {
+        if (!Object.hasOwn(timers, label)) {
+          addLog('warn', [`Timer '${label}' does not exist`]);
+          return;
+        }
+        const ms = performance.now() - timers[label];
+        if (key === 'timeEnd') delete timers[label];
+        addLog(key, [`${label}: ${+ms.toFixed(3)} ms`, ...(key === 'timeLog' ? args.slice(1) : [])]);
+      }
+      else if (key === 'trace') {
+        // Removes the first line ("Error") and this runner's own lines.
+        const stack = cleanStack(new Error().stack ?? '').split('\n').slice(1).join('\n');
+        addLog('trace', args.length ? args : ['console.trace'], {stack});
+      }
+      else if (key === 'group' || key === 'groupCollapsed') {
+        const groupId = `${++groupCount}`;
+        addLog(key, args.length ? args : ['console.group'], {groupId, isCollapsed: key === 'groupCollapsed'});
+        groupIds.push(groupId);
+      }
+      else if (key === 'groupEnd') {
+        groupIds.pop();
+      }
+      else {
+        const table = key === 'table' ? parseTable(args[0], args[1]) : null;
+  
+        // console.table() only shows the data that was tabulated.
+        addLog(key, table ? args.slice(0, 1) : args, {table});
+      }
+    }
+  
+    /**
+     * Sends a message to show in the console.
+     * @param {string} key
+     *   The name of the console function (eg. "log").
+     * @param {any[]} args
+     * @param {Object=} extra
+     *   Other properties to send along with the message.
+     * @param {number=} depth
+     *   Optional, defaults to `0`.  The depth used to summarize the args (see
+     *   summarize()).
+     */
+    function addLog(key, args, extra, depth = 0) {
+      // Keep track of the args so that they can be expanded later.
+      const logId = `${++logCount}`;
+      logArgsById[logId] = args.map(value => ({...summarize(value, depth), value}));
+  
+      send({
+        target: 'viewer',
+        func: 'appendLog',
+        args: [{
+          logId,
+          key,
+          descriptions: logArgsById[logId].map(without(['value'])),
+          groupIds: groupIds.slice(),
+          ...extra,
+        }]
+      });
+    }
+  
+    /**
+     * Shows the value of the last expression in the code that was run unless
+     * it is `undefined`.
+     * @param {*} value
+     */
+    function reportResult(value) {
+      // Like the browser, strings are quoted (but logged strings aren't).
+      if (value !== undefined) addLog('result', [value], {}, 'string' === typeof value ? 1 : 0);
     }
   
     addEventListener('error', evt => {
@@ -127,12 +228,17 @@
      * @param {boolean=} isInPromise
      */
     function reportUncaught(error, isInPromise) {
+      // Points out how to use top-level await if it was used in a classic block.
+      const hint = runningBlockType === 'classic' && error?.name === 'SyntaxError' && /\bawait\b/.test(error.message)
+        ? '\n(To use top-level await, add data-block-type="module" to the script tag.)'
+        : '';
       send({
         target: 'viewer',
         func: 'appendError',
         args: [{
           message: (isInPromise ? 'Uncaught (in promise) ' : 'Uncaught ')
-            + cleanStack(error?.stack ?? `${error?.message ?? error}`),
+            + cleanStack(error?.stack ?? `${error?.message ?? error}`)
+            + hint,
         }]
       });
     }
@@ -147,7 +253,14 @@
       return `${stack}`
         .split('\n')
         .filter(line => !(ownUrl && /^\s*at\b/.test(line) && line.includes(ownUrl)))
-        .join('\n');
+        .join('\n')
+        // Undoes the shift in columns caused by wrapping the last expression.
+        .replace(/(snippet-\d+\.js):(\d+):(\d+)/g, (match, name, line, column) => {
+          const info = columnShiftsBySnippet[name];
+          return info && +line === info.line && +column > info.column
+            ? `${name}:${line}:${Math.max(info.column, column - info.shift)}`
+            : match;
+        });
     }
   
     function without(props, obj) {
@@ -345,6 +458,8 @@
         return [['text', isNaN(value) ? 'Invalid Date' : Date.prototype.toString.call(value)]];
       }
       if (typeName === 'RegExp') return [['regexp', '' + value]];
+      // The state of a promise can't be determined synchronously.
+      if (typeName === 'Promise') return [['text', `${className} {\u2026}`]];
       // DOM nodes (only available in window mode) are shown like the browser
       // shows them in previews (eg. "h2#title.big").
       if ('undefined' !== typeof Node && value instanceof Node) {
@@ -501,30 +616,64 @@
     // }
   
     /**
-     * Runs the code as a classic script so that top-level declarations are
-     * shared between all of the code that is run.
+     * Runs a block of code.
      * @param {string} jsCode
+     * @param {Object=} runOptions
+     * @param {"classic"|"module"=} runOptions.blockType
+     *   "classic" (the default) runs the code as a classic script so that
+     *   top-level declarations are shared between all of the code that is run.
+     *   "module" runs the code as a module which allows for top-level await and
+     *   import statements, but top-level declarations stay in the module.
+     * @param {[number, number]=} runOptions.resultRange
+     *   The start and end index of the last expression in the code whose value
+     *   should be shown.
      */
-    function runCode(jsCode) {
-      // Names the code so that stack traces refer to it by this name.
-      const source = `${jsCode}\n//# sourceURL=snippet-${++snippetCount}.js`;
+    async function runCode(jsCode, runOptions) {
+      const {blockType, resultRange} = Object(runOptions);
   
-      if (mode === 'worker') {
-        try {
+      // Names the code so that stack traces refer to it by this name.
+      const snippetName = `snippet-${++snippetCount}.js`;
+  
+      // Wraps the last expression so that its value is reported.  This keeps
+      // everything on the same lines so that line numbers in errors still match
+      // and the shift in columns is recorded so they can be fixed too.
+      if (Array.isArray(resultRange)) {
+        const [start, end] = resultRange;
+        const prefix = `globalThis[Symbol.for(${JSON.stringify(RESULT_KEY)})]((`;
+        const linesBefore = jsCode.slice(0, start).split('\n');
+        columnShiftsBySnippet[snippetName] = {
+          line: linesBefore.length,
+          column: linesBefore[linesBefore.length - 1].length + 1,
+          shift: prefix.length,
+        };
+        jsCode = jsCode.slice(0, start) + prefix + jsCode.slice(start, end) + '))' + jsCode.slice(end);
+      }
+  
+      const source = `${jsCode}\n//# sourceURL=${snippetName}`;
+  
+      runningBlockType = blockType === 'module' ? 'module' : 'classic';
+      try {
+        if (blockType === 'module') {
+          // Waits for the module to finish (including any top-level await).
+          await import('data:text/javascript;charset=utf-8,' + encodeURIComponent(source));
+        }
+        else if (mode === 'worker') {
           importCode(source);
         }
-        catch (e) {
-          reportUncaught(e);
+        else {
+          const script = document.createElement('script');
+          script.textContent = source;
+          document.head.appendChild(script);
+          script.remove();
         }
       }
-      else {
-        const script = document.createElement('script');
-        script.textContent = source;
-        document.head.appendChild(script);
-        script.remove();
+      catch (e) {
+        reportUncaught(e);
       }
+      runningBlockType = undefined;
   
-      // Lets the viewer know that any synchronous logs have already been sent.
+      // Lets the viewer know that the code finished running and that any logs
+      // made while it ran have already been sent.
       send({target: 'viewer', func: 'onCodeRan', args: []});
     }
   
@@ -592,6 +741,7 @@
      */
     function clearLogs() {
       for (const logId of Object.keys(logArgsById)) delete logArgsById[logId];
+      groupIds = [];
     }
   
     return {clearLogs, runCode, sendDescriptionFor};
@@ -705,6 +855,8 @@
   function main(script) {
     const dataset = JSON.parse(JSON.stringify(script.dataset));
     const runnerMode = dataset.runner === 'window' ? 'window' : 'worker';
+    const blockType = dataset.blockType === 'module' ? 'module' : 'classic';
+    const showResults = dataset.showResults !== 'false';
 
     /** @type {ReturnType<createCallableFrame>} */
     let callableViewerFrame;
@@ -722,9 +874,18 @@
       jsCode() {
         let mountedApp;
         
+        /**
+         * Indicates if any of the libraries that the viewer needs failed to load (eg.
+         * because the CDN is blocked or the user is offline).
+         */
+        const IS_MISSING_LIBRARIES = !window.Vue || !window.ace || !window.Prism;
+        if (IS_MISSING_LIBRARIES) {
+          document.querySelector('#splash').classList.add('failed');
+        }
+        
         const Prism = window.Prism;
         delete window.Prism;
-        Prism.plugins.autoloader.loadLanguages('javascript');
+        Prism?.plugins.autoloader.loadLanguages('javascript');
         
         /**
          * The minimum amount of time (in milliseconds) that the loading screen is shown.
@@ -752,6 +913,8 @@
          * @param {{runnerMode: "worker"|"window", packageInfo: {name: string, version: string, homepage: string, repoUrl: string, bugsUrl: string}}} meta
          */
         function init(jsCode, dataset, meta) {
+          if (IS_MISSING_LIBRARIES) return;
+        
           const hidePrefix = dataset.hidePrefix ?? '';
           const darkSchemeQuery = matchMedia('(prefers-color-scheme: dark)');
           const originalCode = unindentMin(jsCode);
@@ -767,6 +930,8 @@
                   hidePrefix,
                   hiddenGroups: copyHiddenGroups(),
                   runnerMode: meta.runnerMode,
+                  blockType: meta.blockType,
+                  showResults: meta.showResults,
                   packageInfo: meta.packageInfo,
                   // Every group of code that was run (in order) which is used when
                   // copying the console as HTML.  Unlike the displays this is only
@@ -816,6 +981,22 @@
                 themeDescription() {
                   const name = this.theme === 'dark' ? 'Dark' : 'Light';
                   return `${name} (${this.forcedTheme ? 'set by data-theme' : 'follows your system'})`;
+                },
+                blockTypeDescription() {
+                  return this.blockType === 'module'
+                    ? 'Modules (top-level await and imports work, declarations stay in each block)'
+                    : 'Classic scripts (top-level declarations are shared between blocks)';
+                },
+                /**
+                 * The IDs of the groups (from console.groupCollapsed() or a group that
+                 * the user collapsed) whose messages should be hidden.
+                 */
+                collapsedGroupIds() {
+                  return new Set(
+                    this.displays
+                      .filter(d => d.groupId && d.isCollapsed)
+                      .map(d => d.groupId)
+                  );
                 },
                 layoutDescription() {
                   return (this.dividerOrient === 'vertical' ? 'Editor beside the console' : 'Editor below the console')
@@ -973,7 +1154,18 @@
                   });
                   this.runningCount++;
                   this.runHistory.push(group.allLines);
-                  messageParent({target: 'runner', func: 'runCode', args: [group.lines]});
+                  messageParent({
+                    target: 'runner',
+                    func: 'runCode',
+                    args: [group.lines, {
+                      blockType: this.blockType,
+                      // Like the browser's console, show the value of the last
+                      // expression (except for hidden code).
+                      resultRange: this.showResults && !isHidden
+                        ? findLastExpression(group.lines, this.blockType)
+                        : null,
+                    }],
+                  });
                 },
                 clearConsole() {
                   this.displays = [];
@@ -1069,6 +1261,24 @@
                   const url = URL.createObjectURL(new Blob([html], {type: 'text/html'}));
                   Object.assign(document.createElement('a'), {href: url, download: 'js-box.html'}).click();
                   setTimeout(() => URL.revokeObjectURL(url), 1000);
+                },
+                /**
+                 * Clicking a group's header (from console.group()) collapses or expands
+                 * the group unless a value in the header was clicked.
+                 * @param {*} display
+                 * @param {MouseEvent} evt
+                 */
+                onLogRowClick(display, evt) {
+                  if (display.groupId && !evt.target.closest('.js-value-header.expandable')) {
+                    display.isCollapsed = !display.isCollapsed;
+                  }
+                },
+                /**
+                 * Indicates if a display is inside of a collapsed group.
+                 */
+                isInCollapsedGroup(display) {
+                  const {collapsedGroupIds} = this;
+                  return !!collapsedGroupIds.size && !!display.groupIds?.some(id => collapsedGroupIds.has(id));
                 },
                 closeDialog(isConfirmed) {
                   const {dialog} = this;
@@ -1390,6 +1600,7 @@
                   // https://icon-sets.iconify.design/mdi/error-outline/
                   error: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm1-5C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18a8 8 0 0 1-8-8a8 8 0 0 1 8-8a8 8 0 0 1 8 8a8 8 0 0 1-8 8"/></svg>',
                   // Icons similar to those in the browser's console.
+                  result: '<svg viewBox="0 0 16 16"><path d="M9 4.5L5.5 8 9 11.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="8" r="1.1" fill="currentColor"/></svg>',
                   close: '<svg viewBox="0 0 16 16"><path d="M4 4l8 8m0-8l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
                   clear: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.75 12.25l8.5-8.5" stroke="currentColor" stroke-width="1.5"/></svg>',
                   copyToEditor: '<svg viewBox="0 0 16 16"><path d="M6 3.5L2.5 7 6 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 7h6.5a4 4 0 0 1 4 4v1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
@@ -1574,6 +1785,33 @@
         }
         
         /**
+         * Finds the last statement in the code if it is an expression so that its
+         * value can be shown.
+         * @param {string} code
+         * @param {"classic"|"module"} blockType
+         * @returns {[number, number]|null}
+         *   The start and end index of the expression or `null` if the last statement
+         *   isn't an expression (or the code can't be parsed, in which case running
+         *   it will show the syntax error).
+         */
+        function findLastExpression(code, blockType) {
+          if (!window.acorn) return null;
+          try {
+            const {body} = acorn.parse(code, {
+              ecmaVersion: 'latest',
+              sourceType: blockType === 'module' ? 'module' : 'script',
+              allowHashBang: true,
+            });
+            const last = body[body.length - 1];
+            if (last?.type === 'ExpressionStatement' && !last.directive) {
+              return [last.expression.start, last.expression.end];
+            }
+          }
+          catch (e) {}
+          return null;
+        }
+        
+        /**
          * Joins groups of code back together making sure that each one (other than
          * the first) starts with a header so that they stay separate groups.
          * @param {string[]} blocks
@@ -1733,12 +1971,12 @@
          * @param {any[]} options.descriptions
          * @param {{headers: string[], rows: {index: string, cells: any[]}[]}|null} options.table
          */
-        function appendLog({logId, key, descriptions, table}) {
+        function appendLog({logId, key, descriptions, table, groupIds, groupId, isCollapsed, stack}) {
           key = `${key}`;
           mountedApp.displays.push({
             type: 'log',
             key,
-            name: `console.${key}`,
+            name: key === 'result' ? 'Result' : `console.${key}`,
             descriptions: Array.from(descriptions, sanitizeDescription),
             table: table ? {
               headers: Array.from(table.headers, h => `${h}`),
@@ -1747,6 +1985,12 @@
                 cells: Array.from(row.cells, cell => cell && sanitizeDescription(cell)),
               })),
             } : null,
+            // The groups (from console.group()) that this message is in.
+            groupIds: Array.from(groupIds ?? [], id => `${id}`),
+            // Set if this message starts a group.
+            groupId: groupId != null ? `${groupId}` : null,
+            isCollapsed: !!isCollapsed,
+            stack: stack != null ? `${stack}` : null,
             logId: `${logId}`,
           });
         }
@@ -1814,17 +2058,22 @@
         }
         
       },
+      // Exact versions are used so that a new release of a library can never
+      // change how an existing version of this console works.
       jsUrls: [
-        'https://unpkg.com/vue@3/dist/vue.global.prod.js',
-        'https://unpkg.com/ace-builds@1/src-noconflict/ace.js',
-        'https://unpkg.com/prismjs@1/components/prism-core.min.js',
-        'https://unpkg.com/prismjs@1/plugins/autoloader/prism-autoloader.min.js',
-        'https://unpkg.com/prismjs@1/plugins/match-braces/prism-match-braces.min.js',
+        'https://unpkg.com/vue@3.5.43/dist/vue.global.prod.js',
+        'https://unpkg.com/ace-builds@1.44.0/src-noconflict/ace.js',
+        'https://unpkg.com/prismjs@1.30.0/components/prism-core.min.js',
+        'https://unpkg.com/prismjs@1.30.0/plugins/autoloader/prism-autoloader.min.js',
+        'https://unpkg.com/prismjs@1.30.0/plugins/match-braces/prism-match-braces.min.js',
+        // Used to find the last expression in each block of code so that its
+        // value can be shown.
+        ...(showResults ? ['https://cdn.jsdelivr.net/npm/acorn@8.18.0/dist/acorn.min.js'] : []),
       ],
       cssUrls: [
         'data:text/css,' + encodeURIComponent(VIEWER_IFRAME_CSS),
-        'https://unpkg.com/prism-themes@1/themes/prism-vsc-dark-plus.min.css',
-        'https://unpkg.com/prismjs@1/plugins/match-braces/prism-match-braces.min.css',
+        'https://unpkg.com/prism-themes@1.9.0/themes/prism-vsc-dark-plus.min.css',
+        'https://unpkg.com/prismjs@1.30.0/plugins/match-braces/prism-match-braces.min.css',
       ],
       htmlAttributes: 'data-theme="' + theme + '"',
       onMessage(message) {
@@ -1833,7 +2082,7 @@
       async onReady() {
         // The dataset is passed as is so that the viewer knows which options
         // were actually specified (eg. when copying the console as HTML).
-        this.call('init', script.textContent, dataset, {runnerMode, packageInfo: PACKAGE_INFO});
+        this.call('init', script.textContent, dataset, {runnerMode, blockType, showResults, packageInfo: PACKAGE_INFO});
       },
       body: VIEWER_IFRAME_HTML,
       style: {

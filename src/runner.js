@@ -19,42 +19,143 @@ function createRunner(send, options) {
   let logCount = 0;
   let snippetCount = 0;
   let canImportDataUrls = true;
+  // The type of the block of code that is running (see runCode()).
+  let runningBlockType;
+  // How wrapping the last expression of each block shifted the columns on its
+  // line so that stack traces can show the original columns.
+  const columnShiftsBySnippet = {};
+
+  const counts = {};
+  const timers = {};
+  // The IDs of the groups (from console.group()) that are currently open.
+  let groupIds = [];
+  let groupCount = 0;
+
+  // Called by the code that is run (see runCode()) with the value of the last
+  // expression.  The key is unique to this runner because in window mode more
+  // than one console can be on the same page.
+  const RESULT_KEY = `yourjs-box.result.${Math.random().toString(36).slice(2)}`;
+  globalThis[Symbol.for(RESULT_KEY)] = reportResult;
 
   // Overrides for console functions.  In window mode this also captures
   // anything else that the page logs, just like the browser's console.
-  for (const key of ['clear', 'debug', 'error', 'info', 'log', 'table', 'warn']) {
+  for (const key of [
+    'assert', 'clear', 'count', 'countReset', 'debug', 'dir', 'dirxml', 'error',
+    'group', 'groupCollapsed', 'groupEnd', 'info', 'log', 'table', 'time',
+    'timeEnd', 'timeLog', 'trace', 'warn',
+  ]) {
     const original = console[key];
     if ('function' !== typeof original) continue;
     console[key] = function(...args) {
-      if (key === 'clear') {
-        clearLogs();
-        send({target: 'viewer', func: 'clearDisplays', args: [true]});
-      }
-      else {
-        const table = key === 'table' ? parseTable(args[0], args[1]) : null;
-
-        // console.table() only shows the data that was tabulated.
-        if (table) args = args.slice(0, 1);
-
-        // Keep track of the args so that they can be expanded later.
-        const logId = `${++logCount}`;
-        logArgsById[logId] = args.map(value => ({...summarize(value), value}));
-
-        send({
-          target: 'viewer',
-          func: 'appendLog',
-          args: [{
-            logId,
-            key,
-            descriptions: logArgsById[logId].map(without(['value'])),
-            table,
-          }]
-        });
-      }
+      handleConsoleCall(key, args);
 
       // Calls and returns the original console function.
       return original.apply(this, arguments);
     };
+  }
+
+  /**
+   * Shows what was passed to a console function in the same way that the
+   * browser's console would.
+   * @param {string} key
+   * @param {any[]} args
+   */
+  function handleConsoleCall(key, args) {
+    const label = args.length && args[0] !== undefined ? `${args[0]}` : 'default';
+
+    if (key === 'clear') {
+      clearLogs();
+      groupIds = [];
+      send({target: 'viewer', func: 'clearDisplays', args: [true]});
+    }
+    else if (key === 'assert') {
+      if (args[0]) return;
+      const rest = args.slice(1);
+      addLog('assert', !rest.length
+        ? ['Assertion failed: console.assert']
+        : 'string' === typeof rest[0]
+          ? ['Assertion failed: ' + rest[0], ...rest.slice(1)]
+          : ['Assertion failed:', ...rest]);
+    }
+    else if (key === 'count') {
+      counts[label] = (counts[label] || 0) + 1;
+      addLog('count', [`${label}: ${counts[label]}`]);
+    }
+    else if (key === 'countReset') {
+      if (Object.hasOwn(counts, label)) counts[label] = 0;
+      else addLog('warn', [`Count for '${label}' does not exist`]);
+    }
+    else if (key === 'time') {
+      if (Object.hasOwn(timers, label)) addLog('warn', [`Timer '${label}' already exists`]);
+      else timers[label] = performance.now();
+    }
+    else if (key === 'timeLog' || key === 'timeEnd') {
+      if (!Object.hasOwn(timers, label)) {
+        addLog('warn', [`Timer '${label}' does not exist`]);
+        return;
+      }
+      const ms = performance.now() - timers[label];
+      if (key === 'timeEnd') delete timers[label];
+      addLog(key, [`${label}: ${+ms.toFixed(3)} ms`, ...(key === 'timeLog' ? args.slice(1) : [])]);
+    }
+    else if (key === 'trace') {
+      // Removes the first line ("Error") and this runner's own lines.
+      const stack = cleanStack(new Error().stack ?? '').split('\n').slice(1).join('\n');
+      addLog('trace', args.length ? args : ['console.trace'], {stack});
+    }
+    else if (key === 'group' || key === 'groupCollapsed') {
+      const groupId = `${++groupCount}`;
+      addLog(key, args.length ? args : ['console.group'], {groupId, isCollapsed: key === 'groupCollapsed'});
+      groupIds.push(groupId);
+    }
+    else if (key === 'groupEnd') {
+      groupIds.pop();
+    }
+    else {
+      const table = key === 'table' ? parseTable(args[0], args[1]) : null;
+
+      // console.table() only shows the data that was tabulated.
+      addLog(key, table ? args.slice(0, 1) : args, {table});
+    }
+  }
+
+  /**
+   * Sends a message to show in the console.
+   * @param {string} key
+   *   The name of the console function (eg. "log").
+   * @param {any[]} args
+   * @param {Object=} extra
+   *   Other properties to send along with the message.
+   * @param {number=} depth
+   *   Optional, defaults to `0`.  The depth used to summarize the args (see
+   *   summarize()).
+   */
+  function addLog(key, args, extra, depth = 0) {
+    // Keep track of the args so that they can be expanded later.
+    const logId = `${++logCount}`;
+    logArgsById[logId] = args.map(value => ({...summarize(value, depth), value}));
+
+    send({
+      target: 'viewer',
+      func: 'appendLog',
+      args: [{
+        logId,
+        key,
+        descriptions: logArgsById[logId].map(without(['value'])),
+        groupIds: groupIds.slice(),
+        ...extra,
+      }]
+    });
+  }
+
+  /**
+   * Shows the value of the last expression in the code that was run unless
+   * it is `undefined`.
+   * @param {*} value
+   */
+  function reportResult(value) {
+    // Like the browser, strings are quoted (but logged strings aren't).
+    if (value !== undefined) addLog('result', [value], {}, 'string' === typeof value ? 1 : 0);
   }
 
   addEventListener('error', evt => {
@@ -70,12 +171,17 @@ function createRunner(send, options) {
    * @param {boolean=} isInPromise
    */
   function reportUncaught(error, isInPromise) {
+    // Points out how to use top-level await if it was used in a classic block.
+    const hint = runningBlockType === 'classic' && error?.name === 'SyntaxError' && /\bawait\b/.test(error.message)
+      ? '\n(To use top-level await, add data-block-type="module" to the script tag.)'
+      : '';
     send({
       target: 'viewer',
       func: 'appendError',
       args: [{
         message: (isInPromise ? 'Uncaught (in promise) ' : 'Uncaught ')
-          + cleanStack(error?.stack ?? `${error?.message ?? error}`),
+          + cleanStack(error?.stack ?? `${error?.message ?? error}`)
+          + hint,
       }]
     });
   }
@@ -90,7 +196,14 @@ function createRunner(send, options) {
     return `${stack}`
       .split('\n')
       .filter(line => !(ownUrl && /^\s*at\b/.test(line) && line.includes(ownUrl)))
-      .join('\n');
+      .join('\n')
+      // Undoes the shift in columns caused by wrapping the last expression.
+      .replace(/(snippet-\d+\.js):(\d+):(\d+)/g, (match, name, line, column) => {
+        const info = columnShiftsBySnippet[name];
+        return info && +line === info.line && +column > info.column
+          ? `${name}:${line}:${Math.max(info.column, column - info.shift)}`
+          : match;
+      });
   }
 
   function without(props, obj) {
@@ -288,6 +401,8 @@ function createRunner(send, options) {
       return [['text', isNaN(value) ? 'Invalid Date' : Date.prototype.toString.call(value)]];
     }
     if (typeName === 'RegExp') return [['regexp', '' + value]];
+    // The state of a promise can't be determined synchronously.
+    if (typeName === 'Promise') return [['text', `${className} {\u2026}`]];
     // DOM nodes (only available in window mode) are shown like the browser
     // shows them in previews (eg. "h2#title.big").
     if ('undefined' !== typeof Node && value instanceof Node) {
@@ -444,30 +559,64 @@ function createRunner(send, options) {
   // }
 
   /**
-   * Runs the code as a classic script so that top-level declarations are
-   * shared between all of the code that is run.
+   * Runs a block of code.
    * @param {string} jsCode
+   * @param {Object=} runOptions
+   * @param {"classic"|"module"=} runOptions.blockType
+   *   "classic" (the default) runs the code as a classic script so that
+   *   top-level declarations are shared between all of the code that is run.
+   *   "module" runs the code as a module which allows for top-level await and
+   *   import statements, but top-level declarations stay in the module.
+   * @param {[number, number]=} runOptions.resultRange
+   *   The start and end index of the last expression in the code whose value
+   *   should be shown.
    */
-  function runCode(jsCode) {
-    // Names the code so that stack traces refer to it by this name.
-    const source = `${jsCode}\n//# sourceURL=snippet-${++snippetCount}.js`;
+  async function runCode(jsCode, runOptions) {
+    const {blockType, resultRange} = Object(runOptions);
 
-    if (mode === 'worker') {
-      try {
+    // Names the code so that stack traces refer to it by this name.
+    const snippetName = `snippet-${++snippetCount}.js`;
+
+    // Wraps the last expression so that its value is reported.  This keeps
+    // everything on the same lines so that line numbers in errors still match
+    // and the shift in columns is recorded so they can be fixed too.
+    if (Array.isArray(resultRange)) {
+      const [start, end] = resultRange;
+      const prefix = `globalThis[Symbol.for(${JSON.stringify(RESULT_KEY)})]((`;
+      const linesBefore = jsCode.slice(0, start).split('\n');
+      columnShiftsBySnippet[snippetName] = {
+        line: linesBefore.length,
+        column: linesBefore[linesBefore.length - 1].length + 1,
+        shift: prefix.length,
+      };
+      jsCode = jsCode.slice(0, start) + prefix + jsCode.slice(start, end) + '))' + jsCode.slice(end);
+    }
+
+    const source = `${jsCode}\n//# sourceURL=${snippetName}`;
+
+    runningBlockType = blockType === 'module' ? 'module' : 'classic';
+    try {
+      if (blockType === 'module') {
+        // Waits for the module to finish (including any top-level await).
+        await import('data:text/javascript;charset=utf-8,' + encodeURIComponent(source));
+      }
+      else if (mode === 'worker') {
         importCode(source);
       }
-      catch (e) {
-        reportUncaught(e);
+      else {
+        const script = document.createElement('script');
+        script.textContent = source;
+        document.head.appendChild(script);
+        script.remove();
       }
     }
-    else {
-      const script = document.createElement('script');
-      script.textContent = source;
-      document.head.appendChild(script);
-      script.remove();
+    catch (e) {
+      reportUncaught(e);
     }
+    runningBlockType = undefined;
 
-    // Lets the viewer know that any synchronous logs have already been sent.
+    // Lets the viewer know that the code finished running and that any logs
+    // made while it ran have already been sent.
     send({target: 'viewer', func: 'onCodeRan', args: []});
   }
 
@@ -535,6 +684,7 @@ function createRunner(send, options) {
    */
   function clearLogs() {
     for (const logId of Object.keys(logArgsById)) delete logArgsById[logId];
+    groupIds = [];
   }
 
   return {clearLogs, runCode, sendDescriptionFor};
