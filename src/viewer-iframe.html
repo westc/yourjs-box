@@ -64,7 +64,6 @@
   <div id="bottomNav">
     <div class="brand">
       <button class="logo-button" title="About JS Box" @click="openAbout('about')"><span class="logo"><span class="logo-mark">JS</span><span class="logo-text">Box</span></span></button>
-      <button class="info-button" title="About JS Box" @click="openAbout('about')"><icon name="info"></icon></button>
       <span class="runner-badge" :title="runnerMode === 'window' ? 'Code runs directly in this page' : 'Code runs in a Web Worker (no DOM access)'">{{ runnerMode === 'window' ? 'Window' : 'Worker' }}</span>
     </div>
     <div class="buttons">

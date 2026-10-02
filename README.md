@@ -39,7 +39,7 @@ If the editor already has code in it you are asked before it is replaced.
 
 ### Toolbar
 
-- Clicking the **logo** (or the &#9432; button) opens the About window, which
+- Clicking the **logo** opens the About window, which
   shows the version, this console's settings and keyboard shortcuts.  Its
   **Copy as HTML** tab gives you the HTML for this console (with its current
   code, its original code or no code) as an embed snippet or a full page that
