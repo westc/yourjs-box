@@ -70,6 +70,7 @@
     const logArgsById = {};
     let logCount = 0;
     let snippetCount = 0;
+    let canImportDataUrls = true;
   
     // Overrides for console functions.  In window mode this also captures
     // anything else that the page logs, just like the browser's console.
@@ -504,15 +505,11 @@
       const source = `${jsCode}\n//# sourceURL=snippet-${++snippetCount}.js`;
   
       if (mode === 'worker') {
-        const url = URL.createObjectURL(new Blob([source], {type: 'text/javascript'}));
         try {
-          importScripts(url);
+          importCode(source);
         }
         catch (e) {
           reportUncaught(e);
-        }
-        finally {
-          URL.revokeObjectURL(url);
         }
       }
       else {
@@ -524,6 +521,35 @@
   
       // Lets the viewer know that any synchronous logs have already been sent.
       send({target: 'viewer', func: 'onCodeRan', args: []});
+    }
+  
+    /**
+     * Runs code in the worker via importScripts() so that it runs as a classic
+     * script.  A data URL is used because a worker with an opaque origin (which
+     * is the case when the worker itself was created from a data URL) can't
+     * always import blob URLs (eg. Chrome on HTTPS sites).  If data URLs can't be
+     * imported a blob URL is used instead.  Either way a failure to load means
+     * the code never ran, so it is safe to try again with the other kind of URL.
+     * @param {string} source
+     */
+    function importCode(source) {
+      if (canImportDataUrls) {
+        try {
+          importScripts('data:text/javascript;charset=utf-8,' + encodeURIComponent(source));
+          return;
+        }
+        catch (e) {
+          if (e?.name !== 'NetworkError') throw e;
+          canImportDataUrls = false;
+        }
+      }
+      const url = URL.createObjectURL(new Blob([source], {type: 'text/javascript'}));
+      try {
+        importScripts(url);
+      }
+      finally {
+        URL.revokeObjectURL(url);
+      }
     }
   
     /**
