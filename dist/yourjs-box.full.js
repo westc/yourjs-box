@@ -727,6 +727,20 @@
          */
         const MIN_LOADING_TIME = 1000;
         
+        /**
+         * If the orientation isn't specified, the editor is shown below the console
+         * instead of beside it when the console is narrower than this (in pixels).
+         */
+        const NARROW_WIDTH = 600;
+        
+        /**
+         * @returns {"horizontal"|"vertical"}
+         *   The orientation to use when one wasn't specified.
+         */
+        function getAutoDividerOrient() {
+          return innerWidth < NARROW_WIDTH ? 'horizontal' : 'vertical';
+        }
+        
         function init(jsCode, dataset) {
           const hidePrefix = dataset.hidePrefix ?? '';
           const darkSchemeQuery = matchMedia('(prefers-color-scheme: dark)');
@@ -753,7 +767,12 @@
                   prefersDark: darkSchemeQuery.matches,
                   runCount: 0,
                   jsCode: visibleCode,
-                  dividerOrient: dataset.dividerOrient === 'horizontal' ? 'horizontal' : 'vertical',
+                  // If the orientation wasn't specified it follows the width of the
+                  // console until the user chooses one.
+                  isDividerOrientAuto: !/^(horizontal|vertical)$/.test(dataset.dividerOrient),
+                  dividerOrient: /^(horizontal|vertical)$/.test(dataset.dividerOrient)
+                    ? dataset.dividerOrient
+                    : getAutoDividerOrient(),
                   isMovingDivider: false,
                   dividerPct: '50%',
                   dividerSize: '8px',
@@ -783,13 +802,13 @@
                     {
                       iconName: 'horizontalView',
                       title: 'Show the editor below the console',
-                      callback() { this.dividerOrient = 'horizontal'; },
+                      callback() { this.setDividerOrient('horizontal'); },
                       showIf() { return this.dividerOrient !== 'horizontal'; }
                     },
                     {
                       iconName: 'verticalView',
                       title: 'Show the editor beside the console',
-                      callback() { this.dividerOrient = 'vertical'; },
+                      callback() { this.setDividerOrient('vertical'); },
                       showIf() { return this.dividerOrient !== 'vertical'; }
                     },
                     {
@@ -924,6 +943,20 @@
                   this.dialog = null;
                   dialog?.resolve(isConfirmed);
                 },
+                /**
+                 * Sets the orientation chosen by the user which stops it from
+                 * automatically following the width of the console.
+                 * @param {"horizontal"|"vertical"} orient
+                 */
+                setDividerOrient(orient) {
+                  this.isDividerOrientAuto = false;
+                  this.dividerOrient = orient;
+                },
+                onWindowResize() {
+                  if (this.isDividerOrientAuto) {
+                    this.dividerOrient = getAutoDividerOrient();
+                  }
+                },
                 onDisplaysScroll() {
                   const {scrollTop, scrollHeight, clientHeight} = this.$refs.displaysScroller;
                   this.isDisplaysScrolledToBottom = scrollHeight - scrollTop - clientHeight < 8;
@@ -990,6 +1023,7 @@
               },
               mounted() {
                 addEventListener('mousemove', this.onWindowMouseMove);
+                addEventListener('resize', this.onWindowResize);
                 addEventListener('mouseup', this.onWindowMouseUp);
                 addEventListener('error', this.onWindowError);
                 darkSchemeQuery.addEventListener('change', e => this.prefersDark = e.matches);

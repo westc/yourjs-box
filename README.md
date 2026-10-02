@@ -53,7 +53,7 @@ If the editor already has code in it you are asked before it is replaced.
 | Attribute | Description |
 | --- | --- |
 | `data-runner` | `"worker"` (default) runs the code in a Web Worker.  `"window"` runs it directly in the page.  See below. |
-| `data-divider-orient` | `"vertical"` (default) puts the editor beside the output.  `"horizontal"` puts it below. |
+| `data-divider-orient` | `"vertical"` puts the editor beside the output and `"horizontal"` puts it below.  If not specified the editor is beside the output unless the console is narrower than 600px. |
 | `data-hide-prefix` | Any block whose header starts with this prefix is hidden. See below. |
 | `data-theme` | `"light"` or `"dark"`.  Defaults to following the system's color scheme like the browser's dev tools. |
 
