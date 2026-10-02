@@ -1,6 +1,11 @@
-# yourjs-console
+# yourjs-box
 
-A simple way to embed a JavaScript console on your website.
+Embed an interactive JavaScript console on any web page with one script tag.
+Step-by-step code blocks, DevTools-style output, and code that runs in a Web
+Worker or the page itself.
+
+**[Live demo](https://westc.github.io/yourjs-box/)** &middot;
+[Examples](https://westc.github.io/yourjs-box/examples/)
 
 ## Usage
 
@@ -9,7 +14,7 @@ should be loaded into the console inside of the script tag:
 
 ```html
 <div style="height: 400px;">
-  <script src="https://cdn.jsdelivr.net/npm/yourjs-console@1/dist/main.min.js">
+  <script src="https://cdn.jsdelivr.net/npm/yourjs-box@1/dist/yourjs-box.min.js">
     // Say hello \\
     console.log('Hello world!');
 
@@ -20,7 +25,7 @@ should be loaded into the console inside of the script tag:
 ```
 
 The console fills its container.  The script is also available from unpkg at
-`https://unpkg.com/yourjs-console@1/dist/main.min.js`.
+`https://unpkg.com/yourjs-box@1/dist/yourjs-box.min.js`.
 
 ### Code Blocks
 
@@ -91,8 +96,9 @@ Install the development dependencies by running `npm install`.
   changes (without serving anything).
 
 The kitchen sink example (`examples/kitchen-sink.html`) has several consoles
-which cover every feature.  Add `?build=main` or `?build=min` to its URL to
-test `dist/main.js` or `dist/main.min.js` instead of `dist/main.full.js`.
+which cover every feature.  Add `?build=standard` or `?build=min` to its URL to
+test `dist/yourjs-box.js` or `dist/yourjs-box.min.js` instead of
+`dist/yourjs-box.full.js`.
 
 ## Roadmap
 
@@ -102,3 +108,11 @@ test `dist/main.js` or `dist/main.min.js` instead of `dist/main.full.js`.
 - Allow for TypeScript
 - Allow for CoffeeScript
 - Allow code to run in main window.
+
+## License
+
+Released under the [MIT License](LICENSE).  You're free to use, modify and
+distribute it, including in commercial projects, as long as the copyright and
+license notice is kept.
+
+Copyright (c) 2023-present Christopher West

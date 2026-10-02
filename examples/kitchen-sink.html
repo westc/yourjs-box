@@ -34,9 +34,9 @@
     </script>
     <nav>
       Build:
-      <a data-param="build" data-value="full">main.full.js</a>
-      <a data-param="build" data-value="main">main.js</a>
-      <a data-param="build" data-value="min">main.min.js</a>
+      <a data-param="build" data-value="full">yourjs-box.full.js</a>
+      <a data-param="build" data-value="standard">yourjs-box.js</a>
+      <a data-param="build" data-value="min">yourjs-box.min.js</a>
       &middot;
       Theme:
       <a data-param="theme" data-value="">system</a>
@@ -202,13 +202,13 @@
 
     <script>
       // Turns each text/x-console template into a real script using the build
-      // chosen via ?build=full|main|min (defaults to full) and the theme chosen
+      // chosen via ?build=full|standard|min (defaults to full) and the theme chosen
       // via ?theme=light|dark (defaults to the system's color scheme).
       (() => {
         const params = new URLSearchParams(location.search);
         const build = params.get('build') || 'full';
         const theme = params.get('theme') || '';
-        const src = {full: 'main.full.js', main: 'main.js', min: 'main.min.js'}[build] || 'main.full.js';
+        const src = {full: 'yourjs-box.full.js', standard: 'yourjs-box.js', min: 'yourjs-box.min.js'}[build] || 'yourjs-box.full.js';
 
         for (const link of document.querySelectorAll('nav a[data-param]')) {
           const {param, value} = link.dataset;

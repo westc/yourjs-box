@@ -1,9 +1,9 @@
 {
-  "name": "yourjs-console",
+  "name": "yourjs-box",
   "version": "1.0.0",
   "description": "A simple way to embed a JavaScript console on your website.",
-  "unpkg": "dist/main.min.js",
-  "jsdelivr": "dist/main.min.js",
+  "unpkg": "dist/yourjs-box.min.js",
+  "jsdelivr": "dist/yourjs-box.min.js",
   "files": [
     "dist"
   ],
@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/westc/yourjs-console.git"
+    "url": "git+https://github.com/westc/yourjs-box.git"
   },
   "keywords": [
     "JS Console",
@@ -24,9 +24,9 @@
   "author": "Christopher West",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/westc/yourjs-console/issues"
+    "url": "https://github.com/westc/yourjs-box/issues"
   },
-  "homepage": "https://westc.github.io/yourjs-console/",
+  "homepage": "https://westc.github.io/yourjs-box/",
   "devDependencies": {
     "@babel/core": "^7.23.6",
     "@babel/preset-env": "^7.23.6",

@@ -20,7 +20,7 @@
    * so that this script's own messages don't show up in those consoles.  These
    * are shared by every copy of this script that is loaded in the page.
    */
-  const ORIGINAL_CONSOLE = window[Symbol.for('yourjs-console.originalConsole')] ??= {...console};
+  const ORIGINAL_CONSOLE = window[Symbol.for('yourjs-box.originalConsole')] ??= {...console};
 
   /**
    * The only functions that may be relayed to the viewer and to the runner.

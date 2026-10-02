@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>yourjs-box &ndash; Embed a JavaScript console on any page</title>
+    <meta name="description" content="Embed an interactive JavaScript console on any web page with one script tag. Step-by-step code blocks, DevTools-style output, and code that runs in a Web Worker or the page itself." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="yourjs-box" />
+    <meta property="og:description" content="Embed an interactive JavaScript console on any web page with one script tag." />
+    <meta property="og:url" content="https://westc.github.io/yourjs-box/" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23f7df1e'/%3E%3Ctext x='29' y='28' font-family='Arial,sans-serif' font-weight='800' font-size='15' text-anchor='end' fill='%231a1a1a'%3EJS%3C/text%3E%3C/svg%3E" />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #fff;
+        --bg-alt: #f6f7f9;
+        --text: #1f2328;
+        --muted: #59636e;
+        --border: #d8dee4;
+        --accent: #1a73e8;
+        --accent-hover: #1765cc;
+        --accent-text: #fff;
+        --code-bg: #f3f4f6;
+        --card-bg: #fff;
+        --shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          color-scheme: dark;
+          --bg: #17181a;
+          --bg-alt: #1e1f22;
+          --text: #e6e6e6;
+          --muted: #a0a6ad;
+          --border: #34373c;
+          --accent: #8ab4f8;
+          --accent-hover: #aecbfa;
+          --accent-text: #202124;
+          --code-bg: #24262a;
+          --card-bg: #202124;
+          --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.3);
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background-color: var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.55;
+        margin: 0;
+      }
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      code,
+      pre {
+        font-family: ui-monospace, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+      }
+      :not(pre) > code {
+        background-color: var(--code-bg);
+        border-radius: 4px;
+        font-size: 0.9em;
+        padding: 0.1em 0.35em;
+        white-space: nowrap;
+      }
+      .container {
+        margin: 0 auto;
+        max-width: 1120px;
+        padding: 0 24px;
+      }
+
+      /* Header */
+      header {
+        backdrop-filter: blur(8px);
+        background-color: color-mix(in srgb, var(--bg) 85%, transparent);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      header .container {
+        align-items: center;
+        display: flex;
+        gap: 24px;
+        height: 56px;
+      }
+      header nav {
+        display: flex;
+        gap: 20px;
+        margin-left: auto;
+      }
+      header nav a {
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 500;
+      }
+      header nav a:hover {
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      /* Logo (matches the logo in the console) */
+      .logo {
+        align-items: center;
+        color: var(--text);
+        display: inline-flex;
+        font-weight: 700;
+        gap: 7px;
+        letter-spacing: -0.01em;
+        line-height: 1;
+      }
+      .logo:hover {
+        text-decoration: none;
+      }
+      .logo-mark {
+        align-items: flex-end;
+        background-color: #f7df1e;
+        border-radius: 5px;
+        color: #1a1a1a;
+        display: inline-flex;
+        font-size: 12px;
+        font-weight: 800;
+        height: 26px;
+        justify-content: flex-end;
+        letter-spacing: -0.02em;
+        padding: 0 3px 3px 0;
+        width: 26px;
+      }
+      .logo-text {
+        font-size: 19px;
+      }
+
+      /* Hero */
+      .hero {
+        padding-bottom: 40px;
+        padding-top: 72px;
+        text-align: center;
+      }
+      .hero h1 {
+        font-size: clamp(32px, 5vw, 52px);
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        margin: 0 auto 18px;
+        max-width: 780px;
+      }
+      .hero h1 .highlight {
+        background: linear-gradient(transparent 62%, rgb(247 223 30 / 0.55) 62%);
+      }
+      @media (prefers-color-scheme: dark) {
+        .hero h1 .highlight {
+          background: linear-gradient(transparent 70%, rgb(247 223 30 / 0.35) 70%);
+        }
+      }
+      .hero p.lead {
+        color: var(--muted);
+        font-size: clamp(16px, 2vw, 19px);
+        margin: 0 auto 32px;
+        max-width: 640px;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+        margin-bottom: 32px;
+      }
+      .button {
+        align-items: center;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        display: inline-flex;
+        font-size: 15px;
+        font-weight: 600;
+        gap: 8px;
+        height: 42px;
+        padding: 0 18px;
+      }
+      .button:hover {
+        background-color: var(--bg-alt);
+        text-decoration: none;
+      }
+      .button.primary {
+        background-color: var(--accent);
+        border-color: var(--accent);
+        color: var(--accent-text);
+      }
+      .button.primary:hover {
+        background-color: var(--accent-hover);
+      }
+
+      /* Install snippet */
+      .snippet {
+        align-items: center;
+        background-color: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        display: flex;
+        gap: 12px;
+        margin: 0 auto;
+        max-width: 760px;
+        padding: 10px 10px 10px 16px;
+        text-align: left;
+      }
+      .snippet code {
+        flex-grow: 1;
+        font-size: 13.5px;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+      .copy-button {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text);
+        cursor: pointer;
+        flex-shrink: 0;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        height: 32px;
+        padding: 0 12px;
+      }
+      .copy-button:hover {
+        background-color: var(--bg-alt);
+      }
+
+      /* Sections */
+      section {
+        padding: 56px 0;
+      }
+      section#demo {
+        padding-top: 8px;
+      }
+      section.alt {
+        background-color: var(--bg-alt);
+        border-bottom: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+      }
+      h2 {
+        font-size: clamp(24px, 3.2vw, 32px);
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+        margin: 0 0 10px;
+      }
+      .section-lead {
+        color: var(--muted);
+        font-size: 17px;
+        margin: 0 0 28px;
+        max-width: 720px;
+      }
+
+      /* Demo consoles */
+      .console-frame {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        height: 540px;
+        overflow: hidden;
+      }
+      .demo-hint {
+        color: var(--muted);
+        font-size: 14px;
+        margin: 12px 0 0;
+        text-align: center;
+      }
+      kbd {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
+        border-bottom-width: 2px;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 0.85em;
+        padding: 0 5px;
+      }
+
+      /* Window mode demo */
+      .window-demo {
+        align-items: stretch;
+        display: grid;
+        gap: 24px;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+      }
+      .window-demo .console-frame {
+        height: 420px;
+      }
+      #demo-card {
+        align-items: center;
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 32px;
+        text-align: center;
+        transition: background 0.4s ease, color 0.4s ease, transform 0.4s ease;
+      }
+      #demo-card h3 {
+        font-size: 22px;
+        margin: 0 0 8px;
+      }
+      #demo-card p {
+        color: inherit;
+        margin: 0;
+        opacity: 0.75;
+      }
+      #demo-card.celebrating {
+        animation: celebrate 0.6s ease;
+      }
+      @keyframes celebrate {
+        30% {
+          transform: scale(1.06) rotate(-2deg);
+        }
+        60% {
+          transform: scale(0.98) rotate(1deg);
+        }
+      }
+
+      /* Features */
+      .features {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      }
+      .feature {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+      }
+      .feature .icon {
+        align-items: center;
+        background-color: color-mix(in srgb, var(--accent) 14%, transparent);
+        border-radius: 8px;
+        color: var(--accent);
+        display: inline-flex;
+        height: 36px;
+        justify-content: center;
+        margin-bottom: 12px;
+        width: 36px;
+      }
+      .feature h3 {
+        font-size: 16px;
+        margin: 0 0 6px;
+      }
+      .feature p {
+        color: var(--muted);
+        font-size: 14.5px;
+        margin: 0;
+      }
+
+      /* Usage */
+      pre.code-block {
+        background-color: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 13.5px;
+        line-height: 1.6;
+        margin: 0 0 28px;
+        overflow-x: auto;
+        padding: 18px 20px;
+      }
+      .code-block .c {
+        color: #6a737d;
+      }
+      .code-block .t {
+        color: #22863a;
+      }
+      .code-block .a {
+        color: #6f42c1;
+      }
+      .code-block .s {
+        color: #b3591f;
+      }
+      @media (prefers-color-scheme: dark) {
+        .code-block .c {
+          color: #8b949e;
+        }
+        .code-block .t {
+          color: #7ee787;
+        }
+        .code-block .a {
+          color: #d2a8ff;
+        }
+        .code-block .s {
+          color: #ffa657;
+        }
+      }
+      table.attributes {
+        border-collapse: collapse;
+        font-size: 15px;
+        width: 100%;
+      }
+      table.attributes th,
+      table.attributes td {
+        border-bottom: 1px solid var(--border);
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+      table.attributes th {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      table.attributes td:first-child {
+        white-space: nowrap;
+      }
+      .table-wrapper {
+        overflow-x: auto;
+      }
+
+      /* Footer */
+      footer {
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 14px;
+        padding: 28px 0;
+      }
+      footer .container {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 24px;
+        justify-content: space-between;
+      }
+      footer nav {
+        display: flex;
+        gap: 20px;
+      }
+
+      @media (max-width: 760px) {
+        header nav a.optional {
+          display: none;
+        }
+        .window-demo {
+          grid-template-columns: 1fr;
+        }
+        #demo-card {
+          min-height: 180px;
+        }
+        .console-frame {
+          height: 480px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <a class="logo" href="./"><span class="logo-mark">JS</span><span class="logo-text">Box</span></a>
+        <nav>
+          <a class="optional" href="#demo">Demo</a>
+          <a class="optional" href="#features">Features</a>
+          <a href="#usage">Usage</a>
+          <a href="examples/">Examples</a>
+          <a href="https://github.com/westc/yourjs-box">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="hero container">
+        <h1>A JavaScript console you can <span class="highlight">drop into any page</span></h1>
+        <p class="lead">
+          Add one script tag and your readers get an interactive console with
+          step-by-step code blocks and output that looks just like the
+          browser&rsquo;s dev tools.
+        </p>
+        <div class="actions">
+          <a class="button primary" href="#demo">Try it now</a>
+          <a class="button" href="#usage">Get started</a>
+          <a class="button" href="examples/">See examples</a>
+        </div>
+        <div class="snippet">
+          <code id="install-snippet">&lt;script src="https://cdn.jsdelivr.net/npm/yourjs-box@1/dist/yourjs-box.min.js"&gt;&lt;/script&gt;</code>
+          <button class="copy-button" type="button" data-copy-target="install-snippet">Copy</button>
+        </div>
+      </div>
+
+      <section id="demo">
+        <div class="container">
+          <div class="console-frame">
+            <script src="dist/yourjs-box.min.js" data-hide-prefix="SETUP">
+              // SETUP: Helpers used by this demo \\
+              const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+              console.info('Press Run (or Ctrl/\u2318+Enter) to step through the tour.');
+
+              // Welcome!  Press Run to run each block of code one at a time. \\
+              console.log('Hello from yourjs-box!');
+              console.info('Each block runs on its own so you can step through a lesson.');
+
+              // Objects can be expanded just like in the browser's dev tools \\
+              const team = [
+                {name: 'Ada', role: 'Engineer', languages: ['JavaScript', 'Python']},
+                {name: 'Grace', role: 'Admiral', languages: ['COBOL']},
+              ];
+              console.log(team);
+              console.log(new Map([['ada', team[0]]]), new Set(['JavaScript', 'COBOL']));
+
+              // console.table() works too \\
+              console.table(team, ['name', 'role']);
+
+              // Variables carry over from one block to the next \\
+              const languageCount = new Set(team.flatMap(person => person.languages)).size;
+              console.log(`${team.length} people know ${languageCount} languages`);
+
+              // Warnings and errors look familiar \\
+              console.warn('This next line is going to fail...');
+              team[0].greet();
+
+              // So does async code \\
+              (async () => {
+                for (let i = 3; i > 0; i--) {
+                  console.log(i);
+                  await sleep(600);
+                }
+                console.log('Liftoff!');
+              })();
+
+              // Your turn!  Write some code here and press Run. \\
+              console.log('Thanks for trying yourjs-box!');
+            </script>
+          </div>
+          <p class="demo-hint">
+            Press <strong>Run</strong> (or <kbd>Ctrl</kbd>/<kbd>&#8984;</kbd>+<kbd>Enter</kbd>) to step through the code.
+            Hover over code that already ran to copy it back into the editor.
+          </p>
+        </div>
+      </section>
+
+      <section class="alt" id="window-mode">
+        <div class="container">
+          <h2>Or let the code control your page</h2>
+          <p class="section-lead">
+            By default code runs in a Web Worker, safely away from your page.
+            Add <code>data-runner="window"</code> and it runs in the page
+            itself, so it can use your page&rsquo;s DOM and functions.
+          </p>
+          <div class="window-demo">
+            <div id="demo-card">
+              <h3>I&rsquo;m part of this page</h3>
+              <p>Run the code to change me.</p>
+            </div>
+            <div class="console-frame">
+              <script src="dist/yourjs-box.min.js" data-runner="window">
+                // Find an element on this page \\
+                const card = document.querySelector('#demo-card');
+                console.log(card);
+
+                // Change it \\
+                card.style.background = 'linear-gradient(135deg, #f7df1e, #ffb300)';
+                card.style.color = '#1a1a1a';
+                card.querySelector('h3').textContent = 'Changed by the console!';
+
+                // Call a function that this page defined \\
+                console.log(celebrate());
+              </script>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="features">
+        <div class="container">
+          <h2>Everything you need to teach or demo JavaScript</h2>
+          <p class="section-lead">No build step, no framework and nothing to configure.</p>
+          <div class="features">
+            <div class="feature">
+              <span class="icon"><svg width="18" height="18" viewBox="0 0 16 16"><path d="M5.5 4L1.75 8l3.75 4M10.5 4l3.75 4-3.75 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <h3>One script tag</h3>
+              <p>Put your code inside the script tag and the console appears right where the tag is.</p>
+            </div>
+            <div class="feature">
+              <span class="icon"><svg width="18" height="18" viewBox="0 0 16 16"><path d="M3 3.5h10M3 8h10M3 12.5h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+              <h3>Step-by-step blocks</h3>
+              <p>Comments ending in <code>\\</code> split your code into blocks that run one at a time.</p>
+            </div>
+            <div class="feature">
+              <span class="icon"><svg width="18" height="18" viewBox="0 0 16 16"><path d="M4 5l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 11h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+              <h3>Dev tools-style output</h3>
+              <p>Expandable objects, Maps, Sets, classes, <code>console.table()</code> and familiar errors.</p>
+            </div>
+            <div class="feature">
+              <span class="icon"><svg width="18" height="18" viewBox="0 0 16 16"><path d="M8 1.5l5.5 2v4c0 3.5-2.5 6-5.5 7-3-1-5.5-3.5-5.5-7v-4z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+              <h3>Sandboxed by default</h3>
+              <p>Code runs in a Web Worker away from your page. Reset even stops infinite loops.</p>
+            </div>
+            <div class="feature">
+              <span class="icon"><svg width="18" height="18" viewBox="0 0 16 16"><rect x="1.75" y="2.75" width="12.5" height="10.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M1.75 5.75h12.5" stroke="currentColor" stroke-width="1.5"/></svg></span>
+              <h3>Or run in your page</h3>
+              <p>Use <code>data-runner="window"</code> to give code access to your page&rsquo;s globals and DOM.</p>
+            </div>
+            <div class="feature">
+              <span class="icon"><svg width="18" height="18" viewBox="0 0 16 16"><path d="M1.5 8s2.5-4.5 6.5-4.5S14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg></span>
+              <h3>Hidden setup code</h3>
+              <p>Hide helper code that still runs, with a click to reveal it for the curious.</p>
+            </div>
+            <div class="feature">
+              <span class="icon"><svg width="18" height="18" viewBox="0 0 16 16"><path d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+              <h3>Light &amp; dark themes</h3>
+              <p>Follows the visitor&rsquo;s system theme, or pick one with <code>data-theme</code>.</p>
+            </div>
+            <div class="feature">
+              <span class="icon"><svg width="18" height="18" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="5" y="5" width="6" height="6" rx="1" fill="currentColor"/></svg></span>
+              <h3>Style-proof</h3>
+              <p>The console lives in an iframe so your CSS and its CSS never collide.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="alt" id="usage">
+        <div class="container">
+          <h2>Get started</h2>
+          <p class="section-lead">
+            Add the script wherever you want the console to appear.  The console
+            fills its container, so give the container a height.
+          </p>
+<pre class="code-block"><code><span class="t">&lt;div</span> <span class="a">style</span>=<span class="s">"height: 400px"</span><span class="t">&gt;</span>
+  <span class="t">&lt;script</span> <span class="a">src</span>=<span class="s">"https://cdn.jsdelivr.net/npm/yourjs-box@1/dist/yourjs-box.min.js"</span><span class="t">&gt;</span>
+    <span class="c">// Say hello \\</span>
+    console.log('Hello world!');
+
+    <span class="c">// Show a table \\</span>
+    console.table([{name: 'Ada', born: 1815}, {name: 'Grace', born: 1906}]);
+  <span class="t">&lt;/script&gt;</span>
+<span class="t">&lt;/div&gt;</span></code></pre>
+          <div class="table-wrapper">
+            <table class="attributes">
+              <thead>
+                <tr><th>Attribute</th><th>Description</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>data-runner</code></td>
+                  <td><code>"worker"</code> (default) runs code in a Web Worker.  <code>"window"</code> runs it in the page.</td>
+                </tr>
+                <tr>
+                  <td><code>data-divider-orient</code></td>
+                  <td><code>"horizontal"</code> (default) puts the editor below the output.  <code>"vertical"</code> puts it beside it.</td>
+                </tr>
+                <tr>
+                  <td><code>data-hide-prefix</code></td>
+                  <td>Blocks whose header starts with this prefix are hidden but still run (eg. <code>// SETUP: Helpers \\</code>).</td>
+                </tr>
+                <tr>
+                  <td><code>data-theme</code></td>
+                  <td><code>"light"</code> or <code>"dark"</code>.  Follows the system&rsquo;s theme by default.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="demo-hint">
+            See the <a href="https://github.com/westc/yourjs-box#readme">README</a> for all of the details
+            or the <a href="examples/kitchen-sink.html">kitchen sink</a> for every feature in action.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container">
+        <span>&copy; 2023-present Christopher West &middot; Released under the <a href="https://github.com/westc/yourjs-box/blob/main/LICENSE">MIT License</a></span>
+        <nav>
+          <a href="examples/">Examples</a>
+          <a href="https://github.com/westc/yourjs-box">GitHub</a>
+          <a href="https://www.npmjs.com/package/yourjs-box">npm</a>
+        </nav>
+      </div>
+    </footer>
+
+    <script>
+      // Used by the window mode demo.
+      function celebrate() {
+        const card = document.querySelector('#demo-card');
+        card.classList.remove('celebrating');
+        void card.offsetWidth;
+        card.classList.add('celebrating');
+        return 'Woohoo!';
+      }
+
+      // Copy buttons
+      for (const button of document.querySelectorAll('[data-copy-target]')) {
+        button.addEventListener('click', async () => {
+          const text = document.getElementById(button.dataset.copyTarget).textContent;
+          try {
+            await navigator.clipboard.writeText(text);
+            button.textContent = 'Copied!';
+          }
+          catch (e) {
+            button.textContent = 'Press Ctrl+C';
+            getSelection().selectAllChildren(document.getElementById(button.dataset.copyTarget));
+          }
+          setTimeout(() => button.textContent = 'Copy', 1600);
+        });
+      }
+    </script>
+  </body>
+</html>

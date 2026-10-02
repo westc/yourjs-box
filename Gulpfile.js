@@ -23,7 +23,15 @@ const jsViewerIframeSrc = 'src/viewer-iframe.js';
 const jsRunnerSrc = 'src/runner.js';
 const jsSrc = 'src/main.js';
 const dirDest = 'dist';
-const jsDest = `${dirDest}/main.js`;
+const outName = 'yourjs-box';
+const jsDest = `${dirDest}/${outName}.js`;
+
+const pkg = require('./package.json');
+
+// A license banner at the top of each dist file.  Minifiers keep comments that
+// start with "/*!" so it also stays in the minified file.
+const REPO_URL = pkg.repository.url.replace(/^git\+|\.git$/g, '');
+const BANNER = `/*! ${pkg.name} v${pkg.version} | (c) 2023-present ${pkg.author} | ${pkg.license} License | ${REPO_URL} */\n`;
 
 const babelOptions = {
   // presets: ['@babel/preset-env']
@@ -71,28 +79,33 @@ async function definePlaceholderValues() {
   });
 }
 
-// Builds main.js with the minified IFRAME code.
+// Builds yourjs-box.js with the minified IFRAME code.
 function buildMiniJS() {
   return gulp.src(jsSrc)
     .pipe(getReplacer(true))
+    .pipe(replace(/^/, () => BANNER))
+    .pipe(rename({ basename: outName }))
     .pipe(gulp.dest(dirDest));
 }
 
-// Builds main.full.js with the unminified IFRAME code.
+// Builds yourjs-box.full.js with the unminified IFRAME code.
 function buildJS() {
   return gulp.src(jsSrc)
     .pipe(getReplacer())
-    .pipe(rename({ suffix: '.full' }))
+    .pipe(replace(/^/, () => BANNER))
+    .pipe(rename({ basename: outName, suffix: '.full' }))
     .pipe(gulp.dest(dirDest));
 }
 
-// Builds main.min.js from main.js.
+// Builds yourjs-box.min.js from yourjs-box.js.
 function minifyJS() {
   return gulp.src(jsDest)
     .pipe(babel(babelOptions))
     .pipe(uglify({
       compress: { unused: false },
-      mangle: false
+      mangle: false,
+      // Keeps the license banner.
+      output: { comments: /^!/ }
     }))
     .pipe(rename({ suffix: '.min' }))
     .pipe(gulp.dest(dirDest));
