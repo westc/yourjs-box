@@ -1,4 +1,4 @@
-/*! yourjs-box v1.3.1 | (c) 2023-present Christopher West | MIT License | https://github.com/westc/yourjs-box */
+/*! yourjs-box v1.4.0 | (c) 2023-present Christopher West | MIT License | https://github.com/westc/yourjs-box */
 (() => {
   /**
    * Viewer IFRAME's CSS code
@@ -9,7 +9,7 @@
    * Information about this package (eg. its version).
    * @type {{name: string, version: string, homepage: string, repoUrl: string, bugsUrl: string}}
    */
-  const PACKAGE_INFO = {"name":"yourjs-box","version":"1.3.1","homepage":"https://westc.github.io/yourjs-box/","repoUrl":"https://github.com/westc/yourjs-box","bugsUrl":"https://github.com/westc/yourjs-box/issues"};
+  const PACKAGE_INFO = {"name":"yourjs-box","version":"1.4.0","homepage":"https://westc.github.io/yourjs-box/","repoUrl":"https://github.com/westc/yourjs-box","bugsUrl":"https://github.com/westc/yourjs-box/issues"};
   /**
    * Viewer IFRAME's HTML code
    * @type {string}
