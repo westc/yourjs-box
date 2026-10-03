@@ -60,11 +60,13 @@
     <div class="divider" ref="mainDivider"></div>
     <div id="editor">
       <ace-editor
+        ref="editor"
         v-model="jsCode"
         language="javascript"
         :theme="theme"
         :font-size="Math.round(12 * textScale)"
         @key-combo="onEditorKeyCombo"
+        @history-key="onEditorHistoryKey"
         height="100%">
       </ace-editor>
     </div>
@@ -115,6 +117,15 @@
     <button class="menu-item" role="menuitem" @click="closeMenu(); openAbout('about')">
       <span class="menu-icon"><icon name="info"></icon></span>About JS Box
     </button>
+  </div>
+  <div v-if="isHistoryOpen" class="more-menu history-panel" role="menu" aria-label="History" ref="historyPanel" @keydown="onMenuKeyDown">
+    <div class="history-title">History</div>
+    <div v-if="!historyEntries.length" class="history-empty">Code that you run will show up here.</div>
+    <button v-for="entry in historyEntries" class="menu-item history-item" role="menuitem" :title="commandHistory[entry.index]" @click="recallHistory(entry.index)">
+      <span class="history-label">{{ entry.label }}</span>
+      <span class="history-detail">{{ entry.detail }}</span>
+    </button>
+    <div class="history-hint">Tip:  press &uarr; at the start of the editor (or &darr; at the end) to go through the history.</div>
   </div>
   <div v-if="valueMenu" class="more-menu value-menu" role="menu" aria-label="Value" ref="valueMenu" :style="{left: valueMenu.x + 'px', top: valueMenu.y + 'px'}" @keydown="onMenuKeyDown">
     <button class="menu-item" role="menuitem" @click="copyValueAsJson()">
@@ -184,6 +195,8 @@
         <h3>Keyboard shortcuts</h3>
         <dl class="about-details">
           <dt><kbd>{{ modKey }}</kbd> + <kbd>Enter</kbd></dt><dd>Run the next block of code</dd>
+          <dt><kbd>&uarr;</kbd> / <kbd>&darr;</kbd></dt><dd>Go through the code that was run (at the very start or end of the editor)</dd>
+          <dt><kbd>{{ modKey === 'Ctrl' ? 'Alt' : '&#8997;' }}</kbd> + <kbd>H</kbd></dt><dd>Show the history</dd>
           <dt><kbd>Esc</kbd></dt><dd>Close this window, the menu or full screen</dd>
         </dl>
         <div class="about-footer">

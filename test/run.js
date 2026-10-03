@@ -933,6 +933,85 @@ test('Refresh shows the value as it is now', async t => {
   await t.viewer.waitForFunction(() => [...document.querySelectorAll('.expansion .js-value-header')].some(h => h.textContent.trim() === 'b: 2'));
 });
 
+const THREE_BLOCKS = String.raw`
+  // One \\
+  console.log(1);
+  // Two \\
+  console.log(2);
+  // Three \\
+  console.log(3);
+`;
+const block = (header, code) => String.raw`// ${header} \\` + '\n' + code;
+
+test('the up and down arrows go through the history', async t => {
+  await t.open(THREE_BLOCKS);
+  await t.run(2);
+  await t.inViewer(() => ace.edit(document.querySelector('#editor .ace_editor')).focus());
+  const press = async key => {
+    await t.page.keyboard.press(key);
+    return t.editorCode();
+  };
+  // The cursor is at the start after running so up goes back.
+  assert.equal(await press('ArrowUp'), block('Two', 'console.log(2);'));
+  assert.equal(await press('ArrowUp'), block('One', 'console.log(1);'));
+  assert.equal(await press('ArrowUp'), block('One', 'console.log(1);'));
+  // Down only goes forward when the cursor is at the very end.
+  assert.equal(await press('ArrowDown'), block('One', 'console.log(1);'));
+  await t.inViewer(() => ace.edit(document.querySelector('#editor .ace_editor')).navigateFileEnd());
+  assert.equal(await press('ArrowDown'), block('Two', 'console.log(2);'));
+  // Past the newest, the unrun code comes back.
+  assert.equal(await press('ArrowDown'), block('Three', 'console.log(3);'));
+  // Up in the middle of the code just moves the cursor.
+  await t.inViewer(() => ace.edit(document.querySelector('#editor .ace_editor')).moveCursorTo(1, 3));
+  assert.equal(await press('ArrowUp'), block('Three', 'console.log(3);'));
+});
+
+test('running code from the history brings back the unrun code', async t => {
+  await t.open(String.raw`
+    // One \\
+    console.log(1);
+    // Two \\
+    console.log(2);
+    // HIDE \\
+    console.log('hidden after two');
+    // Three \\
+    console.log(3);
+  `, { hidePrefix: 'HIDE' });
+  await t.run();
+  const unrunCode = await t.editorCode();
+  await t.inViewer(() => ace.edit(document.querySelector('#editor .ace_editor')).focus());
+  await t.page.keyboard.press('ArrowUp');
+  await t.run();
+  assert.equal(await t.editorCode(), unrunCode);
+  // Running it again didn't count as running "Two" so the hidden block waits.
+  assert.deepEqual(await t.messages(), ['log: 1', 'log: 1']);
+  await t.run();
+  assert.deepEqual(await t.messages(), ['log: 1', 'log: 1', 'log: 2', 'log: hidden after two']);
+});
+
+test('the history list shows earlier code and Alt+H opens it', async t => {
+  await t.open(THREE_BLOCKS);
+  await t.run(2);
+  await t.inViewer(() => ace.edit(document.querySelector('#editor .ace_editor')).focus());
+  await t.page.keyboard.press('Alt+KeyH');
+  await t.viewer.waitForSelector('.history-panel');
+  assert.deepEqual(await t.inViewer(() => [...document.querySelectorAll('.history-label')].map(e => e.textContent)), ['Two', 'One']);
+  // The editor didn't get a character typed into it.
+  assert.equal(await t.editorCode(), block('Three', 'console.log(3);'));
+  await t.inViewer(() => [...document.querySelectorAll('.history-item')].find(item => item.textContent.includes('One')).click());
+  assert.ok(await t.inViewer(() => !document.querySelector('.history-panel')));
+  assert.equal(await t.editorCode(), block('One', 'console.log(1);'));
+  // The toolbar button opens it too.
+  await t.click('#bottomNav .history-button');
+  assert.ok(await t.inViewer(() => !!document.querySelector('.history-panel')));
+});
+
+test('the toolbar buttons are in order', async t => {
+  await t.open(`1`);
+  const titles = await t.inViewer(() => [...document.querySelectorAll('#bottomNav .buttons button')].map(b => b.title.replace(/ \(.*\)$/, '')));
+  assert.deepEqual(titles, ['More', 'Clear console', 'History', 'Show the editor below the console', 'Full screen', 'Run the next block of code']);
+});
+
 test('explains when the libraries fail to load', async t => {
   await t.open(`1`, {}, { routes: [['https://unpkg.com/**', route => route.abort()]] });
   assert.ok(await t.inViewer(() => document.querySelector('#splash').classList.contains('failed')));

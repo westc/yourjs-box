@@ -40,6 +40,7 @@ If the editor already has code in it you are asked before it is replaced.
 
 ### Toolbar
 
+- The **&#8943;** button opens a menu (see below).
 - **Clear** removes everything from the console.  Code can also call
   `console.clear()`.
 - The **layout** button switches between showing the editor beside or below
@@ -50,7 +51,15 @@ If the editor already has code in it you are asked before it is replaced.
 - **Run** runs the next block of code.
 - Clicking the **logo** opens the About window, which shows the version, this
   console's settings and keyboard shortcuts.
-- The **&#8943;** button opens a menu with:
+- **History** (or <kbd>Alt</kbd>/<kbd>&#8997;</kbd>+<kbd>H</kbd>) lists the code
+  that was run so it can be put back into the editor.  Like the browser's
+  console, pressing <kbd>&uarr;</kbd> when the cursor is at the very start of
+  the editor (with nothing selected) shows the previous code that was run and
+  <kbd>&darr;</kbd> at the very end goes forward again and eventually back to
+  the code that hasn't been run yet.  After running code from the history, the
+  code that hasn't been run yet comes back.  Hidden blocks aren't in the
+  history.
+- The **&#8943;** menu has:
   - **Text size**, which is remembered for every console on the same site.
   - **Open**, which loads a JavaScript file as the code that the console starts
     with (its hidden blocks are hidden and Reset goes back to it).

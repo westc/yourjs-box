@@ -129,6 +129,14 @@ function init(jsCode, dataset, meta) {
           dividerSize: '8px',
           tempDividerPct: null,
           isMenuOpen: false,
+          isHistoryOpen: false,
+          // The code that was run (newest last) which can be brought back into
+          // the editor like the browser's console (eg. with the up arrow).
+          commandHistory: [],
+          // While going through the history:  the index of the code shown and
+          // the unrun code that was in the editor (shown again at the end).
+          historyIndex: null,
+          historyDraft: null,
           /** @type {{x: number, y: number, path: any[], propertyPath: string?, isPrimitive: boolean}?} */
           valueMenu: null,
           /** @type {{message: string}?} */
@@ -256,9 +264,21 @@ function init(jsCode, dataset, meta) {
           const isFullscreen = this.isFullscreen || this.isMaximized;
           return [
             {
+              iconName: 'more',
+              title: 'More',
+              className: 'more-button',
+              callback() { this.toggleMenu(); },
+            },
+            {
               iconName: 'clear',
               title: 'Clear console',
               callback() { this.clearConsole(); },
+            },
+            {
+              iconName: 'history',
+              title: `History (${isMac ? '\u2325' : 'Alt+'}H)`,
+              className: 'history-button',
+              callback() { this.toggleHistory(); },
             },
             {
               iconName: 'horizontalView',
@@ -278,12 +298,6 @@ function init(jsCode, dataset, meta) {
               callback() { this.toggleFullscreen(); },
             },
             {
-              iconName: 'more',
-              title: 'More',
-              className: 'more-button',
-              callback() { this.toggleMenu(); },
-            },
-            {
               iconName: this.runningCount ? 'spinner' : 'play',
               label: 'Run',
               className: 'primary',
@@ -292,6 +306,20 @@ function init(jsCode, dataset, meta) {
               disableIf() { return !this.canRunCode; }
             },
           ].filter(btn => !btn.showIf || btn.showIf.call(this));
+        },
+        /**
+         * The history's entries (newest first) for the history list.
+         */
+        historyEntries() {
+          return this.commandHistory.map((code, index) => {
+            const [group] = parseJSCodeGroups(code);
+            const lines = (group?.lines ?? code).split('\n').filter(line => line.trim());
+            return {
+              index,
+              label: group?.headerLines || lines[0] || '',
+              detail: `${lines.length} line${lines.length === 1 ? '' : 's'}`,
+            };
+          }).reverse();
         },
         canShrinkText() {
           return this.textScale > TEXT_SCALES[0];
@@ -333,9 +361,110 @@ function init(jsCode, dataset, meta) {
           this.runGroup(jsCodeGroup0);
 
           // Remove the code that was run from the editor.
-          this.jsCode = otherJsCodeGroups.map(g => g.allLines).join('\n');
+          const remainingCode = otherJsCodeGroups.map(g => g.allLines).join('\n');
 
-          this.runCount++;
+          if (this.historyIndex !== null) {
+            // Code from the history was run so the unrun code comes back.  It
+            // doesn't count as moving through the code so hidden blocks still
+            // run in their places.
+            this.jsCode = [remainingCode, this.historyDraft].filter(code => code.trim()).join('\n');
+            this.historyIndex = this.historyDraft = null;
+          }
+          else {
+            this.jsCode = remainingCode;
+            this.runCount++;
+          }
+        },
+        /**
+         * Shows older (-1) or newer (1) code from the history in the editor.
+         * Going newer than the newest shows the unrun code again.
+         * @param {-1|1} direction
+         * @returns {boolean}
+         *   `true` if the history was used (so the key shouldn't do anything
+         *   else).
+         */
+        navigateHistory(direction) {
+          const history = this.commandHistory;
+          if (direction < 0) {
+            if (!history.length) return false;
+            if (this.historyIndex === null) {
+              this.historyDraft = this.jsCode;
+              this.historyIndex = history.length;
+            }
+            if (this.historyIndex > 0) this.showHistoryCode(this.historyIndex - 1, 'start');
+            return true;
+          }
+          if (this.historyIndex === null) return false;
+          if (this.historyIndex < history.length - 1) {
+            this.showHistoryCode(this.historyIndex + 1, 'end');
+          }
+          else {
+            const draft = this.historyDraft;
+            this.historyIndex = this.historyDraft = null;
+            this.setEditorCode(draft, 'end');
+          }
+          return true;
+        },
+        /**
+         * Shows code from the history in the editor (saving the unrun code if
+         * this is the first time).
+         * @param {number} index
+         * @param {"start"|"end"} cursorAt
+         */
+        showHistoryCode(index, cursorAt) {
+          if (this.historyIndex === null) this.historyDraft = this.jsCode;
+          this.historyIndex = index;
+          this.setEditorCode(this.commandHistory[index], cursorAt);
+        },
+        /**
+         * @param {string} code
+         * @param {"start"|"end"} cursorAt
+         *   Where the cursor goes so that pressing the same arrow key again
+         *   keeps going through the history.
+         */
+        setEditorCode(code, cursorAt) {
+          this.jsCode = code;
+          this.$nextTick(() => {
+            const editor = this.$refs.editor?.editor;
+            if (!editor) return;
+            if (cursorAt === 'end') editor.navigateFileEnd();
+            else editor.navigateFileStart();
+          });
+        },
+        /**
+         * Called by the editor when the up or down arrow is pressed with the
+         * cursor at the very start or end (and nothing selected).
+         * @param {{direction: -1|1, handled: boolean}} event
+         */
+        onEditorHistoryKey(event) {
+          event.handled = this.navigateHistory(event.direction);
+        },
+        toggleHistory() {
+          if (this.isHistoryOpen) {
+            this.isHistoryOpen = false;
+          }
+          else {
+            this.closeMenu();
+            this.closeValueMenu();
+            this.isHistoryOpen = true;
+            this.$nextTick(() => this.$refs.historyPanel?.querySelector('.menu-item')?.focus());
+          }
+        },
+        /**
+         * Puts code from the history list into the editor.
+         * @param {number} index
+         */
+        recallHistory(index) {
+          this.isHistoryOpen = false;
+          this.showHistoryCode(index, 'start');
+          this.$nextTick(() => this.$refs.editor?.editor.focus());
+        },
+        /**
+         * Forgets that the history was being gone through (eg. when the code in
+         * the editor is replaced).
+         */
+        stopNavigatingHistory() {
+          this.historyIndex = this.historyDraft = null;
         },
         /**
          * Runs the next hidden group if all of the visible code that came
@@ -363,6 +492,12 @@ function init(jsCode, dataset, meta) {
           });
           this.runningCount++;
           this.runHistory.push(group.allLines);
+          // Hidden code wasn't typed or seen so it isn't in the history.
+          const historyCode = group.allLines.trim();
+          if (!isHidden && historyCode && this.commandHistory[this.commandHistory.length - 1] !== historyCode) {
+            this.commandHistory.push(historyCode);
+            if (this.commandHistory.length > 200) this.commandHistory.shift();
+          }
           const {code, resultRange} = prepareCode(group.lines, {
             blockType: this.blockType,
             importsUrl: this.importsUrl,
@@ -404,6 +539,7 @@ function init(jsCode, dataset, meta) {
           this.runCount = 0;
           this.runningCount = 0;
           this.runHistory = [];
+          this.stopNavigatingHistory();
           messageParent({target: 'runner', func: 'reset', args: []});
           this.runHiddenGroups();
         },
@@ -486,6 +622,7 @@ function init(jsCode, dataset, meta) {
             });
             if (!isConfirmed) return;
           }
+          this.stopNavigatingHistory();
           this.jsCode = code;
         },
         /**
@@ -571,6 +708,9 @@ function init(jsCode, dataset, meta) {
             jsCode: this.jsCode,
             originalCode: this.originalCode,
             fileName: this.fileName,
+            commandHistory: this.commandHistory,
+            historyIndex: this.historyIndex,
+            historyDraft: this.historyDraft,
             runHistory: this.runHistory,
             hiddenGroups: this.hiddenGroups,
             runCount: this.runCount,
@@ -592,6 +732,8 @@ function init(jsCode, dataset, meta) {
             this.closeMenu();
           }
           else {
+            this.isHistoryOpen = false;
+            this.closeValueMenu();
             this.isMenuOpen = true;
             this.$nextTick(() => this.$refs.moreMenu?.querySelector('.menu-item:not(:disabled)')?.focus());
           }
@@ -604,14 +746,21 @@ function init(jsCode, dataset, meta) {
          * Lets the arrow keys move between the menu's items.
          * @param {KeyboardEvent} evt
          */
+        /**
+         * Lets Escape close a menu (or the history list) and the arrow keys move
+         * between its items.
+         * @param {KeyboardEvent} evt
+         */
         onMenuKeyDown(evt) {
           if (evt.key === 'Escape') {
             evt.stopPropagation();
-            this.closeMenu(true);
+            this.closeMenu(this.isMenuOpen);
+            this.closeValueMenu();
+            this.isHistoryOpen = false;
           }
           else if (evt.key === 'ArrowDown' || evt.key === 'ArrowUp') {
             evt.preventDefault();
-            const items = [...this.$refs.moreMenu.querySelectorAll('.menu-item:not(:disabled)')];
+            const items = [...evt.currentTarget.querySelectorAll('.menu-item:not(:disabled)')];
             const index = items.indexOf(document.activeElement);
             const next = items[(index + (evt.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length];
             next?.focus();
@@ -694,11 +843,20 @@ function init(jsCode, dataset, meta) {
           if (this.valueMenu && !evt.target.closest('.value-menu')) {
             this.closeValueMenu();
           }
+          if (this.isHistoryOpen && !evt.target.closest('.history-panel, .history-button')) {
+            this.isHistoryOpen = false;
+          }
         },
         /**
          * @param {KeyboardEvent} evt
          */
         onWindowKeyDown(evt) {
+          if (evt.altKey && !evt.ctrlKey && !evt.metaKey && evt.code === 'KeyH') {
+            evt.preventDefault();
+            evt.stopPropagation();
+            this.toggleHistory();
+            return;
+          }
           if (evt.key === 'Escape' && this.valueMenu) {
             this.closeValueMenu();
             return;
@@ -959,7 +1117,8 @@ function init(jsCode, dataset, meta) {
       mounted() {
         addEventListener('mousemove', this.onWindowMouseMove);
         addEventListener('mousedown', this.onWindowMouseDown);
-        addEventListener('keydown', this.onWindowKeyDown);
+        // Capturing lets shortcuts (eg. Alt+H) work before the editor sees them.
+        addEventListener('keydown', this.onWindowKeyDown, true);
         addEventListener('resize', this.onWindowResize);
         addEventListener('mouseup', this.onWindowMouseUp);
         addEventListener('error', this.onWindowError);
@@ -1105,6 +1264,28 @@ function getAceComponentProps() {
       });
 
       // Attempt to capture key combos.
+      // Like the browser's console, the up arrow at the very start (or the
+      // down arrow at the very end) with nothing selected goes through the
+      // history.  This listens while capturing so it runs before Ace moves the
+      // cursor.
+      this.$refs.editor.addEventListener('keydown', evt => {
+        const isUp = evt.key === 'ArrowUp';
+        if (!isUp && evt.key !== 'ArrowDown') return;
+        if (evt.shiftKey || evt.altKey || evt.ctrlKey || evt.metaKey || !editor.selection.isEmpty()) return;
+        const {row, column} = editor.getCursorPosition();
+        const lastRow = editor.session.getLength() - 1;
+        const isAtEdge = isUp
+          ? row === 0 && column === 0
+          : row === lastRow && column === editor.session.getLine(lastRow).length;
+        if (!isAtEdge) return;
+        const event = {direction: isUp ? -1 : 1, handled: false};
+        this.$emit('historyKey', event);
+        if (event.handled) {
+          evt.preventDefault();
+          evt.stopPropagation();
+        }
+      }, true);
+
       editor.textInput.getElement().addEventListener('keydown', (evt) => {
         const isComboKeyCode = evt.keyCode === 16 // SHIFT
           || evt.keyCode === 17 // CTRL
@@ -1209,6 +1390,7 @@ function getIconComponentProps() {
           // https://icon-sets.iconify.design/mdi/error-outline/
           error: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm1-5C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18a8 8 0 0 1-8-8a8 8 0 0 1 8-8a8 8 0 0 1 8 8a8 8 0 0 1-8 8"/></svg>',
           // Icons similar to those in the browser's console.
+          history: '<svg viewBox="0 0 16 16"><path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2.25 2.5v2.75H5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 5v3.25l2.25 1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
           copy: '<svg viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8" rx="1.25" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 3.5v-.75A1.25 1.25 0 0 0 9.25 1.5h-5A1.25 1.25 0 0 0 3 2.75v5A1.25 1.25 0 0 0 4.25 9h.75" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
           variable: '<svg viewBox="0 0 16 16"><path d="M5 2.5c-1.5 1.5-2 3.5-2 5.5s.5 4 2 5.5M11 2.5c1.5 1.5 2 3.5 2 5.5s-.5 4-2 5.5M6.5 6l3 4M9.5 6l-3 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
           path: '<svg viewBox="0 0 16 16"><circle cx="3.5" cy="12.5" r="1.5" fill="currentColor"/><circle cx="12.5" cy="3.5" r="1.5" fill="currentColor"/><path d="M3.5 11V8a2 2 0 0 1 2-2h5a2 2 0 0 0 2-2" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',

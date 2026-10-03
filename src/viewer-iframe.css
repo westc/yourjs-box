@@ -662,6 +662,45 @@ body {
   margin: 4px 0;
 }
 
+/* The history list */
+.history-panel {
+  max-width: min(420px, calc(100% - 12px));
+  width: 360px;
+}
+.history-title {
+  color: var(--muted-text);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 4px 8px 6px;
+  text-transform: uppercase;
+}
+.history-item {
+  justify-content: space-between;
+}
+.history-label {
+  font-family: var(--console-font);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.history-detail {
+  color: var(--muted-text);
+  flex-shrink: 0;
+  font-size: 11px;
+}
+.history-empty,
+.history-hint {
+  color: var(--muted-text);
+  font-size: 12px;
+  padding: 6px 8px;
+}
+.history-hint {
+  border-top: 1px solid var(--toolbar-border);
+  margin-top: 4px;
+}
+
 /* The menu shown when a value is right-clicked */
 .value-menu {
   bottom: auto;
