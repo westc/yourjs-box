@@ -12,6 +12,8 @@
     "dev": "gulp dev",
     "start": "gulp",
     "test": "npm run build && node test/run.js",
+    "release": "node scripts/release.js",
+    "purge-cdn": "node scripts/purge-cdn.js",
     "version": "npm run build && git add dist",
     "prepublishOnly": "npm run build"
   },

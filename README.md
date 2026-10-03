@@ -242,6 +242,16 @@ Install the development dependencies by running `npm install`.
   based browser).  An internet connection is needed because the console loads
   its libraries from CDNs.  Pass part of a test's name to run only matching
   tests (eg. `node test/run.js module`).
+- `npm run release -- <patch|minor|major>` releases a new version:  it checks
+  that you're on an up to date, clean `main`, runs the tests, runs
+  `npm version`, pushes `main` and then the tag (separately, because GitHub
+  Pages doesn't always deploy when they are pushed together), publishes to npm
+  and, once npm lists the new version, purges jsDelivr's cache.  Add
+  `--dry-run` to see what it would do or `--skip-tests` to skip the tests.
+- `npm run purge-cdn` purges jsDelivr's cache so that URLs like
+  `yourjs-box@1` point to the latest version right away.
+- In VS Code, **Terminal &rarr; Run Task&hellip;** has tasks for all of these
+  (eg. Build, Dev server, Test, Release&hellip; and Redeploy GitHub Pages).
 - `npm start` builds and then rebuilds whenever one of the files in `src/`
   changes (without serving anything).
 

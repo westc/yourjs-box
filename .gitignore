@@ -13,7 +13,9 @@ logs/
 Thumbs.db
 
 # Editor-specific files
-.vscode/
+.vscode/*
+# The tasks (eg. Build, Test and Release) are shared.
+!.vscode/tasks.json
 .idea/
 
 # Environment variables
