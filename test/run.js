@@ -676,6 +676,112 @@ test('Copy as HTML includes the options given to YourJSBox.create()', async t =>
   assert.match(html, /<script src="[^"]+" data-hide-prefix="SETUP" data-show-results="false" data-theme="dark">/);
 });
 
+/**
+ * Answers requests for packages with small modules (so the tests don't
+ * depend on esm.sh) that export the specifier that was requested.
+ * @param {string} prefix
+ *   The part of the URL before the specifier.
+ */
+function fakePackages(prefix) {
+  return route => {
+    const specifier = decodeURIComponent(route.request().url().slice(prefix.length));
+    route.fulfill({
+      contentType: 'text/javascript',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: `export default ${JSON.stringify('loaded ' + specifier)}; export const name = ${JSON.stringify(specifier)};`,
+    });
+  };
+}
+
+test('packages can be imported by name in module blocks', async t => {
+  const prefix = 'https://packages.example.com/';
+  await t.open(String.raw`
+    // Static import \\
+    import pkg, {name} from 'some-pkg@1/sub';
+    pkg
+    // Dynamic import \\
+    (await import('@scope/other')).name
+    // Paths and URLs are left alone \\
+    import seven from 'data:text/javascript,export default 7';
+    seven
+  `, { blockType: 'module', importsUrl: prefix + '{specifier}' }, { routes: [[prefix + '**', fakePackages(prefix)]] });
+  await t.run(3);
+  assert.deepEqual(await t.messages(), ["result: 'loaded some-pkg@1/sub'", "result: '@scope/other'", 'result: 7']);
+});
+
+test('packages are loaded from esm.sh by default and can be imported in classic blocks', async t => {
+  const prefix = 'https://esm.sh/';
+  await t.open(String.raw`
+    // Dynamic import \\
+    import('lodash').then(m => console.log(m.default));
+    // Import statements need module blocks \\
+    import x from 'lodash';
+  `, {}, { routes: [[prefix + '**', fakePackages(prefix)]] });
+  await t.run(2);
+  await t.page.waitForTimeout(300);
+  const messages = await t.messages();
+  assert.ok(messages.includes('log: loaded lodash'), messages.join('\n'));
+  assert.ok(messages.some(m => /^error: Uncaught SyntaxError: .*To use import statements, add data-block-type="module"/.test(m)), messages.join('\n'));
+});
+
+test('an empty data-imports-url leaves imports alone', async t => {
+  await t.open(`import('some-pkg').catch(e => console.log(e.name))`, { importsUrl: '' });
+  await t.run();
+  await t.page.waitForTimeout(300);
+  assert.deepEqual(await t.messages(), ['result: Promise {…}', 'log: TypeError']);
+});
+
+test('Save saves the current code', async t => {
+  await t.open(String.raw`
+    // One \\
+    console.log(1);
+    // Two \\
+    console.log(2);
+  `);
+  await t.run();
+  // Pretends to be the browser's "Save as" dialog.
+  await t.inViewer(() => window.showSaveFilePicker = async options => {
+    window.saved = {suggestedName: options.suggestedName, text: ''};
+    return {name: 'lesson.js', createWritable: async () => ({write: async text => saved.text += text, close: async () => {}})};
+  });
+  await t.menu('Save');
+  await t.viewer.waitForFunction(() => window.saved?.text);
+  const saved = await t.inViewer(() => saved);
+  assert.equal(saved.suggestedName, 'js-box.js');
+  assert.equal(saved.text, String.raw`// One \\` + '\nconsole.log(1);\n\n' + String.raw`// Two \\` + '\nconsole.log(2);\n');
+
+  // Without the dialog the file is downloaded (named after the last save).
+  await t.inViewer(() => window.showSaveFilePicker = undefined);
+  const [download] = await Promise.all([t.page.waitForEvent('download'), t.menu('Save')]);
+  assert.equal(download.suggestedFilename(), 'lesson.js');
+  assert.equal(fs.readFileSync(await download.path(), 'utf8'), saved.text);
+});
+
+test('Open makes a file the code the console starts with', async t => {
+  await t.open(`console.log('page code')`, { hidePrefix: 'HIDE' });
+  await t.run();
+  await t.viewer.setInputFiles('input.file-input', {
+    name: 'lesson.js',
+    mimeType: 'text/javascript',
+    buffer: Buffer.from(String.raw`// HIDE: Setup \\` + '\nconsole.log("setup");\n' + String.raw`// Step 1 \\` + '\nconsole.log("step 1");\n'),
+  });
+  // There was output so it asks first.
+  await t.viewer.waitForSelector('.dialog');
+  assert.match(await t.inViewer(() => document.querySelector('.dialog-title').textContent), /Open lesson\.js\?/);
+  await t.click('.dialog-button.primary');
+  await t.viewer.waitForFunction(() => document.querySelectorAll('.console-row:not(.code-row)').length === 1);
+  assert.deepEqual(await t.messages(), ['log: setup']);
+  const opened = await t.editorCode();
+  assert.equal(opened, String.raw`// Step 1 \\` + '\nconsole.log("step 1");');
+  // Reset goes back to the opened file.
+  await t.run();
+  await t.menu('Reset');
+  await t.click('.dialog-button.primary');
+  await t.page.waitForTimeout(300);
+  assert.equal(await t.editorCode(), opened);
+  assert.deepEqual(await t.messages(), ['log: setup']);
+});
+
 test('explains when the libraries fail to load', async t => {
   await t.open(`1`, {}, { routes: [['https://unpkg.com/**', route => route.abort()]] });
   assert.ok(await t.inViewer(() => document.querySelector('#splash').classList.contains('failed')));

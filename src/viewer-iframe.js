@@ -74,8 +74,8 @@ function init(jsCode, dataset, meta) {
 
   const hidePrefix = dataset.hidePrefix ?? '';
   const darkSchemeQuery = matchMedia('(prefers-color-scheme: dark)');
-  const originalCode = unindentMin(jsCode);
-  const {visibleCode, hiddenGroups} = extractHiddenGroups(originalCode, hidePrefix);
+  const startingCode = unindentMin(jsCode);
+  const {visibleCode, hiddenGroups} = extractHiddenGroups(startingCode, hidePrefix);
   const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
   const copyHiddenGroups = () => hiddenGroups.map(group => ({...group}));
 
@@ -87,6 +87,12 @@ function init(jsCode, dataset, meta) {
           hidePrefix,
           hiddenGroups: copyHiddenGroups(),
           runnerMode: meta.runnerMode,
+          importsUrl: meta.importsUrl,
+          // The code the console starts with (and goes back to when reset)
+          // which changes when a file is opened.
+          originalCode: startingCode,
+          // The name of the file that was last opened or saved.
+          fileName: null,
           blockType: meta.blockType,
           showResults: meta.showResults,
           packageInfo: meta.packageInfo,
@@ -190,12 +196,23 @@ function init(jsCode, dataset, meta) {
         /**
          * The code that the copied console will start with.
          */
+        /**
+         * The original code split into the code for the editor and the
+         * hidden groups.
+         */
+        originalGroups() {
+          return extractHiddenGroups(this.originalCode, this.hidePrefix);
+        },
         exportJsCode() {
-          if (this.exportCode === 'original') return originalCode;
+          if (this.exportCode === 'original') return this.originalCode;
           if (this.exportCode === 'blank') return '';
-
-          // The groups that already ran, then the groups in the editor with
-          // any hidden groups that haven't run yet in their original places.
+          return this.currentCode;
+        },
+        /**
+         * The groups that already ran, then the groups in the editor with any
+         * hidden groups that haven't run yet in their original places.
+         */
+        currentCode() {
           const blocks = this.runHistory.slice();
           const pendingHiddenGroups = this.hiddenGroups.slice();
           let visibleCount = this.runCount;
@@ -342,17 +359,17 @@ function init(jsCode, dataset, meta) {
           });
           this.runningCount++;
           this.runHistory.push(group.allLines);
+          const {code, resultRange} = prepareCode(group.lines, {
+            blockType: this.blockType,
+            importsUrl: this.importsUrl,
+            // Like the browser's console, show the value of the last
+            // expression (except for hidden code).
+            findResult: this.showResults && !isHidden,
+          });
           messageParent({
             target: 'runner',
             func: 'runCode',
-            args: [group.lines, {
-              blockType: this.blockType,
-              // Like the browser's console, show the value of the last
-              // expression (except for hidden code).
-              resultRange: this.showResults && !isHidden
-                ? findLastExpression(group.lines, this.blockType)
-                : null,
-            }],
+            args: [code, {blockType: this.blockType, resultRange}],
           });
         },
         clearConsole() {
@@ -369,15 +386,86 @@ function init(jsCode, dataset, meta) {
             confirmText: 'Reset',
           });
           if (!isConfirmed) return;
-
+          this.restart();
+        },
+        /**
+         * Starts over with the original code (clearing the output and, in
+         * worker mode, starting a new worker).
+         */
+        restart() {
+          const {visibleCode, hiddenGroups} = this.originalGroups;
           this.displays = [];
           this.jsCode = visibleCode;
-          this.hiddenGroups = copyHiddenGroups();
+          this.hiddenGroups = hiddenGroups.map(group => ({...group}));
           this.runCount = 0;
           this.runningCount = 0;
           this.runHistory = [];
           messageParent({target: 'runner', func: 'reset', args: []});
           this.runHiddenGroups();
+        },
+        /**
+         * Shows the file picker for opening a JavaScript file.
+         */
+        openFile() {
+          this.closeMenu();
+          const {fileInput} = this.$refs;
+          fileInput.value = '';
+          fileInput.click();
+        },
+        /**
+         * Makes the chosen file's code the code that the console starts with.
+         * @param {Event} evt
+         */
+        async onFileChosen(evt) {
+          const file = evt.target.files?.[0];
+          if (!file) return;
+          const code = unindentMin(await file.text());
+          if (this.displays.length || this.jsCode.trim()) {
+            const isConfirmed = await this.confirm({
+              title: `Open ${file.name}?`,
+              message: 'The output will be cleared and the code in the editor will be replaced with the code in the file.'
+                + (this.runnerMode === 'window'
+                  ? '  Anything the code already defined on the page will stay defined.'
+                  : ''),
+              confirmText: 'Open',
+            });
+            if (!isConfirmed) return;
+          }
+          this.fileName = file.name;
+          this.originalCode = code;
+          this.restart();
+        },
+        /**
+         * Saves the current code (what already ran and what is in the editor)
+         * as a JavaScript file which can be opened later.
+         */
+        async saveFile() {
+          this.closeMenu();
+          const code = this.currentCode + '\n';
+          const suggestedName = this.fileName || 'js-box.js';
+
+          // Shows a "Save as" dialog where it is supported.
+          if ('function' === typeof window.showSaveFilePicker) {
+            try {
+              const handle = await showSaveFilePicker({
+                suggestedName,
+                types: [{description: 'JavaScript', accept: {'text/javascript': ['.js', '.mjs']}}],
+              });
+              const writable = await handle.createWritable();
+              await writable.write(code);
+              await writable.close();
+              this.fileName = handle.name;
+              return;
+            }
+            catch (e) {
+              // The user cancelled.  For other errors the file is downloaded.
+              if (e?.name === 'AbortError') return;
+            }
+          }
+
+          const url = URL.createObjectURL(new Blob([code], {type: 'text/javascript'}));
+          Object.assign(document.createElement('a'), {href: url, download: suggestedName}).click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
         },
         /**
          * Copies code that was already run into the editor so that it can be run
@@ -477,6 +565,8 @@ function init(jsCode, dataset, meta) {
           return JSON.parse(JSON.stringify({
             displays: this.displays,
             jsCode: this.jsCode,
+            originalCode: this.originalCode,
+            fileName: this.fileName,
             runHistory: this.runHistory,
             hiddenGroups: this.hiddenGroups,
             runCount: this.runCount,
@@ -949,6 +1039,8 @@ function getIconComponentProps() {
           // https://icon-sets.iconify.design/mdi/error-outline/
           error: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm1-5C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18a8 8 0 0 1-8-8a8 8 0 0 1 8-8a8 8 0 0 1 8 8a8 8 0 0 1-8 8"/></svg>',
           // Icons similar to those in the browser's console.
+          open: '<svg viewBox="0 0 16 16"><path d="M2 4.5a1 1 0 0 1 1-1h3.2l1.3 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+          save: '<svg viewBox="0 0 16 16"><path d="M8 2.5v7M5 7l3 3 3-3M3 11.5v1.5h10v-1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
           fullscreen: '<svg viewBox="0 0 16 16"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
           exitFullscreen: '<svg viewBox="0 0 16 16"><path d="M6 2.5V6H2.5M13.5 6H10V2.5M10 13.5V10h3.5M2.5 10H6v3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
           more: '<svg viewBox="0 0 16 16"><circle cx="3.5" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="12.5" cy="8" r="1.4" fill="currentColor"/></svg>',
@@ -1141,30 +1233,97 @@ function extractHiddenGroups(jsCode, hidePrefix) {
 }
 
 /**
- * Finds the last statement in the code if it is an expression so that its
- * value can be shown.
+ * Gets a block of code ready to run:  packages imported by name (eg.
+ * `import _ from 'lodash'` or `import('lodash')`) are loaded from importsUrl
+ * and the last statement is found if it is an expression so that its value
+ * can be shown.
  * @param {string} code
- * @param {"classic"|"module"} blockType
- * @returns {[number, number]|null}
- *   The start and end index of the expression or `null` if the last statement
- *   isn't an expression (or the code can't be parsed, in which case running
- *   it will show the syntax error).
+ * @param {Object} options
+ * @param {"classic"|"module"} options.blockType
+ * @param {string?} options.importsUrl
+ *   The URL template where `{specifier}` is replaced with what was imported
+ *   or an empty value to leave imports alone.
+ * @param {boolean} options.findResult
+ * @returns {{code: string, resultRange: [number, number]|null}}
+ *   The code to run and the start and end index of its last expression (or
+ *   `null`).  If the code can't be parsed it is returned as is so that running
+ *   it shows the syntax error.
  */
-function findLastExpression(code, blockType) {
-  if (!window.acorn) return null;
+function prepareCode(code, {blockType, importsUrl, findResult}) {
+  if (!window.acorn) return {code, resultRange: null};
+  let ast;
   try {
-    const {body} = acorn.parse(code, {
+    ast = acorn.parse(code, {
       ecmaVersion: 'latest',
       sourceType: blockType === 'module' ? 'module' : 'script',
       allowHashBang: true,
     });
-    const last = body[body.length - 1];
+  }
+  catch (e) {
+    return {code, resultRange: null};
+  }
+
+  let resultRange = null;
+  if (findResult) {
+    const last = ast.body[ast.body.length - 1];
     if (last?.type === 'ExpressionStatement' && !last.directive) {
-      return [last.expression.start, last.expression.end];
+      resultRange = [last.expression.start, last.expression.end];
     }
   }
-  catch (e) {}
-  return null;
+
+  // Finds every import (and re-export) of a package by name.
+  const replacements = [];
+  if (importsUrl) {
+    walkAst(ast, node => {
+      const {source} = /^(Import(Declaration|Expression)|Export(All|Named)Declaration)$/.test(node.type) ? node : {};
+      if (source?.type === 'Literal' && 'string' === typeof source.value && isBareSpecifier(source.value)) {
+        replacements.push({
+          start: source.start,
+          end: source.end,
+          text: JSON.stringify(importsUrl.replace(/\{specifier\}/g, source.value)),
+        });
+      }
+    });
+  }
+
+  // Replaces them from last to first, moving the result's range as needed.
+  replacements.sort((a, b) => b.start - a.start);
+  for (const {start, end, text} of replacements) {
+    code = code.slice(0, start) + text + code.slice(end);
+    const shift = text.length - (end - start);
+    if (resultRange) resultRange = resultRange.map(index => index >= end ? index + shift : index);
+  }
+
+  return {code, resultRange};
+}
+
+/**
+ * Indicates if an import specifier is a package name (eg. "lodash",
+ * "lodash@4/fp" or "@scope/pkg") rather than a relative path or a URL (eg.
+ * "./utils.js", "https://example.com/x.js" or "node:fs").
+ * @param {string} specifier
+ * @returns {boolean}
+ */
+function isBareSpecifier(specifier) {
+  return !/^(\.{0,2}\/|#|[a-z][a-z\d+.-]*:)/i.test(specifier);
+}
+
+/**
+ * Calls the callback for every node in an Acorn syntax tree.
+ * @param {*} node
+ * @param {(node: *) => void} callback
+ */
+function walkAst(node, callback) {
+  if (Array.isArray(node)) {
+    for (const child of node) walkAst(child, callback);
+  }
+  else if (node && 'string' === typeof node.type) {
+    callback(node);
+    for (const key of Object.keys(node)) {
+      const value = node[key];
+      if (value && 'object' === typeof value) walkAst(value, callback);
+    }
+  }
 }
 
 /**

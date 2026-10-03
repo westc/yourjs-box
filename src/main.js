@@ -62,6 +62,27 @@
   }
 
   /**
+   * Where packages imported by name (eg. `import _ from 'lodash'`) are loaded
+   * from unless data-imports-url is given.  `{specifier}` is replaced with what
+   * was imported (eg. "lodash@4/fp").
+   */
+  const DEFAULT_IMPORTS_URL = 'https://esm.sh/{specifier}';
+
+  /**
+   * Makes the part of a URL template before its first placeholder absolute
+   * (relative to the page) because the code runs somewhere (eg. a worker)
+   * that doesn't know the page's URL.
+   * @param {string} template
+   * @returns {string}
+   */
+  function resolveUrlTemplate(template) {
+    const index = template.indexOf('{');
+    const prefix = index < 0 ? template : template.slice(0, index);
+    return new URL(prefix || './', document.baseURI).href.replace(/\/$/, prefix.endsWith('/') || !prefix ? '/' : '')
+      + (index < 0 ? '' : template.slice(index));
+  }
+
+  /**
    * The only functions that may be relayed to the viewer and to the runner.
    * The runner executes the user's code so anything it sends must be limited
    * to these calls.
@@ -215,6 +236,10 @@
     const runnerMode = dataset.runner === 'window' ? 'window' : 'worker';
     const blockType = dataset.blockType === 'module' ? 'module' : 'classic';
     const showResults = dataset.showResults !== 'false';
+    // An empty data-imports-url turns off loading packages by name.
+    const importsUrl = dataset.importsUrl == null
+      ? DEFAULT_IMPORTS_URL
+      : dataset.importsUrl && resolveUrlTemplate(dataset.importsUrl);
     const libraryUrl = getLibraryFileUrl.bind(null, dataset.librariesUrl || DEFAULT_LIBRARIES_URL);
 
     // The viewer in the page and, when the console is popped out, the viewer
@@ -339,9 +364,9 @@
           libraryUrl('prismjs', 'components/prism-core.min.js'),
           libraryUrl('prismjs', 'plugins/autoloader/prism-autoloader.min.js'),
           libraryUrl('prismjs', 'plugins/match-braces/prism-match-braces.min.js'),
-          // Used to find the last expression in each block of code so that its
-          // value can be shown.
-          ...(showResults ? [libraryUrl('acorn', 'dist/acorn.js')] : []),
+          // Used to find the last expression in each block of code (so that its
+          // value can be shown) and the packages that it imports.
+          libraryUrl('acorn', 'dist/acorn.js'),
         ],
         cssUrls: [
           'data:text/css,' + encodeURIComponent(VIEWER_IFRAME_CSS),
@@ -361,6 +386,7 @@
             runnerMode,
             blockType,
             showResults,
+            importsUrl,
             packageInfo: PACKAGE_INFO,
             libraryVersions: LIBRARY_VERSIONS,
             isPopOut: !!targetWindow,
@@ -435,7 +461,7 @@
    * The options of YourJSBox.create() which are the same as the data
    * attributes of a script tag.
    */
-  const CONSOLE_OPTION_NAMES = ['blockType', 'dividerOrient', 'hidePrefix', 'librariesUrl', 'runner', 'showResults', 'theme'];
+  const CONSOLE_OPTION_NAMES = ['blockType', 'dividerOrient', 'hidePrefix', 'importsUrl', 'librariesUrl', 'runner', 'showResults', 'theme'];
 
   /**
    * The JavaScript API for creating consoles (available as window.YourJSBox).
@@ -466,6 +492,7 @@
      * @param {string=} options.dividerOrient
      * @param {string=} options.theme
      * @param {string=} options.librariesUrl
+     * @param {string=} options.importsUrl
      *   The same as the data attributes of a script tag.
      * @returns {{element: HTMLIFrameElement, destroy: () => void}}
      */

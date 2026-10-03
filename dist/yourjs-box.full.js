@@ -4,7 +4,7 @@
    * Viewer IFRAME's CSS code
    * @type {string}
    */
-  const VIEWER_IFRAME_CSS = "[v-cloak]{display:none}body,html{height:100%;margin:0}body{background-color:var(--console-bg);font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}#vueApp{display:flex;flex-direction:column;inset:0;position:fixed}#main{display:grid;flex-grow:1;gap:0;min-height:0;position:relative}#main.is-moving-divider{-webkit-user-select:none;user-select:none}#main.col-orient.is-moving-divider{cursor:col-resize}#main.row-orient.is-moving-divider{cursor:row-resize}#main.is-moving-divider::after{background-color:var(--accent);content:'';position:absolute;z-index:99}#main.col-orient.is-moving-divider::after{bottom:0;left:calc(100% - var(--temp-editor-pct) - var(--divider-size)/ 2 - 1px);top:0;width:2px}#main.row-orient.is-moving-divider::after{height:2px;left:0;right:0;top:calc(100% - var(--temp-editor-pct) - var(--divider-size)/ 2 - 1px)}#main.col-orient{grid-template-columns:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2);grid-template-rows:1fr}#main.row-orient{grid-template-columns:1fr;grid-template-rows:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2)}.divider{background-color:var(--divider-bg);box-sizing:border-box;position:relative;transition:background-color .15s}#main.col-orient .divider{border-left:1px solid var(--toolbar-border);border-right:1px solid var(--toolbar-border);cursor:col-resize}#main.row-orient .divider{border-bottom:1px solid var(--toolbar-border);border-top:1px solid var(--toolbar-border);cursor:row-resize}.divider::after{background-color:var(--divider-grip);border-radius:2px;content:'';left:50%;position:absolute;top:50%;transform:translate(-50%,-50%);transition:background-color .15s}#main.col-orient .divider::after{height:32px;width:2px}#main.row-orient .divider::after{height:2px;width:32px}#main.is-moving-divider .divider,.divider:hover{background-color:var(--divider-hover-bg)}#main.is-moving-divider .divider::after,.divider:hover::after{background-color:var(--accent)}#displays{position:relative}#displays>div{position:absolute;inset:0;overflow:auto}#bottomNav{align-items:center;background-color:var(--toolbar-bg);border-top:1px solid var(--toolbar-border);color:var(--toolbar-text);display:flex;flex:0 0 auto;font-size:12px;gap:8px;height:32px;padding:0 6px 0 8px;-webkit-user-select:none;user-select:none}#bottomNav>.brand{align-items:center;display:flex;flex-grow:1;gap:8px}.runner-badge{border:1px solid var(--toolbar-border);border-radius:999px;color:var(--muted-text);font-size:10px;letter-spacing:.04em;line-height:15px;padding:0 6px;text-transform:uppercase}#bottomNav>.buttons{align-items:center;display:flex;gap:2px}#bottomNav .separator{background-color:var(--toolbar-border);height:16px;margin:0 4px;width:1px}#bottomNav button{align-items:center;background:0 0;border:0;border-radius:4px;color:inherit;cursor:pointer;display:inline-flex;font:inherit;gap:5px;height:24px;justify-content:center;min-width:26px;padding:0 6px}#bottomNav button>span:not(.label){display:inline-flex;font-size:14px}#bottomNav button svg:not(.spin){transform:none!important}#bottomNav button:hover:not(:disabled){background-color:var(--button-hover)}#bottomNav button:disabled{cursor:not-allowed;opacity:.45}#bottomNav button.primary{background-color:var(--accent);color:var(--accent-text);font-weight:600;margin-left:2px;padding:0 10px 0 8px}#bottomNav button.primary>span:not(.label){font-size:11px}#bottomNav button.primary:hover:not(:disabled){background-color:var(--accent-hover)}#bottomNav button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}.spin{animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.logo{align-items:center;color:var(--toolbar-text);display:inline-flex;font-weight:700;gap:5px;letter-spacing:-.01em;line-height:1}.logo-mark{align-items:flex-end;background-color:#f7df1e;border-radius:3px;box-sizing:border-box;color:#1a1a1a;display:inline-flex;font-size:9.5px;font-weight:800;height:18px;justify-content:flex-end;letter-spacing:-.02em;padding:0 2px 2px 0;width:18px}.logo-text{font-size:14px}.logo-large{gap:12px}.logo-large>.logo-mark{border-radius:10px;box-shadow:0 8px 24px rgb(0 0 0 / .18);font-size:24px;height:56px;padding:0 6px 5px 0;width:56px}.logo-large>.logo-text{font-size:36px}#splash{align-items:center;background-color:var(--console-bg);display:flex;inset:0;justify-content:center;position:fixed;transition:opacity .35s ease,visibility .35s;z-index:1000}#splash.hidden{opacity:0;visibility:hidden}.splash-content{align-items:center;animation:splash-in .4s ease-out both;display:flex;flex-direction:column;gap:24px}.splash-progress{background-color:var(--toolbar-border);border-radius:3px;height:3px;overflow:hidden;width:140px}.splash-progress>div{animation:splash-progress 1.1s ease-in-out infinite;background-color:var(--accent);border-radius:inherit;height:100%;width:40%}@keyframes splash-in{from{opacity:0;transform:translateY(6px)}}@keyframes splash-progress{from{transform:translateX(-100%)}to{transform:translateX(250%)}}.dialog-backdrop{align-items:center;animation:fade-in .12s ease-out;background-color:var(--backdrop);display:flex;inset:0;justify-content:center;position:fixed;z-index:900}.dialog{animation:dialog-in .15s ease-out;background-color:var(--dialog-bg);border:1px solid var(--toolbar-border);border-radius:8px;box-shadow:0 12px 40px rgb(0 0 0 / .3);color:var(--console-text);font-size:13px;padding:16px;width:min(360px,calc(100% - 32px))}.dialog-title{font-size:14px;font-weight:600;margin-bottom:6px}.dialog-message{color:var(--muted-text);line-height:1.45}.dialog-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}.dialog-button{background:0 0;border:1px solid var(--toolbar-border);border-radius:4px;color:inherit;cursor:pointer;font:inherit;height:28px;padding:0 12px}.dialog-button:hover{background-color:var(--button-hover)}.dialog-button.primary{background-color:var(--accent);border-color:var(--accent);color:var(--accent-text);font-weight:600}.dialog-button.primary:hover{background-color:var(--accent-hover)}.dialog-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}#bottomNav button.logo-button{margin-left:-4px;padding:0 4px}.about-dialog{display:flex;flex-direction:column;max-height:calc(100% - 24px);padding:0;width:min(620px,calc(100% - 24px))}.about-dialog.is-export{height:min(560px,calc(100% - 24px))}.about-header{align-items:center;border-bottom:1px solid var(--toolbar-border);display:flex;flex:0 0 auto;padding:0 8px 0 12px}.tabs{display:flex;flex-grow:1;gap:4px}.tab{background:0 0;border:0;border-bottom:2px solid transparent;color:var(--muted-text);cursor:pointer;font:inherit;font-weight:600;padding:10px 8px 8px}.tab:hover{color:var(--console-text)}.tab.active{border-bottom-color:var(--accent);color:var(--console-text)}.close-button{align-items:center;background:0 0;border:0;border-radius:4px;color:var(--muted-text);cursor:pointer;display:inline-flex;font-size:16px;height:28px;justify-content:center;width:28px}.close-button:hover{background-color:var(--button-hover);color:var(--console-text)}.close-button:focus-visible,.segmented>button:focus-visible,.tab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}.about-body{flex:1 1 auto;min-height:0;overflow:auto;padding:16px}.about-title{align-items:center;display:flex;gap:12px}.logo-medium>.logo-mark{border-radius:7px;font-size:16px;height:40px;padding:0 4px 4px 0;width:40px}.logo-medium>.logo-text{display:none}.about-name{font-size:17px;font-weight:700}.about-aka{color:var(--muted-text);font-size:13px;font-weight:400;margin-left:4px}.about-version{color:var(--muted-text);font-size:12px}.about-description{line-height:1.5;margin:12px 0}.about-links{display:flex;flex-wrap:wrap;gap:6px 16px}.about-links a{color:var(--accent);font-weight:600;text-decoration:none}.about-links a:hover{text-decoration:underline}.about-body h3{color:var(--muted-text);font-size:11px;letter-spacing:.05em;margin:18px 0 6px;text-transform:uppercase}.about-details{display:grid;gap:4px 16px;grid-template-columns:max-content 1fr;margin:0}.about-details dt{color:var(--muted-text)}.about-details dd{margin:0}.about-details kbd{background-color:var(--toolbar-bg);border:1px solid var(--toolbar-border);border-bottom-width:2px;border-radius:4px;font-family:inherit;font-size:11px;padding:0 4px}.about-footer{border-top:1px solid var(--toolbar-border);color:var(--muted-text);font-size:12px;margin-top:18px;padding-top:12px}.export-body{display:flex;flex-direction:column;gap:10px}.export-options{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between}.segmented{border:1px solid var(--toolbar-border);border-radius:6px;display:inline-flex;overflow:hidden}.segmented>button{background:0 0;border:0;color:var(--muted-text);cursor:pointer;font:inherit;font-size:12px;font-weight:600;padding:5px 10px}.segmented>button+button{border-left:1px solid var(--toolbar-border)}.segmented>button:hover{background-color:var(--button-hover)}.segmented>button.active{background-color:var(--accent);color:var(--accent-text)}.export-note{color:var(--muted-text);font-size:12px}.export-preview{border:1px solid var(--toolbar-border);border-radius:6px;flex:1 1 auto;min-height:120px;overflow:hidden}.export-actions{display:flex;gap:8px;justify-content:flex-end}.more-menu{background-color:var(--dialog-bg);border:1px solid var(--toolbar-border);border-radius:8px;bottom:38px;box-shadow:0 8px 28px rgb(0 0 0 / .25);color:var(--console-text);font-size:13px;max-height:calc(100% - 48px);min-width:236px;overflow:auto;padding:4px;position:absolute;right:6px;z-index:800}.menu-item{align-items:center;background:0 0;border:0;border-radius:5px;color:inherit;cursor:pointer;display:flex;font:inherit;gap:8px;padding:6px 8px;text-align:left;width:100%}.menu-item:focus-visible,.menu-item:hover:not(:disabled){background-color:var(--button-hover);outline:0}.menu-item:disabled{cursor:not-allowed;opacity:.4}.menu-icon{color:var(--muted-text);display:inline-flex;font-size:14px;justify-content:center;width:16px}.menu-icon svg{transform:none!important}.menu-row{align-items:center;display:flex;gap:2px;padding:2px 2px 2px 8px}.menu-row-label{flex-grow:1}.menu-step{font-weight:600;justify-content:center;width:auto}.menu-percent{color:var(--muted-text);font-variant-numeric:tabular-nums;font-weight:400;min-width:52px}.menu-separator{background-color:var(--toolbar-border);height:1px;margin:4px 0}.popped-out{align-items:center;background-color:var(--console-bg);color:var(--console-text);display:flex;inset:0;justify-content:center;position:fixed;z-index:950}.popped-out-content{align-items:center;display:flex;flex-direction:column;gap:8px;padding:16px;text-align:center}.popped-out-title{font-size:15px;font-weight:600;margin-top:8px}.popped-out-text{color:var(--muted-text);font-size:13px}@keyframes fade-in{from{opacity:0}}@keyframes dialog-in{from{opacity:0;transform:scale(.96)}}.rotated-90deg{transform:rotate(90deg)}.align-top{vertical-align:top!important}.d-inline-block{display:inline-block!important}.d-block{display:block!important}.d-flex{display:flex!important}.d-inline-flex{display:inline-flex!important}.no-select{-webkit-user-select:none;user-select:none}:root{color-scheme:light;--console-font:ui-monospace,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;--console-bg:#fff;--console-text:#1f1f1f;--row-border:#f0f0f0;--arrow:#727272;--chevron:#9aa0a6;--entry-key:#881391;--preview-key:#5f6368;--string:#c41a16;--number:#1a1aa6;--null:#80868b;--header-bg:#f1f3f4;--header-text:#3c4043;--warn-bg:#fffbe5;--warn-border:#fff5c2;--warn-text:#5c3c00;--warn-icon:#e8a600;--error-bg:#fff0f0;--error-border:#ffd6d6;--error-text:#dc362e;--error-icon:#dc362e;--table-header-bg:#f3f3f3;--table-border:#d0d0d0;--toolbar-bg:#f3f3f3;--toolbar-border:#d6d6d6;--toolbar-text:#333;--muted-text:#5f6368;--button-hover:rgb(0 0 0 / 0.08);--accent:#1a73e8;--accent-hover:#1765cc;--accent-text:#fff;--divider-bg:#f3f3f3;--divider-hover-bg:#e8eaed;--divider-grip:#b0b0b0;--dialog-bg:#fff;--backdrop:rgb(0 0 0 / 0.25)}:root[data-theme=dark]{color-scheme:dark;--console-bg:#242424;--console-text:#e3e3e3;--row-border:#3a3a3a;--arrow:#9aa0a6;--chevron:#80868b;--entry-key:#5db0d7;--preview-key:#9aa0a6;--string:#f28b54;--number:#9980ff;--null:#8e8e8e;--header-bg:#2d2e30;--header-text:#c4c7c5;--warn-bg:#332b00;--warn-border:#665500;--warn-text:#ffd17a;--warn-icon:#ffd17a;--error-bg:#290000;--error-border:#5c0000;--error-text:#ff8080;--error-icon:#ff6b6b;--table-header-bg:#2e2e2e;--table-border:#4a4a4a;--toolbar-bg:#2b2b2b;--toolbar-border:#474747;--toolbar-text:#e3e3e3;--muted-text:#9aa0a6;--button-hover:rgb(255 255 255 / 0.1);--accent:#8ab4f8;--accent-hover:#aecbfa;--accent-text:#202124;--divider-bg:#2b2b2b;--divider-hover-bg:#333;--divider-grip:#6b6b6b;--dialog-bg:#2d2e30;--backdrop:rgb(0 0 0 / 0.5)}#displays{background-color:var(--console-bg);color:var(--console-text)}#displays>div{font-family:var(--console-font);font-size:calc(12px * var(--text-scale, 1));line-height:calc(16px * var(--text-scale, 1))}.console-row{border-bottom:1px solid var(--row-border);padding:2px 8px 2px 24px;position:relative;white-space:pre-wrap;word-break:break-word}.console-row>.row-icon{left:6px;line-height:0;position:absolute;top:4px}.log-error,.log-warn{margin-top:-1px}.log-warn{background-color:var(--warn-bg);border-bottom-color:var(--warn-border);border-top:1px solid var(--warn-border);color:var(--warn-text)}.log-warn>.row-icon{color:var(--warn-icon)}.log-error{background-color:var(--error-bg);border-bottom-color:var(--error-border);border-top:1px solid var(--error-border);color:var(--error-text)}.log-error>.row-icon{color:var(--error-icon)}.console-row{padding-left:calc(24px + var(--depth,0) * 16px)}.console-row>.row-icon{left:calc(6px + var(--depth,0) * 16px)}.group-header{cursor:pointer;font-weight:700}.group-header>.row-icon.arrow{top:5px}.log-assert{background-color:var(--error-bg);border-bottom-color:var(--error-border);border-top:1px solid var(--error-border);color:var(--error-text);margin-top:-1px}.log-assert>.row-icon{color:var(--error-icon)}.log-result>.row-icon{color:var(--chevron)}.trace-stack{color:var(--null);padding-left:1ch}.splash-message{color:var(--muted-text);font-size:13px;max-width:280px;text-align:center}.splash-slow{animation:show-after-delay 0s 10s both}@keyframes show-after-delay{from{visibility:hidden}to{visibility:visible}}#splash.failed .splash-progress,#splash.failed .splash-slow,.splash-error{display:none}#splash.failed .splash-error{display:block}.code-header{background-color:var(--header-bg);border-bottom:1px solid var(--row-border);color:var(--header-text);font-weight:700;padding:2px 8px;white-space:pre-wrap}.code-header.toggleable{cursor:pointer}.code-row .copy-to-editor-button{align-items:center;background-color:var(--console-bg);border:1px solid var(--toolbar-border);border-radius:4px;color:var(--toolbar-text);cursor:pointer;display:inline-flex;height:22px;justify-content:center;opacity:0;padding:0;position:absolute;right:6px;top:2px;transition:opacity .15s;width:22px}.code-row .copy-to-editor-button:focus-visible,.code-row:hover .copy-to-editor-button{opacity:1}.code-row .copy-to-editor-button:hover{background-color:var(--toolbar-bg)}@media (hover:none){.code-row .copy-to-editor-button{opacity:.8}}.notice{color:var(--null);font-style:italic}.code-row>.row-icon{color:var(--chevron)}.code-row code,.code-row pre{background:0 0!important;font-family:var(--console-font)!important;font-size:calc(12px * var(--text-scale, 1))!important;line-height:calc(16px * var(--text-scale, 1))!important;padding:0!important;text-shadow:none!important}.js-value{max-width:100%;vertical-align:top}.row-content>.js-value+.js-value{margin-left:1ch}.js-value-header.expandable{cursor:default}.js-value .expansion{padding-left:12px}.js-value .loading{color:var(--null);padding-left:12px}.arrow{display:inline-block;height:10px;position:relative;width:12px}.arrow.expandable::before{border-color:transparent transparent transparent var(--arrow);border-style:solid;border-width:4px 0 4px 6px;content:'';left:2px;position:absolute;top:1px;transform-origin:3px 4px;transition:transform .1s}.arrow.expandable.expanded::before{transform:rotate(90deg)}.entry-key{color:var(--entry-key)}.entry-key.dim{opacity:.6}.t-key{color:var(--preview-key)}.t-regexp,.t-string,.t-symbol{color:var(--string)}.t-number{color:var(--number)}.t-null{color:var(--null)}.t-function{font-style:italic}.t-node{color:var(--entry-key)}.console-table{border:1px solid var(--table-border);border-collapse:collapse;margin:2px 0 4px;white-space:nowrap}.console-table td,.console-table th{border-left:1px solid var(--table-border);max-width:300px;overflow:hidden;padding:1px 4px;text-align:left;text-overflow:ellipsis}.console-table th{background-color:var(--table-header-bg);border-bottom:1px solid var(--table-border);font-weight:400}";
+  const VIEWER_IFRAME_CSS = "[v-cloak]{display:none}body,html{height:100%;margin:0}body{background-color:var(--console-bg);font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}#vueApp{display:flex;flex-direction:column;inset:0;position:fixed}#main{display:grid;flex-grow:1;gap:0;min-height:0;position:relative}#main.is-moving-divider{-webkit-user-select:none;user-select:none}#main.col-orient.is-moving-divider{cursor:col-resize}#main.row-orient.is-moving-divider{cursor:row-resize}#main.is-moving-divider::after{background-color:var(--accent);content:'';position:absolute;z-index:99}#main.col-orient.is-moving-divider::after{bottom:0;left:calc(100% - var(--temp-editor-pct) - var(--divider-size)/ 2 - 1px);top:0;width:2px}#main.row-orient.is-moving-divider::after{height:2px;left:0;right:0;top:calc(100% - var(--temp-editor-pct) - var(--divider-size)/ 2 - 1px)}#main.col-orient{grid-template-columns:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2);grid-template-rows:1fr}#main.row-orient{grid-template-columns:1fr;grid-template-rows:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2)}.divider{background-color:var(--divider-bg);box-sizing:border-box;position:relative;transition:background-color .15s}#main.col-orient .divider{border-left:1px solid var(--toolbar-border);border-right:1px solid var(--toolbar-border);cursor:col-resize}#main.row-orient .divider{border-bottom:1px solid var(--toolbar-border);border-top:1px solid var(--toolbar-border);cursor:row-resize}.divider::after{background-color:var(--divider-grip);border-radius:2px;content:'';left:50%;position:absolute;top:50%;transform:translate(-50%,-50%);transition:background-color .15s}#main.col-orient .divider::after{height:32px;width:2px}#main.row-orient .divider::after{height:2px;width:32px}#main.is-moving-divider .divider,.divider:hover{background-color:var(--divider-hover-bg)}#main.is-moving-divider .divider::after,.divider:hover::after{background-color:var(--accent)}#displays{position:relative}#displays>div{position:absolute;inset:0;overflow:auto}#bottomNav{align-items:center;background-color:var(--toolbar-bg);border-top:1px solid var(--toolbar-border);color:var(--toolbar-text);display:flex;flex:0 0 auto;font-size:12px;gap:8px;height:32px;padding:0 6px 0 8px;-webkit-user-select:none;user-select:none}#bottomNav>.brand{align-items:center;display:flex;flex-grow:1;gap:8px}.runner-badge{border:1px solid var(--toolbar-border);border-radius:999px;color:var(--muted-text);font-size:10px;letter-spacing:.04em;line-height:15px;padding:0 6px;text-transform:uppercase}#bottomNav>.buttons{align-items:center;display:flex;gap:2px}#bottomNav .separator{background-color:var(--toolbar-border);height:16px;margin:0 4px;width:1px}#bottomNav button{align-items:center;background:0 0;border:0;border-radius:4px;color:inherit;cursor:pointer;display:inline-flex;font:inherit;gap:5px;height:24px;justify-content:center;min-width:26px;padding:0 6px}#bottomNav button>span:not(.label){display:inline-flex;font-size:14px}#bottomNav button svg:not(.spin){transform:none!important}#bottomNav button:hover:not(:disabled){background-color:var(--button-hover)}#bottomNav button:disabled{cursor:not-allowed;opacity:.45}#bottomNav button.primary{background-color:var(--accent);color:var(--accent-text);font-weight:600;margin-left:2px;padding:0 10px 0 8px}#bottomNav button.primary>span:not(.label){font-size:11px}#bottomNav button.primary:hover:not(:disabled){background-color:var(--accent-hover)}#bottomNav button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}.spin{animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.logo{align-items:center;color:var(--toolbar-text);display:inline-flex;font-weight:700;gap:5px;letter-spacing:-.01em;line-height:1}.logo-mark{align-items:flex-end;background-color:#f7df1e;border-radius:3px;box-sizing:border-box;color:#1a1a1a;display:inline-flex;font-size:9.5px;font-weight:800;height:18px;justify-content:flex-end;letter-spacing:-.02em;padding:0 2px 2px 0;width:18px}.logo-text{font-size:14px}.logo-large{gap:12px}.logo-large>.logo-mark{border-radius:10px;box-shadow:0 8px 24px rgb(0 0 0 / .18);font-size:24px;height:56px;padding:0 6px 5px 0;width:56px}.logo-large>.logo-text{font-size:36px}#splash{align-items:center;background-color:var(--console-bg);display:flex;inset:0;justify-content:center;position:fixed;transition:opacity .35s ease,visibility .35s;z-index:1000}#splash.hidden{opacity:0;visibility:hidden}.splash-content{align-items:center;animation:splash-in .4s ease-out both;display:flex;flex-direction:column;gap:24px}.splash-progress{background-color:var(--toolbar-border);border-radius:3px;height:3px;overflow:hidden;width:140px}.splash-progress>div{animation:splash-progress 1.1s ease-in-out infinite;background-color:var(--accent);border-radius:inherit;height:100%;width:40%}@keyframes splash-in{from{opacity:0;transform:translateY(6px)}}@keyframes splash-progress{from{transform:translateX(-100%)}to{transform:translateX(250%)}}.dialog-backdrop{align-items:center;animation:fade-in .12s ease-out;background-color:var(--backdrop);display:flex;inset:0;justify-content:center;position:fixed;z-index:900}.dialog{animation:dialog-in .15s ease-out;background-color:var(--dialog-bg);border:1px solid var(--toolbar-border);border-radius:8px;box-shadow:0 12px 40px rgb(0 0 0 / .3);color:var(--console-text);font-size:13px;padding:16px;width:min(360px,calc(100% - 32px))}.dialog-title{font-size:14px;font-weight:600;margin-bottom:6px}.dialog-message{color:var(--muted-text);line-height:1.45}.dialog-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}.dialog-button{background:0 0;border:1px solid var(--toolbar-border);border-radius:4px;color:inherit;cursor:pointer;font:inherit;height:28px;padding:0 12px}.dialog-button:hover{background-color:var(--button-hover)}.dialog-button.primary{background-color:var(--accent);border-color:var(--accent);color:var(--accent-text);font-weight:600}.dialog-button.primary:hover{background-color:var(--accent-hover)}.dialog-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}#bottomNav button.logo-button{margin-left:-4px;padding:0 4px}.about-dialog{display:flex;flex-direction:column;max-height:calc(100% - 24px);padding:0;width:min(620px,calc(100% - 24px))}.about-dialog.is-export{height:min(560px,calc(100% - 24px))}.about-header{align-items:center;border-bottom:1px solid var(--toolbar-border);display:flex;flex:0 0 auto;padding:0 8px 0 12px}.tabs{display:flex;flex-grow:1;gap:4px}.tab{background:0 0;border:0;border-bottom:2px solid transparent;color:var(--muted-text);cursor:pointer;font:inherit;font-weight:600;padding:10px 8px 8px}.tab:hover{color:var(--console-text)}.tab.active{border-bottom-color:var(--accent);color:var(--console-text)}.close-button{align-items:center;background:0 0;border:0;border-radius:4px;color:var(--muted-text);cursor:pointer;display:inline-flex;font-size:16px;height:28px;justify-content:center;width:28px}.close-button:hover{background-color:var(--button-hover);color:var(--console-text)}.close-button:focus-visible,.segmented>button:focus-visible,.tab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}.about-body{flex:1 1 auto;min-height:0;overflow:auto;padding:16px}.about-title{align-items:center;display:flex;gap:12px}.logo-medium>.logo-mark{border-radius:7px;font-size:16px;height:40px;padding:0 4px 4px 0;width:40px}.logo-medium>.logo-text{display:none}.about-name{font-size:17px;font-weight:700}.about-aka{color:var(--muted-text);font-size:13px;font-weight:400;margin-left:4px}.about-version{color:var(--muted-text);font-size:12px}.about-description{line-height:1.5;margin:12px 0}.about-links{display:flex;flex-wrap:wrap;gap:6px 16px}.about-links a{color:var(--accent);font-weight:600;text-decoration:none}.about-links a:hover{text-decoration:underline}.about-body h3{color:var(--muted-text);font-size:11px;letter-spacing:.05em;margin:18px 0 6px;text-transform:uppercase}.about-details{display:grid;gap:4px 16px;grid-template-columns:max-content 1fr;margin:0}.about-details dt{color:var(--muted-text)}.about-details dd{margin:0}.about-details kbd{background-color:var(--toolbar-bg);border:1px solid var(--toolbar-border);border-bottom-width:2px;border-radius:4px;font-family:inherit;font-size:11px;padding:0 4px}.about-footer{border-top:1px solid var(--toolbar-border);color:var(--muted-text);font-size:12px;margin-top:18px;padding-top:12px}.export-body{display:flex;flex-direction:column;gap:10px}.export-options{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between}.segmented{border:1px solid var(--toolbar-border);border-radius:6px;display:inline-flex;overflow:hidden}.segmented>button{background:0 0;border:0;color:var(--muted-text);cursor:pointer;font:inherit;font-size:12px;font-weight:600;padding:5px 10px}.segmented>button+button{border-left:1px solid var(--toolbar-border)}.segmented>button:hover{background-color:var(--button-hover)}.segmented>button.active{background-color:var(--accent);color:var(--accent-text)}.export-note{color:var(--muted-text);font-size:12px}.export-preview{border:1px solid var(--toolbar-border);border-radius:6px;flex:1 1 auto;min-height:120px;overflow:hidden}.export-actions{display:flex;gap:8px;justify-content:flex-end}.file-input{display:none}.more-menu{background-color:var(--dialog-bg);border:1px solid var(--toolbar-border);border-radius:8px;bottom:38px;box-shadow:0 8px 28px rgb(0 0 0 / .25);color:var(--console-text);font-size:13px;max-height:calc(100% - 48px);min-width:236px;overflow:auto;padding:4px;position:absolute;right:6px;z-index:800}.menu-item{align-items:center;background:0 0;border:0;border-radius:5px;color:inherit;cursor:pointer;display:flex;font:inherit;gap:8px;padding:6px 8px;text-align:left;width:100%}.menu-item:focus-visible,.menu-item:hover:not(:disabled){background-color:var(--button-hover);outline:0}.menu-item:disabled{cursor:not-allowed;opacity:.4}.menu-icon{color:var(--muted-text);display:inline-flex;font-size:14px;justify-content:center;width:16px}.menu-icon svg{transform:none!important}.menu-row{align-items:center;display:flex;gap:2px;padding:2px 2px 2px 8px}.menu-row-label{flex-grow:1}.menu-step{font-weight:600;justify-content:center;width:auto}.menu-percent{color:var(--muted-text);font-variant-numeric:tabular-nums;font-weight:400;min-width:52px}.menu-separator{background-color:var(--toolbar-border);height:1px;margin:4px 0}.popped-out{align-items:center;background-color:var(--console-bg);color:var(--console-text);display:flex;inset:0;justify-content:center;position:fixed;z-index:950}.popped-out-content{align-items:center;display:flex;flex-direction:column;gap:8px;padding:16px;text-align:center}.popped-out-title{font-size:15px;font-weight:600;margin-top:8px}.popped-out-text{color:var(--muted-text);font-size:13px}@keyframes fade-in{from{opacity:0}}@keyframes dialog-in{from{opacity:0;transform:scale(.96)}}.rotated-90deg{transform:rotate(90deg)}.align-top{vertical-align:top!important}.d-inline-block{display:inline-block!important}.d-block{display:block!important}.d-flex{display:flex!important}.d-inline-flex{display:inline-flex!important}.no-select{-webkit-user-select:none;user-select:none}:root{color-scheme:light;--console-font:ui-monospace,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;--console-bg:#fff;--console-text:#1f1f1f;--row-border:#f0f0f0;--arrow:#727272;--chevron:#9aa0a6;--entry-key:#881391;--preview-key:#5f6368;--string:#c41a16;--number:#1a1aa6;--null:#80868b;--header-bg:#f1f3f4;--header-text:#3c4043;--warn-bg:#fffbe5;--warn-border:#fff5c2;--warn-text:#5c3c00;--warn-icon:#e8a600;--error-bg:#fff0f0;--error-border:#ffd6d6;--error-text:#dc362e;--error-icon:#dc362e;--table-header-bg:#f3f3f3;--table-border:#d0d0d0;--toolbar-bg:#f3f3f3;--toolbar-border:#d6d6d6;--toolbar-text:#333;--muted-text:#5f6368;--button-hover:rgb(0 0 0 / 0.08);--accent:#1a73e8;--accent-hover:#1765cc;--accent-text:#fff;--divider-bg:#f3f3f3;--divider-hover-bg:#e8eaed;--divider-grip:#b0b0b0;--dialog-bg:#fff;--backdrop:rgb(0 0 0 / 0.25)}:root[data-theme=dark]{color-scheme:dark;--console-bg:#242424;--console-text:#e3e3e3;--row-border:#3a3a3a;--arrow:#9aa0a6;--chevron:#80868b;--entry-key:#5db0d7;--preview-key:#9aa0a6;--string:#f28b54;--number:#9980ff;--null:#8e8e8e;--header-bg:#2d2e30;--header-text:#c4c7c5;--warn-bg:#332b00;--warn-border:#665500;--warn-text:#ffd17a;--warn-icon:#ffd17a;--error-bg:#290000;--error-border:#5c0000;--error-text:#ff8080;--error-icon:#ff6b6b;--table-header-bg:#2e2e2e;--table-border:#4a4a4a;--toolbar-bg:#2b2b2b;--toolbar-border:#474747;--toolbar-text:#e3e3e3;--muted-text:#9aa0a6;--button-hover:rgb(255 255 255 / 0.1);--accent:#8ab4f8;--accent-hover:#aecbfa;--accent-text:#202124;--divider-bg:#2b2b2b;--divider-hover-bg:#333;--divider-grip:#6b6b6b;--dialog-bg:#2d2e30;--backdrop:rgb(0 0 0 / 0.5)}#displays{background-color:var(--console-bg);color:var(--console-text)}#displays>div{font-family:var(--console-font);font-size:calc(12px * var(--text-scale, 1));line-height:calc(16px * var(--text-scale, 1))}.console-row{border-bottom:1px solid var(--row-border);padding:2px 8px 2px 24px;position:relative;white-space:pre-wrap;word-break:break-word}.console-row>.row-icon{left:6px;line-height:0;position:absolute;top:4px}.log-error,.log-warn{margin-top:-1px}.log-warn{background-color:var(--warn-bg);border-bottom-color:var(--warn-border);border-top:1px solid var(--warn-border);color:var(--warn-text)}.log-warn>.row-icon{color:var(--warn-icon)}.log-error{background-color:var(--error-bg);border-bottom-color:var(--error-border);border-top:1px solid var(--error-border);color:var(--error-text)}.log-error>.row-icon{color:var(--error-icon)}.console-row{padding-left:calc(24px + var(--depth,0) * 16px)}.console-row>.row-icon{left:calc(6px + var(--depth,0) * 16px)}.group-header{cursor:pointer;font-weight:700}.group-header>.row-icon.arrow{top:5px}.log-assert{background-color:var(--error-bg);border-bottom-color:var(--error-border);border-top:1px solid var(--error-border);color:var(--error-text);margin-top:-1px}.log-assert>.row-icon{color:var(--error-icon)}.log-result>.row-icon{color:var(--chevron)}.trace-stack{color:var(--null);padding-left:1ch}.splash-message{color:var(--muted-text);font-size:13px;max-width:280px;text-align:center}.splash-slow{animation:show-after-delay 0s 10s both}@keyframes show-after-delay{from{visibility:hidden}to{visibility:visible}}#splash.failed .splash-progress,#splash.failed .splash-slow,.splash-error{display:none}#splash.failed .splash-error{display:block}.code-header{background-color:var(--header-bg);border-bottom:1px solid var(--row-border);color:var(--header-text);font-weight:700;padding:2px 8px;white-space:pre-wrap}.code-header.toggleable{cursor:pointer}.code-row .copy-to-editor-button{align-items:center;background-color:var(--console-bg);border:1px solid var(--toolbar-border);border-radius:4px;color:var(--toolbar-text);cursor:pointer;display:inline-flex;height:22px;justify-content:center;opacity:0;padding:0;position:absolute;right:6px;top:2px;transition:opacity .15s;width:22px}.code-row .copy-to-editor-button:focus-visible,.code-row:hover .copy-to-editor-button{opacity:1}.code-row .copy-to-editor-button:hover{background-color:var(--toolbar-bg)}@media (hover:none){.code-row .copy-to-editor-button{opacity:.8}}.notice{color:var(--null);font-style:italic}.code-row>.row-icon{color:var(--chevron)}.code-row code,.code-row pre{background:0 0!important;font-family:var(--console-font)!important;font-size:calc(12px * var(--text-scale, 1))!important;line-height:calc(16px * var(--text-scale, 1))!important;padding:0!important;text-shadow:none!important}.js-value{max-width:100%;vertical-align:top}.row-content>.js-value+.js-value{margin-left:1ch}.js-value-header.expandable{cursor:default}.js-value .expansion{padding-left:12px}.js-value .loading{color:var(--null);padding-left:12px}.arrow{display:inline-block;height:10px;position:relative;width:12px}.arrow.expandable::before{border-color:transparent transparent transparent var(--arrow);border-style:solid;border-width:4px 0 4px 6px;content:'';left:2px;position:absolute;top:1px;transform-origin:3px 4px;transition:transform .1s}.arrow.expandable.expanded::before{transform:rotate(90deg)}.entry-key{color:var(--entry-key)}.entry-key.dim{opacity:.6}.t-key{color:var(--preview-key)}.t-regexp,.t-string,.t-symbol{color:var(--string)}.t-number{color:var(--number)}.t-null{color:var(--null)}.t-function{font-style:italic}.t-node{color:var(--entry-key)}.console-table{border:1px solid var(--table-border);border-collapse:collapse;margin:2px 0 4px;white-space:nowrap}.console-table td,.console-table th{border-left:1px solid var(--table-border);max-width:300px;overflow:hidden;padding:1px 4px;text-align:left;text-overflow:ellipsis}.console-table th{background-color:var(--table-header-bg);border-bottom:1px solid var(--table-border);font-weight:400}";
   /**
    * Information about this package (eg. its version).
    * @type {{name: string, version: string, homepage: string, repoUrl: string, bugsUrl: string}}
@@ -14,7 +14,7 @@
    * Viewer IFRAME's HTML code
    * @type {string}
    */
-  const VIEWER_IFRAME_HTML = "<div id=\"splash\" aria-label=\"Loading\"><div class=\"splash-content\"><span class=\"logo logo-large\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div class=\"splash-progress\"><div></div></div><div class=\"splash-message splash-slow\">Still loading&hellip;</div><div class=\"splash-message splash-error\">JS Box couldn&rsquo;t load. Please check your connection and reload the page.</div></div></div><div id=\"vueApp\" v-cloak><div id=\"main\" ref=\"main\" :class=\"mainElemClassNames\" :style=\"mainElemStyles\" @mousedown=\"onMainElemMouseDown\"><div id=\"displays\"><div ref=\"displaysScroller\" @scroll=\"onDisplaysScroll\"><template v-for=\"display in displays\"><div v-if=\"display.type === 'prism'\"><div v-if=\"display.isHidden\" class=\"code-header toggleable no-select\" @click=\"display.isCodeShown = !display.isCodeShown\" :title=\"display.isCodeShown ? 'Hide Code' : 'Show Code'\"><span :class=\"['arrow', 'expandable', display.isCodeShown ? 'expanded' : '']\"></span>{{ display.header || 'Hidden code' }}</div><div v-else-if=\"display.header\" class=\"code-header\">{{ display.header }}</div><div v-if=\"display.isCodeShown\" class=\"console-row code-row\"><span class=\"row-icon\"><icon name=\"chevron\"></icon></span><prism language=\"javascript\" :code=\"display.value\" :is-dark=\"theme === 'dark'\" match-braces></prism><button class=\"copy-to-editor-button\" title=\"Copy to editor\" @click=\"copyToEditor(display.value)\"><icon name=\"copyToEditor\"></icon></button></div></div><div v-if=\"display.type === 'log' &amp;&amp; !isInCollapsedGroup(display)\" :class=\"['console-row', 'log-' + display.key, display.groupId ? 'group-header' : '']\" :style=\"{'--depth': display.groupIds.length}\" :title=\"display.name\" @click=\"onLogRowClick(display, $event)\"><span v-if=\"display.key === 'error' || display.key === 'assert'\" class=\"row-icon\"><icon name=\"consoleError\"></icon></span><span v-else-if=\"display.key === 'warn'\" class=\"row-icon\"><icon name=\"consoleWarning\"></icon></span><span v-else-if=\"display.key === 'result'\" class=\"row-icon\"><icon name=\"result\"></icon></span><span v-else-if=\"display.groupId\" :class=\"['row-icon', 'arrow', 'expandable', display.isCollapsed ? '' : 'expanded']\"></span><div class=\"row-content\"><table v-if=\"display.table\" class=\"console-table\"><thead><tr><th v-for=\"header in display.table.headers\">{{ header }}</th></tr></thead><tbody><tr v-for=\"row in display.table.rows\"><td>{{ row.index }}</td><td v-for=\"cell in row.cells\"><template v-if=\"cell\"><span v-for=\"part in cell.parts\" :class=\"'t-' + part[0]\">{{ part[1] }}</span></template></td></tr></tbody></table><js-value v-for=\"(description, index) in display.descriptions\" :description=\"description\" :path=\"[display.logId, index]\"></js-value><div v-if=\"display.stack\" class=\"trace-stack\">{{ display.stack }}</div></div></div><div v-if=\"display.type === 'notice'\" class=\"console-row notice\">{{ display.message }}</div><div v-if=\"display.type === 'error'\" class=\"console-row log-error\"><span class=\"row-icon\"><icon name=\"consoleError\"></icon></span><div class=\"row-content\">{{ display.message }}</div></div></template></div></div><div class=\"divider\" ref=\"mainDivider\"></div><div id=\"editor\"><ace-editor v-model=\"jsCode\" language=\"javascript\" :theme=\"theme\" :font-size=\"Math.round(12 * textScale)\" @key-combo=\"onEditorKeyCombo\" height=\"100%\"></ace-editor></div></div><div id=\"bottomNav\"><div class=\"brand\"><button class=\"logo-button\" title=\"About JS Box\" @click=\"openAbout('about')\"><span class=\"logo\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span></button> <span class=\"runner-badge\" :title=\"runnerMode === 'window' ? 'Code runs directly in this page' : 'Code runs in a Web Worker (no DOM access)'\">{{ runnerMode === 'window' ? 'Window' : 'Worker' }}</span></div><div class=\"buttons\"><template v-for=\"bottomButton in bottomButtons\"><span v-if=\"bottomButton.isSeparator\" class=\"separator\"></span> <button v-else :class=\"bottomButton.className\" @click=\"bottomButton.callback.call(this, $event)\" :title=\"bottomButton.title\" :disabled=\"bottomButton.disableIf &amp;&amp; bottomButton.disableIf.call(this)\"><icon :name=\"bottomButton.iconName\"></icon><span v-if=\"bottomButton.label\" class=\"label\">{{ bottomButton.label }}</span></button></template></div></div><div v-if=\"isMenuOpen\" class=\"more-menu\" role=\"menu\" aria-label=\"More\" ref=\"moreMenu\" @keydown=\"onMenuKeyDown\"><div class=\"menu-row\" role=\"group\" aria-label=\"Text size\"><span class=\"menu-row-label\">Text size</span> <button class=\"menu-item menu-step\" role=\"menuitem\" title=\"Smaller text\" aria-label=\"Smaller text\" :disabled=\"!canShrinkText\" @click=\"changeTextScale(-1)\">A&minus;</button> <button class=\"menu-item menu-step menu-percent\" role=\"menuitem\" title=\"Reset the text size\" aria-label=\"Reset the text size\" @click=\"setTextScale(1)\">{{ Math.round(textScale * 100) }}%</button> <button class=\"menu-item menu-step\" role=\"menuitem\" title=\"Bigger text\" aria-label=\"Bigger text\" :disabled=\"!canGrowText\" @click=\"changeTextScale(1)\">A+</button></div><div class=\"menu-separator\"></div><button v-if=\"isPopOut\" class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); bringBack()\"><span class=\"menu-icon\"><icon name=\"popIn\"></icon></span>Bring back into the page</button> <button v-else class=\"menu-item\" role=\"menuitem\" @click=\"popOut()\"><span class=\"menu-icon\"><icon name=\"popOut\"></icon></span>Pop out into a window</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); openAbout('html')\"><span class=\"menu-icon\"><icon name=\"code\"></icon></span>Copy as HTML&hellip;</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); resetConsole()\"><span class=\"menu-icon\"><icon name=\"refresh\"></icon></span>Reset&hellip;</button><div class=\"menu-separator\"></div><button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); openAbout('about')\"><span class=\"menu-icon\"><icon name=\"info\"></icon></span>About JS Box</button></div><div v-if=\"isPoppedOut\" class=\"popped-out\"><div class=\"popped-out-content\"><span class=\"logo logo-medium\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div class=\"popped-out-title\">This console is open in a separate window</div><div class=\"popped-out-text\">Its code still runs in this page.</div><div class=\"dialog-buttons\"><button class=\"dialog-button\" @click=\"focusPopOut\">Show the window</button> <button class=\"dialog-button primary\" @click=\"requestPopIn\">Bring it back</button></div></div></div><div v-if=\"isAboutOpen\" class=\"dialog-backdrop\" @mousedown.self=\"closeAbout\" @keydown.esc=\"closeAbout\"><div :class=\"['dialog', 'about-dialog', aboutTab === 'html' ? 'is-export' : '']\" role=\"dialog\" aria-modal=\"true\" aria-label=\"About JS Box\"><div class=\"about-header\"><div class=\"tabs\" role=\"tablist\"><button role=\"tab\" :aria-selected=\"aboutTab === 'about'\" :class=\"['tab', aboutTab === 'about' ? 'active' : '']\" @click=\"aboutTab = 'about'\">About</button> <button role=\"tab\" :aria-selected=\"aboutTab === 'html'\" :class=\"['tab', aboutTab === 'html' ? 'active' : '']\" @click=\"aboutTab = 'html'\">Copy as HTML</button></div><button class=\"close-button\" ref=\"aboutCloseButton\" title=\"Close\" @click=\"closeAbout\"><icon name=\"close\"></icon></button></div><div v-if=\"aboutTab === 'about'\" class=\"about-body\"><div class=\"about-title\"><span class=\"logo logo-medium\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div><div class=\"about-name\">YourJS Box <span class=\"about-aka\">aka JS Box</span></div><div class=\"about-version\">Version {{ packageInfo.version }}</div></div></div><p class=\"about-description\">An interactive JavaScript console that can be embedded in any web page with a single script tag.</p><div class=\"about-links\"><a :href=\"packageInfo.homepage\" target=\"_blank\" rel=\"noopener\">Website</a> <a :href=\"packageInfo.repoUrl\" target=\"_blank\" rel=\"noopener\">GitHub</a> <a :href=\"packageInfo.repoUrl + '#readme'\" target=\"_blank\" rel=\"noopener\">Documentation</a> <a :href=\"packageInfo.bugsUrl\" target=\"_blank\" rel=\"noopener\">Report an issue</a></div><h3>This console</h3><dl class=\"about-details\"><dt>Code runs in</dt><dd>{{ runnerDescription }}</dd><dt>Theme</dt><dd>{{ themeDescription }}</dd><dt>Code blocks run as</dt><dd>{{ blockTypeDescription }}</dd><dt>Results</dt><dd>{{ showResults ? 'The value of the last expression is shown' : 'Not shown' }}</dd><dt>Layout</dt><dd>{{ layoutDescription }}</dd></dl><h3>Keyboard shortcuts</h3><dl class=\"about-details\"><dt><kbd>{{ modKey }}</kbd> + <kbd>Enter</kbd></dt><dd>Run the next block of code</dd><dt><kbd>Esc</kbd></dt><dd>Close this window, the menu or full screen</dd></dl><div class=\"about-footer\">MIT License &copy; 2023-present Christopher West &middot; Built with Vue {{ libraryVersions.vue }}, Ace {{ libraryVersions['ace-builds'] }}, Prism {{ libraryVersions.prismjs }} and Acorn {{ libraryVersions.acorn }}</div></div><div v-else class=\"about-body export-body\"><div class=\"export-options\"><div class=\"segmented\" role=\"radiogroup\" aria-label=\"Code\"><button v-for=\"option in exportCodeOptions\" role=\"radio\" :aria-checked=\"exportCode === option.value\" :class=\"exportCode === option.value ? 'active' : ''\" @click=\"exportCode = option.value\">{{ option.label }}</button></div><div class=\"segmented\" role=\"radiogroup\" aria-label=\"Format\"><button v-for=\"option in exportFormatOptions\" role=\"radio\" :aria-checked=\"exportFormat === option.value\" :class=\"exportFormat === option.value ? 'active' : ''\" @click=\"exportFormat = option.value\">{{ option.label }}</button></div></div><div class=\"export-note\">{{ exportNote }}</div><div class=\"export-preview\"><ace-editor :model-value=\"exportHtml\" language=\"html\" :theme=\"theme\" height=\"100%\" :read-only=\"true\"></ace-editor></div><div class=\"export-actions\"><button class=\"dialog-button\" @click=\"downloadExport\">Download page</button> <button class=\"dialog-button primary\" @click=\"copyExport\">{{ copyLabel }}</button></div></div></div></div><div v-if=\"dialog\" class=\"dialog-backdrop\" @mousedown.self=\"closeDialog(false)\" @keydown.esc=\"closeDialog(false)\"><div class=\"dialog\" role=\"alertdialog\" aria-modal=\"true\" :aria-label=\"dialog.title\"><div class=\"dialog-title\">{{ dialog.title }}</div><div class=\"dialog-message\">{{ dialog.message }}</div><div class=\"dialog-buttons\"><button class=\"dialog-button\" @click=\"closeDialog(false)\">Cancel</button> <button class=\"dialog-button primary\" ref=\"dialogConfirmButton\" @click=\"closeDialog(true)\">{{ dialog.confirmText }}</button></div></div></div></div>";
+  const VIEWER_IFRAME_HTML = "<div id=\"splash\" aria-label=\"Loading\"><div class=\"splash-content\"><span class=\"logo logo-large\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div class=\"splash-progress\"><div></div></div><div class=\"splash-message splash-slow\">Still loading&hellip;</div><div class=\"splash-message splash-error\">JS Box couldn&rsquo;t load. Please check your connection and reload the page.</div></div></div><div id=\"vueApp\" v-cloak><input type=\"file\" ref=\"fileInput\" class=\"file-input\" accept=\".js,.mjs,.cjs,.txt,text/javascript,text/plain\" tabindex=\"-1\" aria-hidden=\"true\" @change=\"onFileChosen\"><div id=\"main\" ref=\"main\" :class=\"mainElemClassNames\" :style=\"mainElemStyles\" @mousedown=\"onMainElemMouseDown\"><div id=\"displays\"><div ref=\"displaysScroller\" @scroll=\"onDisplaysScroll\"><template v-for=\"display in displays\"><div v-if=\"display.type === 'prism'\"><div v-if=\"display.isHidden\" class=\"code-header toggleable no-select\" @click=\"display.isCodeShown = !display.isCodeShown\" :title=\"display.isCodeShown ? 'Hide Code' : 'Show Code'\"><span :class=\"['arrow', 'expandable', display.isCodeShown ? 'expanded' : '']\"></span>{{ display.header || 'Hidden code' }}</div><div v-else-if=\"display.header\" class=\"code-header\">{{ display.header }}</div><div v-if=\"display.isCodeShown\" class=\"console-row code-row\"><span class=\"row-icon\"><icon name=\"chevron\"></icon></span><prism language=\"javascript\" :code=\"display.value\" :is-dark=\"theme === 'dark'\" match-braces></prism><button class=\"copy-to-editor-button\" title=\"Copy to editor\" @click=\"copyToEditor(display.value)\"><icon name=\"copyToEditor\"></icon></button></div></div><div v-if=\"display.type === 'log' &amp;&amp; !isInCollapsedGroup(display)\" :class=\"['console-row', 'log-' + display.key, display.groupId ? 'group-header' : '']\" :style=\"{'--depth': display.groupIds.length}\" :title=\"display.name\" @click=\"onLogRowClick(display, $event)\"><span v-if=\"display.key === 'error' || display.key === 'assert'\" class=\"row-icon\"><icon name=\"consoleError\"></icon></span><span v-else-if=\"display.key === 'warn'\" class=\"row-icon\"><icon name=\"consoleWarning\"></icon></span><span v-else-if=\"display.key === 'result'\" class=\"row-icon\"><icon name=\"result\"></icon></span><span v-else-if=\"display.groupId\" :class=\"['row-icon', 'arrow', 'expandable', display.isCollapsed ? '' : 'expanded']\"></span><div class=\"row-content\"><table v-if=\"display.table\" class=\"console-table\"><thead><tr><th v-for=\"header in display.table.headers\">{{ header }}</th></tr></thead><tbody><tr v-for=\"row in display.table.rows\"><td>{{ row.index }}</td><td v-for=\"cell in row.cells\"><template v-if=\"cell\"><span v-for=\"part in cell.parts\" :class=\"'t-' + part[0]\">{{ part[1] }}</span></template></td></tr></tbody></table><js-value v-for=\"(description, index) in display.descriptions\" :description=\"description\" :path=\"[display.logId, index]\"></js-value><div v-if=\"display.stack\" class=\"trace-stack\">{{ display.stack }}</div></div></div><div v-if=\"display.type === 'notice'\" class=\"console-row notice\">{{ display.message }}</div><div v-if=\"display.type === 'error'\" class=\"console-row log-error\"><span class=\"row-icon\"><icon name=\"consoleError\"></icon></span><div class=\"row-content\">{{ display.message }}</div></div></template></div></div><div class=\"divider\" ref=\"mainDivider\"></div><div id=\"editor\"><ace-editor v-model=\"jsCode\" language=\"javascript\" :theme=\"theme\" :font-size=\"Math.round(12 * textScale)\" @key-combo=\"onEditorKeyCombo\" height=\"100%\"></ace-editor></div></div><div id=\"bottomNav\"><div class=\"brand\"><button class=\"logo-button\" title=\"About JS Box\" @click=\"openAbout('about')\"><span class=\"logo\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span></button> <span class=\"runner-badge\" :title=\"runnerMode === 'window' ? 'Code runs directly in this page' : 'Code runs in a Web Worker (no DOM access)'\">{{ runnerMode === 'window' ? 'Window' : 'Worker' }}</span></div><div class=\"buttons\"><template v-for=\"bottomButton in bottomButtons\"><span v-if=\"bottomButton.isSeparator\" class=\"separator\"></span> <button v-else :class=\"bottomButton.className\" @click=\"bottomButton.callback.call(this, $event)\" :title=\"bottomButton.title\" :disabled=\"bottomButton.disableIf &amp;&amp; bottomButton.disableIf.call(this)\"><icon :name=\"bottomButton.iconName\"></icon><span v-if=\"bottomButton.label\" class=\"label\">{{ bottomButton.label }}</span></button></template></div></div><div v-if=\"isMenuOpen\" class=\"more-menu\" role=\"menu\" aria-label=\"More\" ref=\"moreMenu\" @keydown=\"onMenuKeyDown\"><div class=\"menu-row\" role=\"group\" aria-label=\"Text size\"><span class=\"menu-row-label\">Text size</span> <button class=\"menu-item menu-step\" role=\"menuitem\" title=\"Smaller text\" aria-label=\"Smaller text\" :disabled=\"!canShrinkText\" @click=\"changeTextScale(-1)\">A&minus;</button> <button class=\"menu-item menu-step menu-percent\" role=\"menuitem\" title=\"Reset the text size\" aria-label=\"Reset the text size\" @click=\"setTextScale(1)\">{{ Math.round(textScale * 100) }}%</button> <button class=\"menu-item menu-step\" role=\"menuitem\" title=\"Bigger text\" aria-label=\"Bigger text\" :disabled=\"!canGrowText\" @click=\"changeTextScale(1)\">A+</button></div><div class=\"menu-separator\"></div><button class=\"menu-item\" role=\"menuitem\" @click=\"openFile()\"><span class=\"menu-icon\"><icon name=\"open\"></icon></span>Open&hellip;</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"saveFile()\"><span class=\"menu-icon\"><icon name=\"save\"></icon></span>Save&hellip;</button><div class=\"menu-separator\"></div><button v-if=\"isPopOut\" class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); bringBack()\"><span class=\"menu-icon\"><icon name=\"popIn\"></icon></span>Bring back into the page</button> <button v-else class=\"menu-item\" role=\"menuitem\" @click=\"popOut()\"><span class=\"menu-icon\"><icon name=\"popOut\"></icon></span>Pop out into a window</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); openAbout('html')\"><span class=\"menu-icon\"><icon name=\"code\"></icon></span>Copy as HTML&hellip;</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); resetConsole()\"><span class=\"menu-icon\"><icon name=\"refresh\"></icon></span>Reset&hellip;</button><div class=\"menu-separator\"></div><button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); openAbout('about')\"><span class=\"menu-icon\"><icon name=\"info\"></icon></span>About JS Box</button></div><div v-if=\"isPoppedOut\" class=\"popped-out\"><div class=\"popped-out-content\"><span class=\"logo logo-medium\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div class=\"popped-out-title\">This console is open in a separate window</div><div class=\"popped-out-text\">Its code still runs in this page.</div><div class=\"dialog-buttons\"><button class=\"dialog-button\" @click=\"focusPopOut\">Show the window</button> <button class=\"dialog-button primary\" @click=\"requestPopIn\">Bring it back</button></div></div></div><div v-if=\"isAboutOpen\" class=\"dialog-backdrop\" @mousedown.self=\"closeAbout\" @keydown.esc=\"closeAbout\"><div :class=\"['dialog', 'about-dialog', aboutTab === 'html' ? 'is-export' : '']\" role=\"dialog\" aria-modal=\"true\" aria-label=\"About JS Box\"><div class=\"about-header\"><div class=\"tabs\" role=\"tablist\"><button role=\"tab\" :aria-selected=\"aboutTab === 'about'\" :class=\"['tab', aboutTab === 'about' ? 'active' : '']\" @click=\"aboutTab = 'about'\">About</button> <button role=\"tab\" :aria-selected=\"aboutTab === 'html'\" :class=\"['tab', aboutTab === 'html' ? 'active' : '']\" @click=\"aboutTab = 'html'\">Copy as HTML</button></div><button class=\"close-button\" ref=\"aboutCloseButton\" title=\"Close\" @click=\"closeAbout\"><icon name=\"close\"></icon></button></div><div v-if=\"aboutTab === 'about'\" class=\"about-body\"><div class=\"about-title\"><span class=\"logo logo-medium\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div><div class=\"about-name\">YourJS Box <span class=\"about-aka\">aka JS Box</span></div><div class=\"about-version\">Version {{ packageInfo.version }}</div></div></div><p class=\"about-description\">An interactive JavaScript console that can be embedded in any web page with a single script tag.</p><div class=\"about-links\"><a :href=\"packageInfo.homepage\" target=\"_blank\" rel=\"noopener\">Website</a> <a :href=\"packageInfo.repoUrl\" target=\"_blank\" rel=\"noopener\">GitHub</a> <a :href=\"packageInfo.repoUrl + '#readme'\" target=\"_blank\" rel=\"noopener\">Documentation</a> <a :href=\"packageInfo.bugsUrl\" target=\"_blank\" rel=\"noopener\">Report an issue</a></div><h3>This console</h3><dl class=\"about-details\"><dt>Code runs in</dt><dd>{{ runnerDescription }}</dd><dt>Theme</dt><dd>{{ themeDescription }}</dd><dt>Code blocks run as</dt><dd>{{ blockTypeDescription }}</dd><dt>Imports</dt><dd>{{ importsUrl ? 'Packages imported by name load from ' + importsUrl.replace('{specifier}', '\u2026') : 'Only URLs and paths can be imported' }}</dd><dt>Results</dt><dd>{{ showResults ? 'The value of the last expression is shown' : 'Not shown' }}</dd><dt>Layout</dt><dd>{{ layoutDescription }}</dd></dl><h3>Keyboard shortcuts</h3><dl class=\"about-details\"><dt><kbd>{{ modKey }}</kbd> + <kbd>Enter</kbd></dt><dd>Run the next block of code</dd><dt><kbd>Esc</kbd></dt><dd>Close this window, the menu or full screen</dd></dl><div class=\"about-footer\">MIT License &copy; 2023-present Christopher West &middot; Built with Vue {{ libraryVersions.vue }}, Ace {{ libraryVersions['ace-builds'] }}, Prism {{ libraryVersions.prismjs }} and Acorn {{ libraryVersions.acorn }}</div></div><div v-else class=\"about-body export-body\"><div class=\"export-options\"><div class=\"segmented\" role=\"radiogroup\" aria-label=\"Code\"><button v-for=\"option in exportCodeOptions\" role=\"radio\" :aria-checked=\"exportCode === option.value\" :class=\"exportCode === option.value ? 'active' : ''\" @click=\"exportCode = option.value\">{{ option.label }}</button></div><div class=\"segmented\" role=\"radiogroup\" aria-label=\"Format\"><button v-for=\"option in exportFormatOptions\" role=\"radio\" :aria-checked=\"exportFormat === option.value\" :class=\"exportFormat === option.value ? 'active' : ''\" @click=\"exportFormat = option.value\">{{ option.label }}</button></div></div><div class=\"export-note\">{{ exportNote }}</div><div class=\"export-preview\"><ace-editor :model-value=\"exportHtml\" language=\"html\" :theme=\"theme\" height=\"100%\" :read-only=\"true\"></ace-editor></div><div class=\"export-actions\"><button class=\"dialog-button\" @click=\"downloadExport\">Download page</button> <button class=\"dialog-button primary\" @click=\"copyExport\">{{ copyLabel }}</button></div></div></div></div><div v-if=\"dialog\" class=\"dialog-backdrop\" @mousedown.self=\"closeDialog(false)\" @keydown.esc=\"closeDialog(false)\"><div class=\"dialog\" role=\"alertdialog\" aria-modal=\"true\" :aria-label=\"dialog.title\"><div class=\"dialog-title\">{{ dialog.title }}</div><div class=\"dialog-message\">{{ dialog.message }}</div><div class=\"dialog-buttons\"><button class=\"dialog-button\" @click=\"closeDialog(false)\">Cancel</button> <button class=\"dialog-button primary\" ref=\"dialogConfirmButton\" @click=\"closeDialog(true)\">{{ dialog.confirmText }}</button></div></div></div></div>";
   /**
    * The URL of this script which is used to remove this script's lines from the
    * stack traces of errors in window mode.
@@ -60,6 +60,27 @@
       .replace(/\{(name|version)\}/g, (_, key) => key === 'name' ? name : LIBRARY_VERSIONS[name])
       .replace(/\/?$/, '/');
     return new URL(baseUrl + path, document.baseURI).href;
+  }
+
+  /**
+   * Where packages imported by name (eg. `import _ from 'lodash'`) are loaded
+   * from unless data-imports-url is given.  `{specifier}` is replaced with what
+   * was imported (eg. "lodash@4/fp").
+   */
+  const DEFAULT_IMPORTS_URL = 'https://esm.sh/{specifier}';
+
+  /**
+   * Makes the part of a URL template before its first placeholder absolute
+   * (relative to the page) because the code runs somewhere (eg. a worker)
+   * that doesn't know the page's URL.
+   * @param {string} template
+   * @returns {string}
+   */
+  function resolveUrlTemplate(template) {
+    const index = template.indexOf('{');
+    const prefix = index < 0 ? template : template.slice(0, index);
+    return new URL(prefix || './', document.baseURI).href.replace(/\/$/, prefix.endsWith('/') || !prefix ? '/' : '')
+      + (index < 0 ? '' : template.slice(index));
   }
 
   /**
@@ -285,10 +306,12 @@
      * @param {boolean=} isInPromise
      */
     function reportUncaught(error, isInPromise) {
-      // Points out how to use top-level await if it was used in a classic block.
-      const hint = runningBlockType === 'classic' && error?.name === 'SyntaxError' && /\bawait\b/.test(error.message)
-        ? '\n(To use top-level await, add data-block-type="module" to the script tag.)'
-        : '';
+      // Points out how to use top-level await or import statements if they were
+      // used in a classic block.
+      const feature = runningBlockType === 'classic' && error?.name === 'SyntaxError'
+        ? /\bawait\b/.test(error.message) ? 'top-level await' : /\bimport\b/.test(error.message) ? 'import statements' : null
+        : null;
+      const hint = feature ? `\n(To use ${feature}, add data-block-type="module" to the script tag.)` : '';
       send({
         target: 'viewer',
         func: 'appendError',
@@ -928,6 +951,10 @@
     const runnerMode = dataset.runner === 'window' ? 'window' : 'worker';
     const blockType = dataset.blockType === 'module' ? 'module' : 'classic';
     const showResults = dataset.showResults !== 'false';
+    // An empty data-imports-url turns off loading packages by name.
+    const importsUrl = dataset.importsUrl == null
+      ? DEFAULT_IMPORTS_URL
+      : dataset.importsUrl && resolveUrlTemplate(dataset.importsUrl);
     const libraryUrl = getLibraryFileUrl.bind(null, dataset.librariesUrl || DEFAULT_LIBRARIES_URL);
 
     // The viewer in the page and, when the console is popped out, the viewer
@@ -1117,8 +1144,8 @@
           
             const hidePrefix = dataset.hidePrefix ?? '';
             const darkSchemeQuery = matchMedia('(prefers-color-scheme: dark)');
-            const originalCode = unindentMin(jsCode);
-            const {visibleCode, hiddenGroups} = extractHiddenGroups(originalCode, hidePrefix);
+            const startingCode = unindentMin(jsCode);
+            const {visibleCode, hiddenGroups} = extractHiddenGroups(startingCode, hidePrefix);
             const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
             const copyHiddenGroups = () => hiddenGroups.map(group => ({...group}));
           
@@ -1130,6 +1157,12 @@
                     hidePrefix,
                     hiddenGroups: copyHiddenGroups(),
                     runnerMode: meta.runnerMode,
+                    importsUrl: meta.importsUrl,
+                    // The code the console starts with (and goes back to when reset)
+                    // which changes when a file is opened.
+                    originalCode: startingCode,
+                    // The name of the file that was last opened or saved.
+                    fileName: null,
                     blockType: meta.blockType,
                     showResults: meta.showResults,
                     packageInfo: meta.packageInfo,
@@ -1233,12 +1266,23 @@
                   /**
                    * The code that the copied console will start with.
                    */
+                  /**
+                   * The original code split into the code for the editor and the
+                   * hidden groups.
+                   */
+                  originalGroups() {
+                    return extractHiddenGroups(this.originalCode, this.hidePrefix);
+                  },
                   exportJsCode() {
-                    if (this.exportCode === 'original') return originalCode;
+                    if (this.exportCode === 'original') return this.originalCode;
                     if (this.exportCode === 'blank') return '';
-          
-                    // The groups that already ran, then the groups in the editor with
-                    // any hidden groups that haven't run yet in their original places.
+                    return this.currentCode;
+                  },
+                  /**
+                   * The groups that already ran, then the groups in the editor with any
+                   * hidden groups that haven't run yet in their original places.
+                   */
+                  currentCode() {
                     const blocks = this.runHistory.slice();
                     const pendingHiddenGroups = this.hiddenGroups.slice();
                     let visibleCount = this.runCount;
@@ -1385,17 +1429,17 @@
                     });
                     this.runningCount++;
                     this.runHistory.push(group.allLines);
+                    const {code, resultRange} = prepareCode(group.lines, {
+                      blockType: this.blockType,
+                      importsUrl: this.importsUrl,
+                      // Like the browser's console, show the value of the last
+                      // expression (except for hidden code).
+                      findResult: this.showResults && !isHidden,
+                    });
                     messageParent({
                       target: 'runner',
                       func: 'runCode',
-                      args: [group.lines, {
-                        blockType: this.blockType,
-                        // Like the browser's console, show the value of the last
-                        // expression (except for hidden code).
-                        resultRange: this.showResults && !isHidden
-                          ? findLastExpression(group.lines, this.blockType)
-                          : null,
-                      }],
+                      args: [code, {blockType: this.blockType, resultRange}],
                     });
                   },
                   clearConsole() {
@@ -1412,15 +1456,86 @@
                       confirmText: 'Reset',
                     });
                     if (!isConfirmed) return;
-          
+                    this.restart();
+                  },
+                  /**
+                   * Starts over with the original code (clearing the output and, in
+                   * worker mode, starting a new worker).
+                   */
+                  restart() {
+                    const {visibleCode, hiddenGroups} = this.originalGroups;
                     this.displays = [];
                     this.jsCode = visibleCode;
-                    this.hiddenGroups = copyHiddenGroups();
+                    this.hiddenGroups = hiddenGroups.map(group => ({...group}));
                     this.runCount = 0;
                     this.runningCount = 0;
                     this.runHistory = [];
                     messageParent({target: 'runner', func: 'reset', args: []});
                     this.runHiddenGroups();
+                  },
+                  /**
+                   * Shows the file picker for opening a JavaScript file.
+                   */
+                  openFile() {
+                    this.closeMenu();
+                    const {fileInput} = this.$refs;
+                    fileInput.value = '';
+                    fileInput.click();
+                  },
+                  /**
+                   * Makes the chosen file's code the code that the console starts with.
+                   * @param {Event} evt
+                   */
+                  async onFileChosen(evt) {
+                    const file = evt.target.files?.[0];
+                    if (!file) return;
+                    const code = unindentMin(await file.text());
+                    if (this.displays.length || this.jsCode.trim()) {
+                      const isConfirmed = await this.confirm({
+                        title: `Open ${file.name}?`,
+                        message: 'The output will be cleared and the code in the editor will be replaced with the code in the file.'
+                          + (this.runnerMode === 'window'
+                            ? '  Anything the code already defined on the page will stay defined.'
+                            : ''),
+                        confirmText: 'Open',
+                      });
+                      if (!isConfirmed) return;
+                    }
+                    this.fileName = file.name;
+                    this.originalCode = code;
+                    this.restart();
+                  },
+                  /**
+                   * Saves the current code (what already ran and what is in the editor)
+                   * as a JavaScript file which can be opened later.
+                   */
+                  async saveFile() {
+                    this.closeMenu();
+                    const code = this.currentCode + '\n';
+                    const suggestedName = this.fileName || 'js-box.js';
+          
+                    // Shows a "Save as" dialog where it is supported.
+                    if ('function' === typeof window.showSaveFilePicker) {
+                      try {
+                        const handle = await showSaveFilePicker({
+                          suggestedName,
+                          types: [{description: 'JavaScript', accept: {'text/javascript': ['.js', '.mjs']}}],
+                        });
+                        const writable = await handle.createWritable();
+                        await writable.write(code);
+                        await writable.close();
+                        this.fileName = handle.name;
+                        return;
+                      }
+                      catch (e) {
+                        // The user cancelled.  For other errors the file is downloaded.
+                        if (e?.name === 'AbortError') return;
+                      }
+                    }
+          
+                    const url = URL.createObjectURL(new Blob([code], {type: 'text/javascript'}));
+                    Object.assign(document.createElement('a'), {href: url, download: suggestedName}).click();
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
                   },
                   /**
                    * Copies code that was already run into the editor so that it can be run
@@ -1520,6 +1635,8 @@
                     return JSON.parse(JSON.stringify({
                       displays: this.displays,
                       jsCode: this.jsCode,
+                      originalCode: this.originalCode,
+                      fileName: this.fileName,
                       runHistory: this.runHistory,
                       hiddenGroups: this.hiddenGroups,
                       runCount: this.runCount,
@@ -1992,6 +2109,8 @@
                     // https://icon-sets.iconify.design/mdi/error-outline/
                     error: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm1-5C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18a8 8 0 0 1-8-8a8 8 0 0 1 8-8a8 8 0 0 1 8 8a8 8 0 0 1-8 8"/></svg>',
                     // Icons similar to those in the browser's console.
+                    open: '<svg viewBox="0 0 16 16"><path d="M2 4.5a1 1 0 0 1 1-1h3.2l1.3 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+                    save: '<svg viewBox="0 0 16 16"><path d="M8 2.5v7M5 7l3 3 3-3M3 11.5v1.5h10v-1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
                     fullscreen: '<svg viewBox="0 0 16 16"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
                     exitFullscreen: '<svg viewBox="0 0 16 16"><path d="M6 2.5V6H2.5M13.5 6H10V2.5M10 13.5V10h3.5M2.5 10H6v3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
                     more: '<svg viewBox="0 0 16 16"><circle cx="3.5" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="12.5" cy="8" r="1.4" fill="currentColor"/></svg>',
@@ -2184,30 +2303,97 @@
           }
           
           /**
-           * Finds the last statement in the code if it is an expression so that its
-           * value can be shown.
+           * Gets a block of code ready to run:  packages imported by name (eg.
+           * `import _ from 'lodash'` or `import('lodash')`) are loaded from importsUrl
+           * and the last statement is found if it is an expression so that its value
+           * can be shown.
            * @param {string} code
-           * @param {"classic"|"module"} blockType
-           * @returns {[number, number]|null}
-           *   The start and end index of the expression or `null` if the last statement
-           *   isn't an expression (or the code can't be parsed, in which case running
-           *   it will show the syntax error).
+           * @param {Object} options
+           * @param {"classic"|"module"} options.blockType
+           * @param {string?} options.importsUrl
+           *   The URL template where `{specifier}` is replaced with what was imported
+           *   or an empty value to leave imports alone.
+           * @param {boolean} options.findResult
+           * @returns {{code: string, resultRange: [number, number]|null}}
+           *   The code to run and the start and end index of its last expression (or
+           *   `null`).  If the code can't be parsed it is returned as is so that running
+           *   it shows the syntax error.
            */
-          function findLastExpression(code, blockType) {
-            if (!window.acorn) return null;
+          function prepareCode(code, {blockType, importsUrl, findResult}) {
+            if (!window.acorn) return {code, resultRange: null};
+            let ast;
             try {
-              const {body} = acorn.parse(code, {
+              ast = acorn.parse(code, {
                 ecmaVersion: 'latest',
                 sourceType: blockType === 'module' ? 'module' : 'script',
                 allowHashBang: true,
               });
-              const last = body[body.length - 1];
+            }
+            catch (e) {
+              return {code, resultRange: null};
+            }
+          
+            let resultRange = null;
+            if (findResult) {
+              const last = ast.body[ast.body.length - 1];
               if (last?.type === 'ExpressionStatement' && !last.directive) {
-                return [last.expression.start, last.expression.end];
+                resultRange = [last.expression.start, last.expression.end];
               }
             }
-            catch (e) {}
-            return null;
+          
+            // Finds every import (and re-export) of a package by name.
+            const replacements = [];
+            if (importsUrl) {
+              walkAst(ast, node => {
+                const {source} = /^(Import(Declaration|Expression)|Export(All|Named)Declaration)$/.test(node.type) ? node : {};
+                if (source?.type === 'Literal' && 'string' === typeof source.value && isBareSpecifier(source.value)) {
+                  replacements.push({
+                    start: source.start,
+                    end: source.end,
+                    text: JSON.stringify(importsUrl.replace(/\{specifier\}/g, source.value)),
+                  });
+                }
+              });
+            }
+          
+            // Replaces them from last to first, moving the result's range as needed.
+            replacements.sort((a, b) => b.start - a.start);
+            for (const {start, end, text} of replacements) {
+              code = code.slice(0, start) + text + code.slice(end);
+              const shift = text.length - (end - start);
+              if (resultRange) resultRange = resultRange.map(index => index >= end ? index + shift : index);
+            }
+          
+            return {code, resultRange};
+          }
+          
+          /**
+           * Indicates if an import specifier is a package name (eg. "lodash",
+           * "lodash@4/fp" or "@scope/pkg") rather than a relative path or a URL (eg.
+           * "./utils.js", "https://example.com/x.js" or "node:fs").
+           * @param {string} specifier
+           * @returns {boolean}
+           */
+          function isBareSpecifier(specifier) {
+            return !/^(\.{0,2}\/|#|[a-z][a-z\d+.-]*:)/i.test(specifier);
+          }
+          
+          /**
+           * Calls the callback for every node in an Acorn syntax tree.
+           * @param {*} node
+           * @param {(node: *) => void} callback
+           */
+          function walkAst(node, callback) {
+            if (Array.isArray(node)) {
+              for (const child of node) walkAst(child, callback);
+            }
+            else if (node && 'string' === typeof node.type) {
+              callback(node);
+              for (const key of Object.keys(node)) {
+                const value = node[key];
+                if (value && 'object' === typeof value) walkAst(value, callback);
+              }
+            }
           }
           
           /**
@@ -2496,9 +2682,9 @@
           libraryUrl('prismjs', 'components/prism-core.min.js'),
           libraryUrl('prismjs', 'plugins/autoloader/prism-autoloader.min.js'),
           libraryUrl('prismjs', 'plugins/match-braces/prism-match-braces.min.js'),
-          // Used to find the last expression in each block of code so that its
-          // value can be shown.
-          ...(showResults ? [libraryUrl('acorn', 'dist/acorn.js')] : []),
+          // Used to find the last expression in each block of code (so that its
+          // value can be shown) and the packages that it imports.
+          libraryUrl('acorn', 'dist/acorn.js'),
         ],
         cssUrls: [
           'data:text/css,' + encodeURIComponent(VIEWER_IFRAME_CSS),
@@ -2518,6 +2704,7 @@
             runnerMode,
             blockType,
             showResults,
+            importsUrl,
             packageInfo: PACKAGE_INFO,
             libraryVersions: LIBRARY_VERSIONS,
             isPopOut: !!targetWindow,
@@ -2592,7 +2779,7 @@
    * The options of YourJSBox.create() which are the same as the data
    * attributes of a script tag.
    */
-  const CONSOLE_OPTION_NAMES = ['blockType', 'dividerOrient', 'hidePrefix', 'librariesUrl', 'runner', 'showResults', 'theme'];
+  const CONSOLE_OPTION_NAMES = ['blockType', 'dividerOrient', 'hidePrefix', 'importsUrl', 'librariesUrl', 'runner', 'showResults', 'theme'];
 
   /**
    * The JavaScript API for creating consoles (available as window.YourJSBox).
@@ -2623,6 +2810,7 @@
      * @param {string=} options.dividerOrient
      * @param {string=} options.theme
      * @param {string=} options.librariesUrl
+     * @param {string=} options.importsUrl
      *   The same as the data attributes of a script tag.
      * @returns {{element: HTMLIFrameElement, destroy: () => void}}
      */

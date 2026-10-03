@@ -192,10 +192,12 @@ function createRunner(send, options) {
    * @param {boolean=} isInPromise
    */
   function reportUncaught(error, isInPromise) {
-    // Points out how to use top-level await if it was used in a classic block.
-    const hint = runningBlockType === 'classic' && error?.name === 'SyntaxError' && /\bawait\b/.test(error.message)
-      ? '\n(To use top-level await, add data-block-type="module" to the script tag.)'
-      : '';
+    // Points out how to use top-level await or import statements if they were
+    // used in a classic block.
+    const feature = runningBlockType === 'classic' && error?.name === 'SyntaxError'
+      ? /\bawait\b/.test(error.message) ? 'top-level await' : /\bimport\b/.test(error.message) ? 'import statements' : null
+      : null;
+    const hint = feature ? `\n(To use ${feature}, add data-block-type="module" to the script tag.)` : '';
     send({
       target: 'viewer',
       func: 'appendError',

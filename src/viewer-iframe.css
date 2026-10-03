@@ -581,6 +581,11 @@ body {
   justify-content: flex-end;
 }
 
+/* Used to choose a file to open (only its file picker is shown) */
+.file-input {
+  display: none;
+}
+
 /* The "More" menu */
 .more-menu {
   background-color: var(--dialog-bg);

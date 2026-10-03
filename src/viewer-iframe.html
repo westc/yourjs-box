@@ -7,6 +7,7 @@
   </div>
 </div>
 <div id="vueApp" v-cloak>
+  <input type="file" ref="fileInput" class="file-input" accept=".js,.mjs,.cjs,.txt,text/javascript,text/plain" tabindex="-1" aria-hidden="true" @change="onFileChosen">
   <div id="main" ref="main" :class="mainElemClassNames" :style="mainElemStyles" @mousedown="onMainElemMouseDown">
     <div id="displays">
       <div ref="displaysScroller" @scroll="onDisplaysScroll">
@@ -90,6 +91,13 @@
     </div>
 
     <div class="menu-separator"></div>
+    <button class="menu-item" role="menuitem" @click="openFile()">
+      <span class="menu-icon"><icon name="open"></icon></span>Open&hellip;
+    </button>
+    <button class="menu-item" role="menuitem" @click="saveFile()">
+      <span class="menu-icon"><icon name="save"></icon></span>Save&hellip;
+    </button>
+    <div class="menu-separator"></div>
     <button v-if="isPopOut" class="menu-item" role="menuitem" @click="closeMenu(); bringBack()">
       <span class="menu-icon"><icon name="popIn"></icon></span>Bring back into the page
     </button>
@@ -147,6 +155,7 @@
           <dt>Code runs in</dt><dd>{{ runnerDescription }}</dd>
           <dt>Theme</dt><dd>{{ themeDescription }}</dd>
           <dt>Code blocks run as</dt><dd>{{ blockTypeDescription }}</dd>
+          <dt>Imports</dt><dd>{{ importsUrl ? 'Packages imported by name load from ' + importsUrl.replace('{specifier}', '…') : 'Only URLs and paths can be imported' }}</dd>
           <dt>Results</dt><dd>{{ showResults ? 'The value of the last expression is shown' : 'Not shown' }}</dd>
           <dt>Layout</dt><dd>{{ layoutDescription }}</dd>
         </dl>

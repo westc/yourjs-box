@@ -151,8 +151,8 @@
           const response = await fetch('data:application/json,{"hello":"world"}');
           await response.json();
 
-          // So do imports \\
-          import {camelCase} from 'https://cdn.jsdelivr.net/npm/lodash-es@4.17.21/+esm';
+          // So do imports (npm packages can be imported by name) \\
+          import {camelCase} from 'lodash-es';
           camelCase('Hello from a module');
 
           // Declarations stay in their block, so use globalThis to share \\
