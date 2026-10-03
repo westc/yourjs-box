@@ -1,10 +1,10 @@
-/*! yourjs-box v1.5.0 | (c) 2023-present Christopher West | MIT License | https://github.com/westc/yourjs-box */
+/*! yourjs-box v1.5.0 | (c) 2023-present Chris West | MIT License | https://github.com/westc/yourjs-box */
 (() => {
   /**
    * Viewer IFRAME's CSS code
    * @type {string}
    */
-  const VIEWER_IFRAME_CSS = "[v-cloak]{display:none}body,html{height:100%;margin:0}body{background-color:var(--console-bg);font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}#vueApp{display:flex;flex-direction:column;inset:0;position:fixed}#main{display:grid;flex-grow:1;gap:0;min-height:0;position:relative}#main.is-moving-divider{-webkit-user-select:none;user-select:none}#main.col-orient.is-moving-divider{cursor:col-resize}#main.row-orient.is-moving-divider{cursor:row-resize}#main.is-moving-divider::after{background-color:var(--accent);content:'';position:absolute;z-index:99}#main.col-orient.is-moving-divider::after{bottom:0;left:calc(100% - var(--temp-editor-pct) - var(--divider-size)/ 2 - 1px);top:0;width:2px}#main.row-orient.is-moving-divider::after{height:2px;left:0;right:0;top:calc(100% - var(--temp-editor-pct) - var(--divider-size)/ 2 - 1px)}#main.col-orient{grid-template-columns:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2);grid-template-rows:1fr}#main.row-orient{grid-template-columns:1fr;grid-template-rows:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2)}.divider{background-color:var(--divider-bg);box-sizing:border-box;position:relative;transition:background-color .15s}#main.col-orient .divider{border-left:1px solid var(--toolbar-border);border-right:1px solid var(--toolbar-border);cursor:col-resize}#main.row-orient .divider{border-bottom:1px solid var(--toolbar-border);border-top:1px solid var(--toolbar-border);cursor:row-resize}.divider::after{background-color:var(--divider-grip);border-radius:2px;content:'';left:50%;position:absolute;top:50%;transform:translate(-50%,-50%);transition:background-color .15s}#main.col-orient .divider::after{height:32px;width:2px}#main.row-orient .divider::after{height:2px;width:32px}#main.is-moving-divider .divider,.divider:hover{background-color:var(--divider-hover-bg)}#main.is-moving-divider .divider::after,.divider:hover::after{background-color:var(--accent)}#displays{position:relative}#displays>div{position:absolute;inset:0;overflow:auto}#bottomNav{align-items:center;background-color:var(--toolbar-bg);border-top:1px solid var(--toolbar-border);color:var(--toolbar-text);display:flex;flex:0 0 auto;font-size:12px;gap:8px;height:32px;padding:0 6px 0 8px;-webkit-user-select:none;user-select:none}#bottomNav>.brand{align-items:center;display:flex;flex-grow:1;gap:8px}.runner-badge{border:1px solid var(--toolbar-border);border-radius:999px;color:var(--muted-text);font-size:10px;letter-spacing:.04em;line-height:15px;padding:0 6px;text-transform:uppercase}#bottomNav>.buttons{align-items:center;display:flex;gap:2px}#bottomNav .separator{background-color:var(--toolbar-border);height:16px;margin:0 4px;width:1px}#bottomNav button{align-items:center;background:0 0;border:0;border-radius:4px;color:inherit;cursor:pointer;display:inline-flex;font:inherit;gap:5px;height:24px;justify-content:center;min-width:26px;padding:0 6px}#bottomNav button>span:not(.label){display:inline-flex;font-size:14px}#bottomNav button svg:not(.spin){transform:none!important}#bottomNav button:hover:not(:disabled){background-color:var(--button-hover)}#bottomNav button:disabled{cursor:not-allowed;opacity:.45}#bottomNav button.primary{background-color:var(--accent);color:var(--accent-text);font-weight:600;margin-left:2px;padding:0 10px 0 8px}#bottomNav button.primary>span:not(.label){font-size:11px}#bottomNav button.primary:hover:not(:disabled){background-color:var(--accent-hover)}#bottomNav button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}.spin{animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.logo{align-items:center;color:var(--toolbar-text);display:inline-flex;font-weight:700;gap:5px;letter-spacing:-.01em;line-height:1}.logo-mark{align-items:flex-end;background-color:#f7df1e;border-radius:3px;box-sizing:border-box;color:#1a1a1a;display:inline-flex;font-size:9.5px;font-weight:800;height:18px;justify-content:flex-end;letter-spacing:-.02em;padding:0 2px 2px 0;width:18px}.logo-text{font-size:14px}.logo-large{gap:12px}.logo-large>.logo-mark{border-radius:10px;box-shadow:0 8px 24px rgb(0 0 0 / .18);font-size:24px;height:56px;padding:0 6px 5px 0;width:56px}.logo-large>.logo-text{font-size:36px}#splash{align-items:center;background-color:var(--console-bg);display:flex;inset:0;justify-content:center;position:fixed;transition:opacity .35s ease,visibility .35s;z-index:1000}#splash.hidden{opacity:0;visibility:hidden}.splash-content{align-items:center;animation:splash-in .4s ease-out both;display:flex;flex-direction:column;gap:24px}.splash-progress{background-color:var(--toolbar-border);border-radius:3px;height:3px;overflow:hidden;width:140px}.splash-progress>div{animation:splash-progress 1.1s ease-in-out infinite;background-color:var(--accent);border-radius:inherit;height:100%;width:40%}@keyframes splash-in{from{opacity:0;transform:translateY(6px)}}@keyframes splash-progress{from{transform:translateX(-100%)}to{transform:translateX(250%)}}.dialog-backdrop{align-items:center;animation:fade-in .12s ease-out;background-color:var(--backdrop);display:flex;inset:0;justify-content:center;position:fixed;z-index:900}.dialog{animation:dialog-in .15s ease-out;background-color:var(--dialog-bg);border:1px solid var(--toolbar-border);border-radius:8px;box-shadow:0 12px 40px rgb(0 0 0 / .3);color:var(--console-text);font-size:13px;padding:16px;width:min(360px,calc(100% - 32px))}.dialog-title{font-size:14px;font-weight:600;margin-bottom:6px}.dialog-message{color:var(--muted-text);line-height:1.45}.dialog-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}.dialog-button{background:0 0;border:1px solid var(--toolbar-border);border-radius:4px;color:inherit;cursor:pointer;font:inherit;height:28px;padding:0 12px}.dialog-button:hover{background-color:var(--button-hover)}.dialog-button.primary{background-color:var(--accent);border-color:var(--accent);color:var(--accent-text);font-weight:600}.dialog-button.primary:hover{background-color:var(--accent-hover)}.dialog-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}#bottomNav button.logo-button{margin-left:-4px;padding:0 4px}.about-dialog{display:flex;flex-direction:column;max-height:calc(100% - 24px);padding:0;width:min(620px,calc(100% - 24px))}.about-dialog.is-export{height:min(560px,calc(100% - 24px))}.about-header{align-items:center;border-bottom:1px solid var(--toolbar-border);display:flex;flex:0 0 auto;padding:0 8px 0 12px}.tabs{display:flex;flex-grow:1;gap:4px}.tab{background:0 0;border:0;border-bottom:2px solid transparent;color:var(--muted-text);cursor:pointer;font:inherit;font-weight:600;padding:10px 8px 8px}.tab:hover{color:var(--console-text)}.tab.active{border-bottom-color:var(--accent);color:var(--console-text)}.close-button{align-items:center;background:0 0;border:0;border-radius:4px;color:var(--muted-text);cursor:pointer;display:inline-flex;font-size:16px;height:28px;justify-content:center;width:28px}.close-button:hover{background-color:var(--button-hover);color:var(--console-text)}.close-button:focus-visible,.segmented>button:focus-visible,.tab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}.about-body{flex:1 1 auto;min-height:0;overflow:auto;padding:16px}.about-title{align-items:center;display:flex;gap:12px}.logo-medium>.logo-mark{border-radius:7px;font-size:16px;height:40px;padding:0 4px 4px 0;width:40px}.logo-medium>.logo-text{display:none}.about-name{font-size:17px;font-weight:700}.about-aka{color:var(--muted-text);font-size:13px;font-weight:400;margin-left:4px}.about-version{color:var(--muted-text);font-size:12px}.about-description{line-height:1.5;margin:12px 0}.about-links{display:flex;flex-wrap:wrap;gap:6px 16px}.about-links a{color:var(--accent);font-weight:600;text-decoration:none}.about-links a:hover{text-decoration:underline}.about-body h3{color:var(--muted-text);font-size:11px;letter-spacing:.05em;margin:18px 0 6px;text-transform:uppercase}.about-details{display:grid;gap:4px 16px;grid-template-columns:max-content 1fr;margin:0}.about-details dt{color:var(--muted-text)}.about-details dd{margin:0}.about-details kbd{background-color:var(--toolbar-bg);border:1px solid var(--toolbar-border);border-bottom-width:2px;border-radius:4px;font-family:inherit;font-size:11px;padding:0 4px}.about-footer{border-top:1px solid var(--toolbar-border);color:var(--muted-text);font-size:12px;margin-top:18px;padding-top:12px}.export-body{display:flex;flex-direction:column;gap:10px}.export-options{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between}.segmented{border:1px solid var(--toolbar-border);border-radius:6px;display:inline-flex;overflow:hidden}.segmented>button{background:0 0;border:0;color:var(--muted-text);cursor:pointer;font:inherit;font-size:12px;font-weight:600;padding:5px 10px}.segmented>button+button{border-left:1px solid var(--toolbar-border)}.segmented>button:hover{background-color:var(--button-hover)}.segmented>button.active{background-color:var(--accent);color:var(--accent-text)}.export-note{color:var(--muted-text);font-size:12px}.export-preview{border:1px solid var(--toolbar-border);border-radius:6px;flex:1 1 auto;min-height:120px;overflow:hidden}.export-actions{display:flex;gap:8px;justify-content:flex-end}.file-input{display:none}.more-menu{background-color:var(--dialog-bg);border:1px solid var(--toolbar-border);border-radius:8px;bottom:38px;box-shadow:0 8px 28px rgb(0 0 0 / .25);color:var(--console-text);font-size:13px;max-height:calc(100% - 48px);min-width:236px;overflow:auto;padding:4px;position:absolute;right:6px;z-index:800}.menu-item{align-items:center;background:0 0;border:0;border-radius:5px;color:inherit;cursor:pointer;display:flex;font:inherit;gap:8px;padding:6px 8px;text-align:left;width:100%}.menu-item:focus-visible,.menu-item:hover:not(:disabled){background-color:var(--button-hover);outline:0}.menu-item:disabled{cursor:not-allowed;opacity:.4}.menu-icon{color:var(--muted-text);display:inline-flex;font-size:14px;justify-content:center;width:16px}.menu-icon svg{transform:none!important}.menu-row{align-items:center;display:flex;gap:2px;padding:2px 2px 2px 8px}.menu-row-label{flex-grow:1}.menu-step{font-weight:600;justify-content:center;width:auto}.menu-percent{color:var(--muted-text);font-variant-numeric:tabular-nums;font-weight:400;min-width:52px}.menu-separator{background-color:var(--toolbar-border);height:1px;margin:4px 0}.popped-out{align-items:center;background-color:var(--console-bg);color:var(--console-text);display:flex;inset:0;justify-content:center;position:fixed;z-index:950}.popped-out-content{align-items:center;display:flex;flex-direction:column;gap:8px;padding:16px;text-align:center}.popped-out-title{font-size:15px;font-weight:600;margin-top:8px}.popped-out-text{color:var(--muted-text);font-size:13px}@keyframes fade-in{from{opacity:0}}@keyframes dialog-in{from{opacity:0;transform:scale(.96)}}.rotated-90deg{transform:rotate(90deg)}.align-top{vertical-align:top!important}.d-inline-block{display:inline-block!important}.d-block{display:block!important}.d-flex{display:flex!important}.d-inline-flex{display:inline-flex!important}.no-select{-webkit-user-select:none;user-select:none}:root{color-scheme:light;--console-font:ui-monospace,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;--console-bg:#fff;--console-text:#1f1f1f;--row-border:#f0f0f0;--arrow:#727272;--chevron:#9aa0a6;--entry-key:#881391;--preview-key:#5f6368;--string:#c41a16;--number:#1a1aa6;--null:#80868b;--header-bg:#f1f3f4;--header-text:#3c4043;--warn-bg:#fffbe5;--warn-border:#fff5c2;--warn-text:#5c3c00;--warn-icon:#e8a600;--error-bg:#fff0f0;--error-border:#ffd6d6;--error-text:#dc362e;--error-icon:#dc362e;--table-header-bg:#f3f3f3;--table-border:#d0d0d0;--toolbar-bg:#f3f3f3;--toolbar-border:#d6d6d6;--toolbar-text:#333;--muted-text:#5f6368;--button-hover:rgb(0 0 0 / 0.08);--accent:#1a73e8;--accent-hover:#1765cc;--accent-text:#fff;--divider-bg:#f3f3f3;--divider-hover-bg:#e8eaed;--divider-grip:#b0b0b0;--dialog-bg:#fff;--backdrop:rgb(0 0 0 / 0.25)}:root[data-theme=dark]{color-scheme:dark;--console-bg:#242424;--console-text:#e3e3e3;--row-border:#3a3a3a;--arrow:#9aa0a6;--chevron:#80868b;--entry-key:#5db0d7;--preview-key:#9aa0a6;--string:#f28b54;--number:#9980ff;--null:#8e8e8e;--header-bg:#2d2e30;--header-text:#c4c7c5;--warn-bg:#332b00;--warn-border:#665500;--warn-text:#ffd17a;--warn-icon:#ffd17a;--error-bg:#290000;--error-border:#5c0000;--error-text:#ff8080;--error-icon:#ff6b6b;--table-header-bg:#2e2e2e;--table-border:#4a4a4a;--toolbar-bg:#2b2b2b;--toolbar-border:#474747;--toolbar-text:#e3e3e3;--muted-text:#9aa0a6;--button-hover:rgb(255 255 255 / 0.1);--accent:#8ab4f8;--accent-hover:#aecbfa;--accent-text:#202124;--divider-bg:#2b2b2b;--divider-hover-bg:#333;--divider-grip:#6b6b6b;--dialog-bg:#2d2e30;--backdrop:rgb(0 0 0 / 0.5)}#displays{background-color:var(--console-bg);color:var(--console-text)}#displays>div{font-family:var(--console-font);font-size:calc(12px * var(--text-scale, 1));line-height:calc(16px * var(--text-scale, 1))}.console-row{border-bottom:1px solid var(--row-border);padding:2px 8px 2px 24px;position:relative;white-space:pre-wrap;word-break:break-word}.console-row>.row-icon{left:6px;line-height:0;position:absolute;top:4px}.log-error,.log-warn{margin-top:-1px}.log-warn{background-color:var(--warn-bg);border-bottom-color:var(--warn-border);border-top:1px solid var(--warn-border);color:var(--warn-text)}.log-warn>.row-icon{color:var(--warn-icon)}.log-error{background-color:var(--error-bg);border-bottom-color:var(--error-border);border-top:1px solid var(--error-border);color:var(--error-text)}.log-error>.row-icon{color:var(--error-icon)}.console-row{padding-left:calc(24px + var(--depth,0) * 16px)}.console-row>.row-icon{left:calc(6px + var(--depth,0) * 16px)}.group-header{cursor:pointer;font-weight:700}.group-header>.row-icon.arrow{top:5px}.log-assert{background-color:var(--error-bg);border-bottom-color:var(--error-border);border-top:1px solid var(--error-border);color:var(--error-text);margin-top:-1px}.log-assert>.row-icon{color:var(--error-icon)}.log-result>.row-icon{color:var(--chevron)}.trace-stack{color:var(--null);padding-left:1ch}.splash-message{color:var(--muted-text);font-size:13px;max-width:280px;text-align:center}.splash-slow{animation:show-after-delay 0s 10s both}@keyframes show-after-delay{from{visibility:hidden}to{visibility:visible}}#splash.failed .splash-progress,#splash.failed .splash-slow,.splash-error{display:none}#splash.failed .splash-error{display:block}.code-header{background-color:var(--header-bg);border-bottom:1px solid var(--row-border);color:var(--header-text);font-weight:700;padding:2px 8px;white-space:pre-wrap}.code-header.toggleable{cursor:pointer}.code-row .copy-to-editor-button{align-items:center;background-color:var(--console-bg);border:1px solid var(--toolbar-border);border-radius:4px;color:var(--toolbar-text);cursor:pointer;display:inline-flex;height:22px;justify-content:center;opacity:0;padding:0;position:absolute;right:6px;top:2px;transition:opacity .15s;width:22px}.code-row .copy-to-editor-button:focus-visible,.code-row:hover .copy-to-editor-button{opacity:1}.code-row .copy-to-editor-button:hover{background-color:var(--toolbar-bg)}@media (hover:none){.code-row .copy-to-editor-button{opacity:.8}}.notice{color:var(--null);font-style:italic}.code-row>.row-icon{color:var(--chevron)}.code-row code,.code-row pre{background:0 0!important;font-family:var(--console-font)!important;font-size:calc(12px * var(--text-scale, 1))!important;line-height:calc(16px * var(--text-scale, 1))!important;padding:0!important;text-shadow:none!important}.js-value{max-width:100%;vertical-align:top}.row-content>.js-value+.js-value{margin-left:1ch}.js-value-header.expandable{cursor:default}.js-value .expansion{padding-left:12px}.js-value .loading{color:var(--null);padding-left:12px}.arrow{display:inline-block;height:10px;position:relative;width:12px}.arrow.expandable::before{border-color:transparent transparent transparent var(--arrow);border-style:solid;border-width:4px 0 4px 6px;content:'';left:2px;position:absolute;top:1px;transform-origin:3px 4px;transition:transform .1s}.arrow.expandable.expanded::before{transform:rotate(90deg)}.entry-key{color:var(--entry-key)}.entry-key.dim{opacity:.6}.t-key{color:var(--preview-key)}.t-regexp,.t-string,.t-symbol{color:var(--string)}.t-number{color:var(--number)}.t-null{color:var(--null)}.t-function{font-style:italic}.t-node{color:var(--entry-key)}.console-table{border:1px solid var(--table-border);border-collapse:collapse;margin:2px 0 4px;white-space:nowrap}.console-table td,.console-table th{border-left:1px solid var(--table-border);max-width:300px;overflow:hidden;padding:1px 4px;text-align:left;text-overflow:ellipsis}.console-table th{background-color:var(--table-header-bg);border-bottom:1px solid var(--table-border);font-weight:400}";
+  const VIEWER_IFRAME_CSS = "[v-cloak]{display:none}body,html{height:100%;margin:0}body{background-color:var(--console-bg);font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}#vueApp{display:flex;flex-direction:column;inset:0;position:fixed}#main{display:grid;flex-grow:1;gap:0;min-height:0;position:relative}#main.is-moving-divider{-webkit-user-select:none;user-select:none}#main.col-orient.is-moving-divider{cursor:col-resize}#main.row-orient.is-moving-divider{cursor:row-resize}#main.is-moving-divider::after{background-color:var(--accent);content:'';position:absolute;z-index:99}#main.col-orient.is-moving-divider::after{bottom:0;left:calc(100% - var(--temp-editor-pct) - var(--divider-size)/ 2 - 1px);top:0;width:2px}#main.row-orient.is-moving-divider::after{height:2px;left:0;right:0;top:calc(100% - var(--temp-editor-pct) - var(--divider-size)/ 2 - 1px)}#main.col-orient{grid-template-columns:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2);grid-template-rows:1fr}#main.row-orient{grid-template-columns:1fr;grid-template-rows:1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size)/ 2)}.divider{background-color:var(--divider-bg);box-sizing:border-box;position:relative;transition:background-color .15s}#main.col-orient .divider{border-left:1px solid var(--toolbar-border);border-right:1px solid var(--toolbar-border);cursor:col-resize}#main.row-orient .divider{border-bottom:1px solid var(--toolbar-border);border-top:1px solid var(--toolbar-border);cursor:row-resize}.divider::after{background-color:var(--divider-grip);border-radius:2px;content:'';left:50%;position:absolute;top:50%;transform:translate(-50%,-50%);transition:background-color .15s}#main.col-orient .divider::after{height:32px;width:2px}#main.row-orient .divider::after{height:2px;width:32px}#main.is-moving-divider .divider,.divider:hover{background-color:var(--divider-hover-bg)}#main.is-moving-divider .divider::after,.divider:hover::after{background-color:var(--accent)}#displays{position:relative}#displays>div{position:absolute;inset:0;overflow:auto}#bottomNav{align-items:center;background-color:var(--toolbar-bg);border-top:1px solid var(--toolbar-border);color:var(--toolbar-text);display:flex;flex:0 0 auto;font-size:12px;gap:8px;height:32px;padding:0 6px 0 8px;-webkit-user-select:none;user-select:none}#bottomNav>.brand{align-items:center;display:flex;flex-grow:1;gap:8px}.runner-badge{border:1px solid var(--toolbar-border);border-radius:999px;color:var(--muted-text);font-size:10px;letter-spacing:.04em;line-height:15px;padding:0 6px;text-transform:uppercase}#bottomNav>.buttons{align-items:center;display:flex;gap:2px}#bottomNav .separator{background-color:var(--toolbar-border);height:16px;margin:0 4px;width:1px}#bottomNav button{align-items:center;background:0 0;border:0;border-radius:4px;color:inherit;cursor:pointer;display:inline-flex;font:inherit;gap:5px;height:24px;justify-content:center;min-width:26px;padding:0 6px}#bottomNav button>span:not(.label){display:inline-flex;font-size:14px}#bottomNav button svg:not(.spin){transform:none!important}#bottomNav button:hover:not(:disabled){background-color:var(--button-hover)}#bottomNav button:disabled{cursor:not-allowed;opacity:.45}#bottomNav button.primary{background-color:var(--accent);color:var(--accent-text);font-weight:600;margin-left:2px;padding:0 10px 0 8px}#bottomNav button.primary>span:not(.label){font-size:11px}#bottomNav button.primary:hover:not(:disabled){background-color:var(--accent-hover)}#bottomNav button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}.spin{animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.logo{align-items:center;color:var(--toolbar-text);display:inline-flex;font-weight:700;gap:5px;letter-spacing:-.01em;line-height:1}.logo-mark{align-items:flex-end;background-color:#f7df1e;border-radius:3px;box-sizing:border-box;color:#1a1a1a;display:inline-flex;font-size:9.5px;font-weight:800;height:18px;justify-content:flex-end;letter-spacing:-.02em;padding:0 2px 2px 0;width:18px}.logo-text{font-size:14px}.logo-large{gap:12px}.logo-large>.logo-mark{border-radius:10px;box-shadow:0 8px 24px rgb(0 0 0 / .18);font-size:24px;height:56px;padding:0 6px 5px 0;width:56px}.logo-large>.logo-text{font-size:36px}#splash{align-items:center;background-color:var(--console-bg);display:flex;inset:0;justify-content:center;position:fixed;transition:opacity .35s ease,visibility .35s;z-index:1000}#splash.hidden{opacity:0;visibility:hidden}.splash-content{align-items:center;animation:splash-in .4s ease-out both;display:flex;flex-direction:column;gap:24px}.splash-progress{background-color:var(--toolbar-border);border-radius:3px;height:3px;overflow:hidden;width:140px}.splash-progress>div{animation:splash-progress 1.1s ease-in-out infinite;background-color:var(--accent);border-radius:inherit;height:100%;width:40%}@keyframes splash-in{from{opacity:0;transform:translateY(6px)}}@keyframes splash-progress{from{transform:translateX(-100%)}to{transform:translateX(250%)}}.dialog-backdrop{align-items:center;animation:fade-in .12s ease-out;background-color:var(--backdrop);display:flex;inset:0;justify-content:center;position:fixed;z-index:900}.dialog{animation:dialog-in .15s ease-out;background-color:var(--dialog-bg);border:1px solid var(--toolbar-border);border-radius:8px;box-shadow:0 12px 40px rgb(0 0 0 / .3);color:var(--console-text);font-size:13px;padding:16px;width:min(360px,calc(100% - 32px))}.dialog-title{font-size:14px;font-weight:600;margin-bottom:6px}.dialog-message{color:var(--muted-text);line-height:1.45}.dialog-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}.dialog-button{background:0 0;border:1px solid var(--toolbar-border);border-radius:4px;color:inherit;cursor:pointer;font:inherit;height:28px;padding:0 12px}.dialog-button:hover{background-color:var(--button-hover)}.dialog-button.primary{background-color:var(--accent);border-color:var(--accent);color:var(--accent-text);font-weight:600}.dialog-button.primary:hover{background-color:var(--accent-hover)}.dialog-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}#bottomNav button.logo-button{margin-left:-4px;padding:0 4px}.about-dialog{display:flex;flex-direction:column;max-height:calc(100% - 24px);padding:0;width:min(620px,calc(100% - 24px))}.about-dialog.is-export{height:min(560px,calc(100% - 24px))}.about-header{align-items:center;border-bottom:1px solid var(--toolbar-border);display:flex;flex:0 0 auto;padding:0 8px 0 12px}.tabs{display:flex;flex-grow:1;gap:4px}.tab{background:0 0;border:0;border-bottom:2px solid transparent;color:var(--muted-text);cursor:pointer;font:inherit;font-weight:600;padding:10px 8px 8px}.tab:hover{color:var(--console-text)}.tab.active{border-bottom-color:var(--accent);color:var(--console-text)}.close-button{align-items:center;background:0 0;border:0;border-radius:4px;color:var(--muted-text);cursor:pointer;display:inline-flex;font-size:16px;height:28px;justify-content:center;width:28px}.close-button:hover{background-color:var(--button-hover);color:var(--console-text)}.close-button:focus-visible,.segmented>button:focus-visible,.tab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}.about-body{flex:1 1 auto;min-height:0;overflow:auto;padding:16px}.about-title{align-items:center;display:flex;gap:12px}.logo-medium>.logo-mark{border-radius:7px;font-size:16px;height:40px;padding:0 4px 4px 0;width:40px}.logo-medium>.logo-text{display:none}.about-name{font-size:17px;font-weight:700}.about-aka{color:var(--muted-text);font-size:13px;font-weight:400;margin-left:4px}.about-version{color:var(--muted-text);font-size:12px}.about-description{line-height:1.5;margin:12px 0}.about-links{display:flex;flex-wrap:wrap;gap:6px 16px}.about-links a{color:var(--accent);font-weight:600;text-decoration:none}.about-links a:hover{text-decoration:underline}.about-body h3{color:var(--muted-text);font-size:11px;letter-spacing:.05em;margin:18px 0 6px;text-transform:uppercase}.about-details{display:grid;gap:4px 16px;grid-template-columns:max-content 1fr;margin:0}.about-details dt{color:var(--muted-text)}.about-details dd{margin:0}.about-details kbd{background-color:var(--toolbar-bg);border:1px solid var(--toolbar-border);border-bottom-width:2px;border-radius:4px;font-family:inherit;font-size:11px;padding:0 4px}.about-footer{border-top:1px solid var(--toolbar-border);color:var(--muted-text);font-size:12px;margin-top:18px;padding-top:12px}.export-body{display:flex;flex-direction:column;gap:10px}.export-options{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between}.segmented{border:1px solid var(--toolbar-border);border-radius:6px;display:inline-flex;overflow:hidden}.segmented>button{background:0 0;border:0;color:var(--muted-text);cursor:pointer;font:inherit;font-size:12px;font-weight:600;padding:5px 10px}.segmented>button+button{border-left:1px solid var(--toolbar-border)}.segmented>button:hover{background-color:var(--button-hover)}.segmented>button.active{background-color:var(--accent);color:var(--accent-text)}.export-note{color:var(--muted-text);font-size:12px}.export-preview{border:1px solid var(--toolbar-border);border-radius:6px;flex:1 1 auto;min-height:120px;overflow:hidden}.export-actions{display:flex;gap:8px;justify-content:flex-end}.file-input{display:none}.more-menu{background-color:var(--dialog-bg);border:1px solid var(--toolbar-border);border-radius:8px;bottom:38px;box-shadow:0 8px 28px rgb(0 0 0 / .25);color:var(--console-text);font-size:13px;max-height:calc(100% - 48px);min-width:236px;overflow:auto;padding:4px;position:absolute;right:6px;z-index:800}.menu-item{align-items:center;background:0 0;border:0;border-radius:5px;color:inherit;cursor:pointer;display:flex;font:inherit;gap:8px;padding:6px 8px;text-align:left;width:100%}.menu-item:focus-visible,.menu-item:hover:not(:disabled){background-color:var(--button-hover);outline:0}.menu-item:disabled{cursor:not-allowed;opacity:.4}.menu-icon{color:var(--muted-text);display:inline-flex;font-size:14px;justify-content:center;width:16px}.menu-icon svg{transform:none!important}.menu-row{align-items:center;display:flex;gap:2px;padding:2px 2px 2px 8px}.menu-row-label{flex-grow:1}.menu-step{font-weight:600;justify-content:center;width:auto}.menu-percent{color:var(--muted-text);font-variant-numeric:tabular-nums;font-weight:400;min-width:52px}.menu-separator{background-color:var(--toolbar-border);height:1px;margin:4px 0}.value-menu{bottom:auto;min-width:220px;position:fixed;right:auto;z-index:850}.toast{animation:fade-in .15s ease-out;background-color:var(--console-text);border-radius:6px;bottom:44px;box-shadow:0 6px 20px rgb(0 0 0 / .25);color:var(--console-bg);font-size:12px;left:50%;max-width:calc(100% - 32px);padding:6px 12px;pointer-events:none;position:fixed;transform:translateX(-50%);z-index:860}.popped-out{align-items:center;background-color:var(--console-bg);color:var(--console-text);display:flex;inset:0;justify-content:center;position:fixed;z-index:950}.popped-out-content{align-items:center;display:flex;flex-direction:column;gap:8px;padding:16px;text-align:center}.popped-out-title{font-size:15px;font-weight:600;margin-top:8px}.popped-out-text{color:var(--muted-text);font-size:13px}@keyframes fade-in{from{opacity:0}}@keyframes dialog-in{from{opacity:0;transform:scale(.96)}}.rotated-90deg{transform:rotate(90deg)}.align-top{vertical-align:top!important}.d-inline-block{display:inline-block!important}.d-block{display:block!important}.d-flex{display:flex!important}.d-inline-flex{display:inline-flex!important}.no-select{-webkit-user-select:none;user-select:none}:root{color-scheme:light;--console-font:ui-monospace,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;--console-bg:#fff;--console-text:#1f1f1f;--row-border:#f0f0f0;--arrow:#727272;--chevron:#9aa0a6;--entry-key:#881391;--preview-key:#5f6368;--string:#c41a16;--number:#1a1aa6;--null:#80868b;--header-bg:#f1f3f4;--header-text:#3c4043;--warn-bg:#fffbe5;--warn-border:#fff5c2;--warn-text:#5c3c00;--warn-icon:#e8a600;--error-bg:#fff0f0;--error-border:#ffd6d6;--error-text:#dc362e;--error-icon:#dc362e;--table-header-bg:#f3f3f3;--table-border:#d0d0d0;--toolbar-bg:#f3f3f3;--toolbar-border:#d6d6d6;--toolbar-text:#333;--muted-text:#5f6368;--button-hover:rgb(0 0 0 / 0.08);--accent:#1a73e8;--accent-hover:#1765cc;--accent-text:#fff;--divider-bg:#f3f3f3;--divider-hover-bg:#e8eaed;--divider-grip:#b0b0b0;--dialog-bg:#fff;--backdrop:rgb(0 0 0 / 0.25)}:root[data-theme=dark]{color-scheme:dark;--console-bg:#242424;--console-text:#e3e3e3;--row-border:#3a3a3a;--arrow:#9aa0a6;--chevron:#80868b;--entry-key:#5db0d7;--preview-key:#9aa0a6;--string:#f28b54;--number:#9980ff;--null:#8e8e8e;--header-bg:#2d2e30;--header-text:#c4c7c5;--warn-bg:#332b00;--warn-border:#665500;--warn-text:#ffd17a;--warn-icon:#ffd17a;--error-bg:#290000;--error-border:#5c0000;--error-text:#ff8080;--error-icon:#ff6b6b;--table-header-bg:#2e2e2e;--table-border:#4a4a4a;--toolbar-bg:#2b2b2b;--toolbar-border:#474747;--toolbar-text:#e3e3e3;--muted-text:#9aa0a6;--button-hover:rgb(255 255 255 / 0.1);--accent:#8ab4f8;--accent-hover:#aecbfa;--accent-text:#202124;--divider-bg:#2b2b2b;--divider-hover-bg:#333;--divider-grip:#6b6b6b;--dialog-bg:#2d2e30;--backdrop:rgb(0 0 0 / 0.5)}#displays{background-color:var(--console-bg);color:var(--console-text)}#displays>div{font-family:var(--console-font);font-size:calc(12px * var(--text-scale, 1));line-height:calc(16px * var(--text-scale, 1))}.console-row{border-bottom:1px solid var(--row-border);padding:2px 8px 2px 24px;position:relative;white-space:pre-wrap;word-break:break-word}.console-row>.row-icon{left:6px;line-height:0;position:absolute;top:4px}.log-error,.log-warn{margin-top:-1px}.log-warn{background-color:var(--warn-bg);border-bottom-color:var(--warn-border);border-top:1px solid var(--warn-border);color:var(--warn-text)}.log-warn>.row-icon{color:var(--warn-icon)}.log-error{background-color:var(--error-bg);border-bottom-color:var(--error-border);border-top:1px solid var(--error-border);color:var(--error-text)}.log-error>.row-icon{color:var(--error-icon)}.console-row{padding-left:calc(24px + var(--depth,0) * 16px)}.console-row>.row-icon{left:calc(6px + var(--depth,0) * 16px)}.group-header{cursor:pointer;font-weight:700}.group-header>.row-icon.arrow{top:5px}.log-assert{background-color:var(--error-bg);border-bottom-color:var(--error-border);border-top:1px solid var(--error-border);color:var(--error-text);margin-top:-1px}.log-assert>.row-icon{color:var(--error-icon)}.log-result>.row-icon{color:var(--chevron)}.trace-stack{color:var(--null);padding-left:1ch}.splash-message{color:var(--muted-text);font-size:13px;max-width:280px;text-align:center}.splash-slow{animation:show-after-delay 0s 10s both}@keyframes show-after-delay{from{visibility:hidden}to{visibility:visible}}#splash.failed .splash-progress,#splash.failed .splash-slow,.splash-error{display:none}#splash.failed .splash-error{display:block}.code-header{background-color:var(--header-bg);border-bottom:1px solid var(--row-border);color:var(--header-text);font-weight:700;padding:2px 8px;white-space:pre-wrap}.code-header.toggleable{cursor:pointer}.code-row .copy-to-editor-button{align-items:center;background-color:var(--console-bg);border:1px solid var(--toolbar-border);border-radius:4px;color:var(--toolbar-text);cursor:pointer;display:inline-flex;height:22px;justify-content:center;opacity:0;padding:0;position:absolute;right:6px;top:2px;transition:opacity .15s;width:22px}.code-row .copy-to-editor-button:focus-visible,.code-row:hover .copy-to-editor-button{opacity:1}.code-row .copy-to-editor-button:hover{background-color:var(--toolbar-bg)}@media (hover:none){.code-row .copy-to-editor-button{opacity:.8}}.notice{color:var(--null);font-style:italic}.code-row>.row-icon{color:var(--chevron)}.code-row code,.code-row pre{background:0 0!important;font-family:var(--console-font)!important;font-size:calc(12px * var(--text-scale, 1))!important;line-height:calc(16px * var(--text-scale, 1))!important;padding:0!important;text-shadow:none!important}.js-value{max-width:100%;vertical-align:top}.row-content>.js-value+.js-value{margin-left:1ch}.js-value-header.expandable{cursor:default}.js-value .expansion{padding-left:12px}.js-value .loading{color:var(--null);padding-left:12px}.arrow{display:inline-block;height:10px;position:relative;width:12px}.arrow.expandable::before{border-color:transparent transparent transparent var(--arrow);border-style:solid;border-width:4px 0 4px 6px;content:'';left:2px;position:absolute;top:1px;transform-origin:3px 4px;transition:transform .1s}.arrow.expandable.expanded::before{transform:rotate(90deg)}.entry-key{color:var(--entry-key)}.entry-key.dim{opacity:.6}.t-key{color:var(--preview-key)}.t-regexp,.t-string,.t-symbol{color:var(--string)}.t-number{color:var(--number)}.t-null{color:var(--null)}.t-function{font-style:italic}.t-node{color:var(--entry-key)}.console-table{border:1px solid var(--table-border);border-collapse:collapse;margin:2px 0 4px;white-space:nowrap}.console-table td,.console-table th{border-left:1px solid var(--table-border);max-width:300px;overflow:hidden;padding:1px 4px;text-align:left;text-overflow:ellipsis}.console-table th{background-color:var(--table-header-bg);border-bottom:1px solid var(--table-border);font-weight:400}";
   /**
    * Information about this package (eg. its version).
    * @type {{name: string, version: string, homepage: string, repoUrl: string, bugsUrl: string}}
@@ -14,7 +14,7 @@
    * Viewer IFRAME's HTML code
    * @type {string}
    */
-  const VIEWER_IFRAME_HTML = "<div id=\"splash\" aria-label=\"Loading\"><div class=\"splash-content\"><span class=\"logo logo-large\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div class=\"splash-progress\"><div></div></div><div class=\"splash-message splash-slow\">Still loading&hellip;</div><div class=\"splash-message splash-error\">JS Box couldn&rsquo;t load. Please check your connection and reload the page.</div></div></div><div id=\"vueApp\" v-cloak><input type=\"file\" ref=\"fileInput\" class=\"file-input\" accept=\".js,.mjs,.cjs,.txt,text/javascript,text/plain\" tabindex=\"-1\" aria-hidden=\"true\" @change=\"onFileChosen\"><div id=\"main\" ref=\"main\" :class=\"mainElemClassNames\" :style=\"mainElemStyles\" @mousedown=\"onMainElemMouseDown\"><div id=\"displays\"><div ref=\"displaysScroller\" @scroll=\"onDisplaysScroll\"><template v-for=\"display in displays\"><div v-if=\"display.type === 'prism'\"><div v-if=\"display.isHidden\" class=\"code-header toggleable no-select\" @click=\"display.isCodeShown = !display.isCodeShown\" :title=\"display.isCodeShown ? 'Hide Code' : 'Show Code'\"><span :class=\"['arrow', 'expandable', display.isCodeShown ? 'expanded' : '']\"></span>{{ display.header || 'Hidden code' }}</div><div v-else-if=\"display.header\" class=\"code-header\">{{ display.header }}</div><div v-if=\"display.isCodeShown\" class=\"console-row code-row\"><span class=\"row-icon\"><icon name=\"chevron\"></icon></span><prism language=\"javascript\" :code=\"display.value\" :is-dark=\"theme === 'dark'\" match-braces></prism><button class=\"copy-to-editor-button\" title=\"Copy to editor\" @click=\"copyToEditor(display.value)\"><icon name=\"copyToEditor\"></icon></button></div></div><div v-if=\"display.type === 'log' &amp;&amp; !isInCollapsedGroup(display)\" :class=\"['console-row', 'log-' + display.key, display.groupId ? 'group-header' : '']\" :style=\"{'--depth': display.groupIds.length}\" :title=\"display.name\" @click=\"onLogRowClick(display, $event)\"><span v-if=\"display.key === 'error' || display.key === 'assert'\" class=\"row-icon\"><icon name=\"consoleError\"></icon></span><span v-else-if=\"display.key === 'warn'\" class=\"row-icon\"><icon name=\"consoleWarning\"></icon></span><span v-else-if=\"display.key === 'result'\" class=\"row-icon\"><icon name=\"result\"></icon></span><span v-else-if=\"display.groupId\" :class=\"['row-icon', 'arrow', 'expandable', display.isCollapsed ? '' : 'expanded']\"></span><div class=\"row-content\"><table v-if=\"display.table\" class=\"console-table\"><thead><tr><th v-for=\"header in display.table.headers\">{{ header }}</th></tr></thead><tbody><tr v-for=\"row in display.table.rows\"><td>{{ row.index }}</td><td v-for=\"cell in row.cells\"><template v-if=\"cell\"><span v-for=\"part in cell.parts\" :class=\"'t-' + part[0]\">{{ part[1] }}</span></template></td></tr></tbody></table><js-value v-for=\"(description, index) in display.descriptions\" :description=\"description\" :path=\"[display.logId, index]\"></js-value><div v-if=\"display.stack\" class=\"trace-stack\">{{ display.stack }}</div></div></div><div v-if=\"display.type === 'notice'\" class=\"console-row notice\">{{ display.message }}</div><div v-if=\"display.type === 'error'\" class=\"console-row log-error\"><span class=\"row-icon\"><icon name=\"consoleError\"></icon></span><div class=\"row-content\">{{ display.message }}</div></div></template></div></div><div class=\"divider\" ref=\"mainDivider\"></div><div id=\"editor\"><ace-editor v-model=\"jsCode\" language=\"javascript\" :theme=\"theme\" :font-size=\"Math.round(12 * textScale)\" @key-combo=\"onEditorKeyCombo\" height=\"100%\"></ace-editor></div></div><div id=\"bottomNav\"><div class=\"brand\"><button class=\"logo-button\" title=\"About JS Box\" @click=\"openAbout('about')\"><span class=\"logo\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span></button> <span class=\"runner-badge\" :title=\"runnerMode === 'window' ? 'Code runs directly in this page' : 'Code runs in a Web Worker (no DOM access)'\">{{ runnerMode === 'window' ? 'Window' : 'Worker' }}</span></div><div class=\"buttons\"><template v-for=\"bottomButton in bottomButtons\"><span v-if=\"bottomButton.isSeparator\" class=\"separator\"></span> <button v-else :class=\"bottomButton.className\" @click=\"bottomButton.callback.call(this, $event)\" :title=\"bottomButton.title\" :disabled=\"bottomButton.disableIf &amp;&amp; bottomButton.disableIf.call(this)\"><icon :name=\"bottomButton.iconName\"></icon><span v-if=\"bottomButton.label\" class=\"label\">{{ bottomButton.label }}</span></button></template></div></div><div v-if=\"isMenuOpen\" class=\"more-menu\" role=\"menu\" aria-label=\"More\" ref=\"moreMenu\" @keydown=\"onMenuKeyDown\"><div class=\"menu-row\" role=\"group\" aria-label=\"Text size\"><span class=\"menu-row-label\">Text size</span> <button class=\"menu-item menu-step\" role=\"menuitem\" title=\"Smaller text\" aria-label=\"Smaller text\" :disabled=\"!canShrinkText\" @click=\"changeTextScale(-1)\">A&minus;</button> <button class=\"menu-item menu-step menu-percent\" role=\"menuitem\" title=\"Reset the text size\" aria-label=\"Reset the text size\" @click=\"setTextScale(1)\">{{ Math.round(textScale * 100) }}%</button> <button class=\"menu-item menu-step\" role=\"menuitem\" title=\"Bigger text\" aria-label=\"Bigger text\" :disabled=\"!canGrowText\" @click=\"changeTextScale(1)\">A+</button></div><div class=\"menu-separator\"></div><button class=\"menu-item\" role=\"menuitem\" @click=\"openFile()\"><span class=\"menu-icon\"><icon name=\"open\"></icon></span>Open&hellip;</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"saveFile()\"><span class=\"menu-icon\"><icon name=\"save\"></icon></span>Save&hellip;</button><div class=\"menu-separator\"></div><button v-if=\"isPopOut\" class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); bringBack()\"><span class=\"menu-icon\"><icon name=\"popIn\"></icon></span>Bring back into the page</button> <button v-else class=\"menu-item\" role=\"menuitem\" @click=\"popOut()\"><span class=\"menu-icon\"><icon name=\"popOut\"></icon></span>Pop out into a window</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); openAbout('html')\"><span class=\"menu-icon\"><icon name=\"code\"></icon></span>Copy as HTML&hellip;</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); resetConsole()\"><span class=\"menu-icon\"><icon name=\"refresh\"></icon></span>Reset&hellip;</button><div class=\"menu-separator\"></div><button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); openAbout('about')\"><span class=\"menu-icon\"><icon name=\"info\"></icon></span>About JS Box</button></div><div v-if=\"isPoppedOut\" class=\"popped-out\"><div class=\"popped-out-content\"><span class=\"logo logo-medium\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div class=\"popped-out-title\">This console is open in a separate window</div><div class=\"popped-out-text\">Its code still runs in this page.</div><div class=\"dialog-buttons\"><button class=\"dialog-button\" @click=\"focusPopOut\">Show the window</button> <button class=\"dialog-button primary\" @click=\"requestPopIn\">Bring it back</button></div></div></div><div v-if=\"isAboutOpen\" class=\"dialog-backdrop\" @mousedown.self=\"closeAbout\" @keydown.esc=\"closeAbout\"><div :class=\"['dialog', 'about-dialog', aboutTab === 'html' ? 'is-export' : '']\" role=\"dialog\" aria-modal=\"true\" aria-label=\"About JS Box\"><div class=\"about-header\"><div class=\"tabs\" role=\"tablist\"><button role=\"tab\" :aria-selected=\"aboutTab === 'about'\" :class=\"['tab', aboutTab === 'about' ? 'active' : '']\" @click=\"aboutTab = 'about'\">About</button> <button role=\"tab\" :aria-selected=\"aboutTab === 'html'\" :class=\"['tab', aboutTab === 'html' ? 'active' : '']\" @click=\"aboutTab = 'html'\">Copy as HTML</button></div><button class=\"close-button\" ref=\"aboutCloseButton\" title=\"Close\" @click=\"closeAbout\"><icon name=\"close\"></icon></button></div><div v-if=\"aboutTab === 'about'\" class=\"about-body\"><div class=\"about-title\"><span class=\"logo logo-medium\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div><div class=\"about-name\">YourJS Box <span class=\"about-aka\">aka JS Box</span></div><div class=\"about-version\">Version {{ packageInfo.version }}</div></div></div><p class=\"about-description\">An interactive JavaScript console that can be embedded in any web page with a single script tag.</p><div class=\"about-links\"><a :href=\"packageInfo.homepage\" target=\"_blank\" rel=\"noopener\">Website</a> <a :href=\"packageInfo.repoUrl\" target=\"_blank\" rel=\"noopener\">GitHub</a> <a :href=\"packageInfo.repoUrl + '#readme'\" target=\"_blank\" rel=\"noopener\">Documentation</a> <a :href=\"packageInfo.bugsUrl\" target=\"_blank\" rel=\"noopener\">Report an issue</a></div><h3>This console</h3><dl class=\"about-details\"><dt>Code runs in</dt><dd>{{ runnerDescription }}</dd><dt>Theme</dt><dd>{{ themeDescription }}</dd><dt>Code blocks run as</dt><dd>{{ blockTypeDescription }}</dd><dt>Imports</dt><dd>{{ importsUrl ? 'Packages imported by name load from ' + importsUrl.replace('{specifier}', '\u2026') : 'Only URLs and paths can be imported' }}</dd><dt>Results</dt><dd>{{ showResults ? 'The value of the last expression is shown' : 'Not shown' }}</dd><dt>Layout</dt><dd>{{ layoutDescription }}</dd></dl><h3>Keyboard shortcuts</h3><dl class=\"about-details\"><dt><kbd>{{ modKey }}</kbd> + <kbd>Enter</kbd></dt><dd>Run the next block of code</dd><dt><kbd>Esc</kbd></dt><dd>Close this window, the menu or full screen</dd></dl><div class=\"about-footer\">MIT License &copy; 2023-present Christopher West &middot; Built with Vue {{ libraryVersions.vue }}, Ace {{ libraryVersions['ace-builds'] }}, Prism {{ libraryVersions.prismjs }} and Acorn {{ libraryVersions.acorn }}</div></div><div v-else class=\"about-body export-body\"><div class=\"export-options\"><div class=\"segmented\" role=\"radiogroup\" aria-label=\"Code\"><button v-for=\"option in exportCodeOptions\" role=\"radio\" :aria-checked=\"exportCode === option.value\" :class=\"exportCode === option.value ? 'active' : ''\" @click=\"exportCode = option.value\">{{ option.label }}</button></div><div class=\"segmented\" role=\"radiogroup\" aria-label=\"Format\"><button v-for=\"option in exportFormatOptions\" role=\"radio\" :aria-checked=\"exportFormat === option.value\" :class=\"exportFormat === option.value ? 'active' : ''\" @click=\"exportFormat = option.value\">{{ option.label }}</button></div></div><div class=\"export-note\">{{ exportNote }}</div><div class=\"export-preview\"><ace-editor :model-value=\"exportHtml\" language=\"html\" :theme=\"theme\" height=\"100%\" :read-only=\"true\"></ace-editor></div><div class=\"export-actions\"><button class=\"dialog-button\" @click=\"downloadExport\">Download page</button> <button class=\"dialog-button primary\" @click=\"copyExport\">{{ copyLabel }}</button></div></div></div></div><div v-if=\"dialog\" class=\"dialog-backdrop\" @mousedown.self=\"closeDialog(false)\" @keydown.esc=\"closeDialog(false)\"><div class=\"dialog\" role=\"alertdialog\" aria-modal=\"true\" :aria-label=\"dialog.title\"><div class=\"dialog-title\">{{ dialog.title }}</div><div class=\"dialog-message\">{{ dialog.message }}</div><div class=\"dialog-buttons\"><button class=\"dialog-button\" @click=\"closeDialog(false)\">Cancel</button> <button class=\"dialog-button primary\" ref=\"dialogConfirmButton\" @click=\"closeDialog(true)\">{{ dialog.confirmText }}</button></div></div></div></div>";
+  const VIEWER_IFRAME_HTML = "<div id=\"splash\" aria-label=\"Loading\"><div class=\"splash-content\"><span class=\"logo logo-large\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div class=\"splash-progress\"><div></div></div><div class=\"splash-message splash-slow\">Still loading&hellip;</div><div class=\"splash-message splash-error\">JS Box couldn&rsquo;t load. Please check your connection and reload the page.</div></div></div><div id=\"vueApp\" v-cloak><input type=\"file\" ref=\"fileInput\" class=\"file-input\" accept=\".js,.mjs,.cjs,.txt,text/javascript,text/plain\" tabindex=\"-1\" aria-hidden=\"true\" @change=\"onFileChosen\"><div id=\"main\" ref=\"main\" :class=\"mainElemClassNames\" :style=\"mainElemStyles\" @mousedown=\"onMainElemMouseDown\"><div id=\"displays\"><div ref=\"displaysScroller\" @scroll=\"onDisplaysScroll\"><template v-for=\"display in displays\"><div v-if=\"display.type === 'prism'\"><div v-if=\"display.isHidden\" class=\"code-header toggleable no-select\" @click=\"display.isCodeShown = !display.isCodeShown\" :title=\"display.isCodeShown ? 'Hide Code' : 'Show Code'\"><span :class=\"['arrow', 'expandable', display.isCodeShown ? 'expanded' : '']\"></span>{{ display.header || 'Hidden code' }}</div><div v-else-if=\"display.header\" class=\"code-header\">{{ display.header }}</div><div v-if=\"display.isCodeShown\" class=\"console-row code-row\"><span class=\"row-icon\"><icon name=\"chevron\"></icon></span><prism language=\"javascript\" :code=\"display.value\" :is-dark=\"theme === 'dark'\" match-braces></prism><button class=\"copy-to-editor-button\" title=\"Copy to editor\" @click=\"copyToEditor(display.value)\"><icon name=\"copyToEditor\"></icon></button></div></div><div v-if=\"display.type === 'log' &amp;&amp; !isInCollapsedGroup(display)\" :class=\"['console-row', 'log-' + display.key, display.groupId ? 'group-header' : '']\" :style=\"{'--depth': display.groupIds.length}\" :title=\"display.name\" @click=\"onLogRowClick(display, $event)\"><span v-if=\"display.key === 'error' || display.key === 'assert'\" class=\"row-icon\"><icon name=\"consoleError\"></icon></span><span v-else-if=\"display.key === 'warn'\" class=\"row-icon\"><icon name=\"consoleWarning\"></icon></span><span v-else-if=\"display.key === 'result'\" class=\"row-icon\"><icon name=\"result\"></icon></span><span v-else-if=\"display.groupId\" :class=\"['row-icon', 'arrow', 'expandable', display.isCollapsed ? '' : 'expanded']\"></span><div class=\"row-content\"><table v-if=\"display.table\" class=\"console-table\"><thead><tr><th v-for=\"header in display.table.headers\">{{ header }}</th></tr></thead><tbody><tr v-for=\"row in display.table.rows\"><td>{{ row.index }}</td><td v-for=\"cell in row.cells\"><template v-if=\"cell\"><span v-for=\"part in cell.parts\" :class=\"'t-' + part[0]\">{{ part[1] }}</span></template></td></tr></tbody></table><js-value v-for=\"(description, index) in display.descriptions\" :description=\"description\" :key-path=\"[]\" :path=\"[display.logId, index]\"></js-value><div v-if=\"display.stack\" class=\"trace-stack\">{{ display.stack }}</div></div></div><div v-if=\"display.type === 'notice'\" class=\"console-row notice\">{{ display.message }}</div><div v-if=\"display.type === 'error'\" class=\"console-row log-error\"><span class=\"row-icon\"><icon name=\"consoleError\"></icon></span><div class=\"row-content\">{{ display.message }}</div></div></template></div></div><div class=\"divider\" ref=\"mainDivider\"></div><div id=\"editor\"><ace-editor v-model=\"jsCode\" language=\"javascript\" :theme=\"theme\" :font-size=\"Math.round(12 * textScale)\" @key-combo=\"onEditorKeyCombo\" height=\"100%\"></ace-editor></div></div><div id=\"bottomNav\"><div class=\"brand\"><button class=\"logo-button\" title=\"About JS Box\" @click=\"openAbout('about')\"><span class=\"logo\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span></button> <span class=\"runner-badge\" :title=\"runnerMode === 'window' ? 'Code runs directly in this page' : 'Code runs in a Web Worker (no DOM access)'\">{{ runnerMode === 'window' ? 'Window' : 'Worker' }}</span></div><div class=\"buttons\"><template v-for=\"bottomButton in bottomButtons\"><span v-if=\"bottomButton.isSeparator\" class=\"separator\"></span> <button v-else :class=\"bottomButton.className\" @click=\"bottomButton.callback.call(this, $event)\" :title=\"bottomButton.title\" :disabled=\"bottomButton.disableIf &amp;&amp; bottomButton.disableIf.call(this)\"><icon :name=\"bottomButton.iconName\"></icon><span v-if=\"bottomButton.label\" class=\"label\">{{ bottomButton.label }}</span></button></template></div></div><div v-if=\"isMenuOpen\" class=\"more-menu\" role=\"menu\" aria-label=\"More\" ref=\"moreMenu\" @keydown=\"onMenuKeyDown\"><div class=\"menu-row\" role=\"group\" aria-label=\"Text size\"><span class=\"menu-row-label\">Text size</span> <button class=\"menu-item menu-step\" role=\"menuitem\" title=\"Smaller text\" aria-label=\"Smaller text\" :disabled=\"!canShrinkText\" @click=\"changeTextScale(-1)\">A&minus;</button> <button class=\"menu-item menu-step menu-percent\" role=\"menuitem\" title=\"Reset the text size\" aria-label=\"Reset the text size\" @click=\"setTextScale(1)\">{{ Math.round(textScale * 100) }}%</button> <button class=\"menu-item menu-step\" role=\"menuitem\" title=\"Bigger text\" aria-label=\"Bigger text\" :disabled=\"!canGrowText\" @click=\"changeTextScale(1)\">A+</button></div><div class=\"menu-separator\"></div><button class=\"menu-item\" role=\"menuitem\" @click=\"openFile()\"><span class=\"menu-icon\"><icon name=\"open\"></icon></span>Open&hellip;</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"saveFile()\"><span class=\"menu-icon\"><icon name=\"save\"></icon></span>Save&hellip;</button><div class=\"menu-separator\"></div><button v-if=\"isPopOut\" class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); bringBack()\"><span class=\"menu-icon\"><icon name=\"popIn\"></icon></span>Bring back into the page</button> <button v-else class=\"menu-item\" role=\"menuitem\" @click=\"popOut()\"><span class=\"menu-icon\"><icon name=\"popOut\"></icon></span>Pop out into a window</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); openAbout('html')\"><span class=\"menu-icon\"><icon name=\"code\"></icon></span>Copy as HTML&hellip;</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); resetConsole()\"><span class=\"menu-icon\"><icon name=\"refresh\"></icon></span>Reset&hellip;</button><div class=\"menu-separator\"></div><button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); openAbout('about')\"><span class=\"menu-icon\"><icon name=\"info\"></icon></span>About JS Box</button></div><div v-if=\"valueMenu\" class=\"more-menu value-menu\" role=\"menu\" aria-label=\"Value\" ref=\"valueMenu\" :style=\"{left: valueMenu.x + 'px', top: valueMenu.y + 'px'}\" @keydown=\"onMenuKeyDown\"><button class=\"menu-item\" role=\"menuitem\" @click=\"copyValueAsJson()\"><span class=\"menu-icon\"><icon name=\"copy\"></icon></span>Copy as JSON</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"saveValueAsJson()\"><span class=\"menu-icon\"><icon name=\"save\"></icon></span>Save as JSON&hellip;</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"storeValueAsGlobal()\"><span class=\"menu-icon\"><icon name=\"variable\"></icon></span>Store as global variable</button> <button v-if=\"valueMenu.propertyPath\" class=\"menu-item\" role=\"menuitem\" @click=\"copyPropertyPath()\"><span class=\"menu-icon\"><icon name=\"path\"></icon></span>Copy property path</button><template v-if=\"!valueMenu.isPrimitive\"><div class=\"menu-separator\"></div><button class=\"menu-item\" role=\"menuitem\" @click=\"refreshValue()\"><span class=\"menu-icon\"><icon name=\"refresh\"></icon></span>Refresh</button></template></div><div v-if=\"toast\" class=\"toast\" role=\"status\">{{ toast.message }}</div><div v-if=\"isPoppedOut\" class=\"popped-out\"><div class=\"popped-out-content\"><span class=\"logo logo-medium\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div class=\"popped-out-title\">This console is open in a separate window</div><div class=\"popped-out-text\">Its code still runs in this page.</div><div class=\"dialog-buttons\"><button class=\"dialog-button\" @click=\"focusPopOut\">Show the window</button> <button class=\"dialog-button primary\" @click=\"requestPopIn\">Bring it back</button></div></div></div><div v-if=\"isAboutOpen\" class=\"dialog-backdrop\" @mousedown.self=\"closeAbout\" @keydown.esc=\"closeAbout\"><div :class=\"['dialog', 'about-dialog', aboutTab === 'html' ? 'is-export' : '']\" role=\"dialog\" aria-modal=\"true\" aria-label=\"About JS Box\"><div class=\"about-header\"><div class=\"tabs\" role=\"tablist\"><button role=\"tab\" :aria-selected=\"aboutTab === 'about'\" :class=\"['tab', aboutTab === 'about' ? 'active' : '']\" @click=\"aboutTab = 'about'\">About</button> <button role=\"tab\" :aria-selected=\"aboutTab === 'html'\" :class=\"['tab', aboutTab === 'html' ? 'active' : '']\" @click=\"aboutTab = 'html'\">Copy as HTML</button></div><button class=\"close-button\" ref=\"aboutCloseButton\" title=\"Close\" @click=\"closeAbout\"><icon name=\"close\"></icon></button></div><div v-if=\"aboutTab === 'about'\" class=\"about-body\"><div class=\"about-title\"><span class=\"logo logo-medium\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div><div class=\"about-name\">YourJS Box <span class=\"about-aka\">aka JS Box</span></div><div class=\"about-version\">Version {{ packageInfo.version }}</div></div></div><p class=\"about-description\">An interactive JavaScript console that can be embedded in any web page with a single script tag.</p><div class=\"about-links\"><a :href=\"packageInfo.homepage\" target=\"_blank\" rel=\"noopener\">Website</a> <a :href=\"packageInfo.repoUrl\" target=\"_blank\" rel=\"noopener\">GitHub</a> <a :href=\"packageInfo.repoUrl + '#readme'\" target=\"_blank\" rel=\"noopener\">Documentation</a> <a :href=\"packageInfo.bugsUrl\" target=\"_blank\" rel=\"noopener\">Report an issue</a></div><h3>This console</h3><dl class=\"about-details\"><dt>Code runs in</dt><dd>{{ runnerDescription }}</dd><dt>Theme</dt><dd>{{ themeDescription }}</dd><dt>Code blocks run as</dt><dd>{{ blockTypeDescription }}</dd><dt>Imports</dt><dd>{{ importsUrl ? 'Packages imported by name load from ' + importsUrl.replace('{specifier}', '\u2026') : 'Only URLs and paths can be imported' }}</dd><dt>Results</dt><dd>{{ showResults ? 'The value of the last expression is shown' : 'Not shown' }}</dd><dt>Layout</dt><dd>{{ layoutDescription }}</dd></dl><h3>Keyboard shortcuts</h3><dl class=\"about-details\"><dt><kbd>{{ modKey }}</kbd> + <kbd>Enter</kbd></dt><dd>Run the next block of code</dd><dt><kbd>Esc</kbd></dt><dd>Close this window, the menu or full screen</dd></dl><div class=\"about-footer\">MIT License &copy; 2023-present Chris West &middot; Built with Vue {{ libraryVersions.vue }}, Ace {{ libraryVersions['ace-builds'] }}, Prism {{ libraryVersions.prismjs }} and Acorn {{ libraryVersions.acorn }}</div></div><div v-else class=\"about-body export-body\"><div class=\"export-options\"><div class=\"segmented\" role=\"radiogroup\" aria-label=\"Code\"><button v-for=\"option in exportCodeOptions\" role=\"radio\" :aria-checked=\"exportCode === option.value\" :class=\"exportCode === option.value ? 'active' : ''\" @click=\"exportCode = option.value\">{{ option.label }}</button></div><div class=\"segmented\" role=\"radiogroup\" aria-label=\"Format\"><button v-for=\"option in exportFormatOptions\" role=\"radio\" :aria-checked=\"exportFormat === option.value\" :class=\"exportFormat === option.value ? 'active' : ''\" @click=\"exportFormat = option.value\">{{ option.label }}</button></div></div><div class=\"export-note\">{{ exportNote }}</div><div class=\"export-preview\"><ace-editor :model-value=\"exportHtml\" language=\"html\" :theme=\"theme\" height=\"100%\" :read-only=\"true\"></ace-editor></div><div class=\"export-actions\"><button class=\"dialog-button\" @click=\"downloadExport\">Download page</button> <button class=\"dialog-button primary\" @click=\"copyExport\">{{ copyLabel }}</button></div></div></div></div><div v-if=\"dialog\" class=\"dialog-backdrop\" @mousedown.self=\"closeDialog(false)\" @keydown.esc=\"closeDialog(false)\"><div class=\"dialog\" role=\"alertdialog\" aria-modal=\"true\" :aria-label=\"dialog.title\"><div class=\"dialog-title\">{{ dialog.title }}</div><div class=\"dialog-message\">{{ dialog.message }}</div><div class=\"dialog-buttons\"><button class=\"dialog-button\" @click=\"closeDialog(false)\">Cancel</button> <button class=\"dialog-button primary\" ref=\"dialogConfirmButton\" @click=\"closeDialog(true)\">{{ dialog.confirmText }}</button></div></div></div></div>";
   /**
    * The URL of this script which is used to remove this script's lines from the
    * stack traces of errors in window mode.
@@ -89,8 +89,8 @@
    * to these calls.
    */
   const RELAYABLE_FUNCS = {
-    viewer: ['appendLog', 'appendError', 'clearDisplays', 'onCodeRan', 'updateDescriptionFor'],
-    runner: ['clearLogs', 'reset', 'runCode', 'sendDescriptionFor'],
+    viewer: ['appendLog', 'appendError', 'clearDisplays', 'onCodeRan', 'onStoredAsGlobal', 'onValueJson', 'updateDescriptionFor'],
+    runner: ['clearLogs', 'getValueAsJson', 'refreshDescription', 'reset', 'runCode', 'sendDescriptionFor', 'storeAsGlobal'],
     // Things that the viewer (but never the runner) can ask this script to do.
     host: ['focusPopOut', 'popIn', 'popOut', 'requestPopIn', 'setMaximized'],
   };
@@ -631,9 +631,9 @@
       const $entries = [];
       const protoEntries = [];
       const $protoEntries = [];
+      let wasIterated = false;
   
       if (value !== null && ('object' === typeof value || 'function' === typeof value)) {
-        let wasIterated = false;
         try {
           // Map
           if (typeName === 'Map') {
@@ -681,7 +681,9 @@
         }
       }
   
-      return {entries, protoEntries, $entries, $protoEntries};
+      // Map and Set entries (and other iterated values) aren't properties so
+      // they have no property path.
+      return {entries, protoEntries, entriesArePropertyKeys: !wasIterated, $entries, $protoEntries};
     }
   
     // ['123', 0, 'entries', 0]
@@ -792,16 +794,25 @@
      *   entry indices.
      */
     function sendDescriptionFor(path) {
-      // Get the description of the desired value.
-      let level = logArgsById;
-      let pathPartIndex = 0;
-      for (let pathPart of path) {
-        if (pathPartIndex && pathPartIndex % 2 === 0) {
-          pathPart = '$' + pathPart;
-        }
-        level = level?.[pathPart];
-        pathPartIndex++;
-      }
+      sendDescription(path, false);
+    }
+  
+    /**
+     * Describes the value again (eg. after the code changed it) including its
+     * preview.
+     * @param {(string|number)[]} path
+     */
+    function refreshDescription(path) {
+      sendDescription(path, true);
+    }
+  
+    /**
+     * @param {(string|number)[]} path
+     * @param {boolean} isRefresh
+     *   If `true` the value's preview is included too.
+     */
+    function sendDescription(path, isRefresh) {
+      const level = getLevel(path);
       if (!level) return;
       const description = describe(level.value, 'receiver' in level ? level.receiver : level.value);
   
@@ -809,11 +820,95 @@
       Object.assign(level, description);
   
       // Send the description without values back to the viewer.
+      const summary = isRefresh
+        ? summarize(level.value, path.length > 2 ? 1 : 0, path[path.length - 2] === 'protoEntries')
+        : {};
       send({
         target: 'viewer',
         func: 'updateDescriptionFor',
-        args: [path, without(['$entries', '$protoEntries'], description)],
+        args: [path, {...without(['$entries', '$protoEntries'], description), ...summary}],
       });
+    }
+  
+    /**
+     * Finds what is stored for a logged value (or a value within it).
+     * @param {(string|number)[]} path
+     *   The log ID, the argument index and then pairs of entry group keys and
+     *   entry indices.
+     * @returns {{value: *, receiver?: *}|undefined}
+     */
+    function getLevel(path) {
+      let level = logArgsById;
+      path.forEach((pathPart, index) => {
+        level = level?.[index && index % 2 === 0 ? '$' + pathPart : pathPart];
+      });
+      return level;
+    }
+  
+    /**
+     * Sends a value as JSON to the viewer (eg. to copy or save it).
+     * @param {(string|number)[]} path
+     * @param {string} requestId
+     */
+    function getValueAsJson(path, requestId) {
+      const level = getLevel(path);
+      let result;
+      try {
+        result = level ? toJson(level.value) : {error: 'The value is no longer available.'};
+      }
+      catch (e) {
+        result = {error: `The value couldn't be converted to JSON (${e?.message ?? e}).`};
+      }
+      send({target: 'viewer', func: 'onValueJson', args: [{requestId, ...result}]});
+    }
+  
+    /**
+     * Converts a value to JSON like JSON.stringify() does except that Maps and
+     * Sets become arrays, BigInts become strings and circular references (an
+     * object inside of itself) are left out instead of causing an error.  An
+     * object that appears more than once without being circular is kept.
+     * @param {*} value
+     * @returns {{json?: string, circularCount: number, error?: string}}
+     */
+    function toJson(value) {
+      let circularCount = 0;
+      // The objects currently being converted along with what they were
+      // converted from (eg. a Map is converted to an array).
+      const stack = [];
+      const json = JSON.stringify(value, function(key, val) {
+        // `this` is the object containing `key` so anything after it on the
+        // stack has already been converted.
+        while (stack.length && stack[stack.length - 1].converted !== this) stack.pop();
+  
+        if ('bigint' === typeof val) return `${val}`;
+        if (val !== null && 'object' === typeof val) {
+          const original = val;
+          if (stack.some(item => item.original === original)) {
+            circularCount++;
+            return undefined;
+          }
+          if (val instanceof Map || val instanceof Set) val = [...val];
+          stack.push({original, converted: val});
+        }
+        return val;
+      }, 2);
+      return json === undefined
+        ? {error: 'This value can\'t be represented as JSON.', circularCount}
+        : {json, circularCount};
+    }
+  
+    /**
+     * Stores a value as a global variable (temp1, temp2, etc.) like the
+     * browser's console does so that code can use it.
+     * @param {(string|number)[]} path
+     */
+    function storeAsGlobal(path) {
+      const level = getLevel(path);
+      if (!level) return;
+      let index = 1;
+      while (`temp${index}` in globalThis) index++;
+      globalThis[`temp${index}`] = level.value;
+      send({target: 'viewer', func: 'onStoredAsGlobal', args: [`temp${index}`]});
     }
   
     /**
@@ -824,7 +919,7 @@
       groupIds = [];
     }
   
-    return {clearLogs, destroy, runCode, sendDescriptionFor};
+    return {clearLogs, destroy, getValueAsJson, refreshDescription, runCode, sendDescriptionFor, storeAsGlobal};
   }
   
 
@@ -1199,6 +1294,10 @@
                     dividerSize: '8px',
                     tempDividerPct: null,
                     isMenuOpen: false,
+                    /** @type {{x: number, y: number, path: any[], propertyPath: string?, isPrimitive: boolean}?} */
+                    valueMenu: null,
+                    /** @type {{message: string}?} */
+                    toast: null,
                     textScale: loadTextScale(),
                     isFullscreen: false,
                     // Set when full screen isn't allowed so the console fills the page.
@@ -1757,14 +1856,179 @@
                     if (this.isMenuOpen && !evt.target.closest('.more-menu, .more-button')) {
                       this.closeMenu();
                     }
+                    if (this.valueMenu && !evt.target.closest('.value-menu')) {
+                      this.closeValueMenu();
+                    }
                   },
                   /**
                    * @param {KeyboardEvent} evt
                    */
                   onWindowKeyDown(evt) {
+                    if (evt.key === 'Escape' && this.valueMenu) {
+                      this.closeValueMenu();
+                      return;
+                    }
                     if (evt.key === 'Escape' && this.isMaximized && !this.isMenuOpen && !this.dialog && !this.isAboutOpen) {
                       this.setMaximized(false);
                     }
+                  },
+                  /**
+                   * Shows the menu for a value that was right-clicked.
+                   * @param {MouseEvent} evt
+                   * @param {{path: any[], keyPath: string[]?, isPrimitive: boolean}} value
+                   */
+                  openValueMenu(evt, {path, keyPath, isPrimitive}) {
+                    this.closeMenu();
+                    this.valueMenu = {
+                      x: evt.clientX,
+                      y: evt.clientY,
+                      path: path.slice(),
+                      // Only properties and items (not logged values themselves) have
+                      // a property path.
+                      propertyPath: keyPath?.length ? formatPropertyPath(keyPath) : null,
+                      fileName: keyPath?.length && /^[\w$-]+$/.test(keyPath[keyPath.length - 1]) ? keyPath[keyPath.length - 1] : 'value',
+                      isPrimitive,
+                    };
+                    // Keeps the menu inside of the window.
+                    this.$nextTick(() => {
+                      const menu = this.$refs.valueMenu;
+                      if (!menu || !this.valueMenu) return;
+                      const {width, height} = menu.getBoundingClientRect();
+                      this.valueMenu.x = Math.max(4, Math.min(this.valueMenu.x, innerWidth - width - 4));
+                      this.valueMenu.y = Math.max(4, Math.min(this.valueMenu.y, innerHeight - height - 4));
+                      menu.querySelector('.menu-item')?.focus();
+                    });
+                  },
+                  closeValueMenu() {
+                    this.valueMenu = null;
+                  },
+                  /**
+                   * Asks the runner to convert the value to JSON.
+                   * @param {any[]} path
+                   * @returns {Promise<{json: string?, circularCount: number, error: string?}>}
+                   */
+                  requestValueJson(path) {
+                    const requestId = `${Date.now()}-${Math.random()}`;
+                    return new Promise(resolve => {
+                      jsonRequests.set(requestId, resolve);
+                      messageParent({target: 'runner', func: 'getValueAsJson', args: [path, requestId]});
+                    });
+                  },
+                  /**
+                   * Shows a short message (eg. "Copied") for a few seconds.
+                   * @param {string} message
+                   */
+                  showToast(message) {
+                    clearTimeout(this.toastTimeout);
+                    this.toast = {message};
+                    this.toastTimeout = setTimeout(() => this.toast = null, 3500);
+                  },
+                  /**
+                   * @param {{json: string?, circularCount: number, error: string?}} result
+                   * @param {string} action
+                   *   What was done (eg. "Copied as JSON").
+                   */
+                  showJsonToast({circularCount, error}, action) {
+                    this.showToast(
+                      error || action + (circularCount
+                        ? ` (${circularCount} circular reference${circularCount === 1 ? ' was' : 's were'} left out)`
+                        : '')
+                    );
+                  },
+                  /**
+                   * Copies the value as JSON.  The copy is started right away (while
+                   * the browser still allows it) with the JSON filled in when it is
+                   * ready.
+                   */
+                  async copyValueAsJson() {
+                    // A plain copy because the menu's (reactive) path can't be sent.
+                    const path = [...this.valueMenu.path];
+                    this.closeValueMenu();
+                    const resultPromise = this.requestValueJson(path);
+                    try {
+                      if (window.ClipboardItem && navigator.clipboard?.write) {
+                        await navigator.clipboard.write([new ClipboardItem({
+                          'text/plain': resultPromise.then(({json, error}) => {
+                            if (error) throw new Error(error);
+                            return new Blob([json], {type: 'text/plain'});
+                          }),
+                        })]);
+                      }
+                      else {
+                        const {json, error} = await resultPromise;
+                        if (error) throw new Error(error);
+                        await navigator.clipboard.writeText(json);
+                      }
+                      this.showJsonToast(await resultPromise, 'Copied as JSON');
+                    }
+                    catch (e) {
+                      const result = await resultPromise;
+                      this.showToast(result.error || 'The value couldn\'t be copied.  Your browser may not allow copying here.');
+                    }
+                  },
+                  /**
+                   * Saves the value as a JSON file.  The "Save as" dialog is shown right
+                   * away (while the browser still allows it).
+                   */
+                  async saveValueAsJson() {
+                    const {fileName} = this.valueMenu;
+                    const path = [...this.valueMenu.path];
+                    this.closeValueMenu();
+                    const resultPromise = this.requestValueJson(path);
+                    const suggestedName = `${fileName}.json`;
+                    let handle;
+                    if ('function' === typeof window.showSaveFilePicker) {
+                      try {
+                        handle = await showSaveFilePicker({
+                          suggestedName,
+                          types: [{description: 'JSON', accept: {'application/json': ['.json']}}],
+                        });
+                      }
+                      catch (e) {
+                        if (e?.name === 'AbortError') return;
+                      }
+                    }
+                    const result = await resultPromise;
+                    if (result.error) {
+                      this.showToast(result.error);
+                      return;
+                    }
+                    const text = result.json + '\n';
+                    if (handle) {
+                      const writable = await handle.createWritable();
+                      await writable.write(text);
+                      await writable.close();
+                    }
+                    else {
+                      const url = URL.createObjectURL(new Blob([text], {type: 'application/json'}));
+                      Object.assign(document.createElement('a'), {href: url, download: suggestedName}).click();
+                      setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    }
+                    this.showJsonToast(result, 'Saved as JSON');
+                  },
+                  storeValueAsGlobal() {
+                    const path = [...this.valueMenu.path];
+                    this.closeValueMenu();
+                    messageParent({target: 'runner', func: 'storeAsGlobal', args: [path]});
+                  },
+                  async copyPropertyPath() {
+                    const {propertyPath} = this.valueMenu;
+                    this.closeValueMenu();
+                    try {
+                      await navigator.clipboard.writeText(propertyPath);
+                      this.showToast(`Copied ${propertyPath}`);
+                    }
+                    catch (e) {
+                      this.showToast('The property path couldn\'t be copied.  Your browser may not allow copying here.');
+                    }
+                  },
+                  /**
+                   * Shows the value as it is now (eg. after the code changed it).
+                   */
+                  refreshValue() {
+                    const path = [...this.valueMenu.path];
+                    this.closeValueMenu();
+                    messageParent({target: 'runner', func: 'refreshDescription', args: [path]});
                   },
                   closeDialog(isConfirmed) {
                     const {dialog} = this;
@@ -1786,6 +2050,7 @@
                     }
                   },
                   onDisplaysScroll() {
+                    this.closeValueMenu();
                     const {scrollTop, scrollHeight, clientHeight} = this.$refs.displaysScroller;
                     this.isDisplaysScrolledToBottom = scrollHeight - scrollTop - clientHeight < 8;
                   },
@@ -2109,6 +2374,9 @@
                     // https://icon-sets.iconify.design/mdi/error-outline/
                     error: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm1-5C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18a8 8 0 0 1-8-8a8 8 0 0 1 8-8a8 8 0 0 1 8 8a8 8 0 0 1-8 8"/></svg>',
                     // Icons similar to those in the browser's console.
+                    copy: '<svg viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8" rx="1.25" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 3.5v-.75A1.25 1.25 0 0 0 9.25 1.5h-5A1.25 1.25 0 0 0 3 2.75v5A1.25 1.25 0 0 0 4.25 9h.75" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
+                    variable: '<svg viewBox="0 0 16 16"><path d="M5 2.5c-1.5 1.5-2 3.5-2 5.5s.5 4 2 5.5M11 2.5c1.5 1.5 2 3.5 2 5.5s-.5 4-2 5.5M6.5 6l3 4M9.5 6l-3 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+                    path: '<svg viewBox="0 0 16 16"><circle cx="3.5" cy="12.5" r="1.5" fill="currentColor"/><circle cx="12.5" cy="3.5" r="1.5" fill="currentColor"/><path d="M3.5 11V8a2 2 0 0 1 2-2h5a2 2 0 0 0 2-2" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
                     open: '<svg viewBox="0 0 16 16"><path d="M2 4.5a1 1 0 0 1 1-1h3.2l1.3 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
                     save: '<svg viewBox="0 0 16 16"><path d="M8 2.5v7M5 7l3 3 3-3M3 11.5v1.5h10v-1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
                     fullscreen: '<svg viewBox="0 0 16 16"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -2136,7 +2404,10 @@
           
           function getJSValueComponentProps() {
             return {
-              props: ['description', 'path', 'name', 'isDimName'],
+              // keyPath is the property keys leading to this value from the logged
+              // value (eg. ["people", "0", "name"]) or null if it can't be reached by
+              // property keys (eg. inside of a Map).
+              props: ['description', 'path', 'name', 'isDimName', 'keyPath'],
               data() {
                 return {
                   isExpanded: false,
@@ -2148,7 +2419,12 @@
                   if (newValue && !this.hasBeenExpanded) {
                     this.hasBeenExpanded = newValue;
                   }
-                }
+                },
+                // When a refresh replaces this value's description, its new contents are
+                // requested if it is still expanded.
+                isPartialDescription(isPartial) {
+                  if (isPartial && this.isExpanded) this.requestDescription();
+                },
               },
               computed: {
                 isPartialDescription() {
@@ -2169,10 +2445,20 @@
                   ];
                 },
                 entryGroups() {
-                  // protoEntries only ever contains the [[Prototype]] entry.
+                  // protoEntries only ever contains the [[Prototype]] entry whose
+                  // members can be reached directly so it adds nothing to the key path.
+                  const {keyPath, description} = this;
                   return [
-                    { key: 'entries', isDim: entry => entry[2] === false },
-                    { key: 'protoEntries', isDim: () => true },
+                    {
+                      key: 'entries',
+                      isDim: entry => entry[2] === false,
+                      getKeyPath: entry => keyPath && description.entriesArePropertyKeys ? keyPath.concat([entry[0]]) : null,
+                    },
+                    {
+                      key: 'protoEntries',
+                      isDim: () => true,
+                      getKeyPath: () => keyPath,
+                    },
                   ];
                 }
               },
@@ -2180,14 +2466,26 @@
                 toggleExpanded() {
                   if (!this.isExpandable) return;
                   this.isExpanded = !this.isExpanded;
-                  if (this.isExpanded && this.isPartialDescription) {
-                    messageParent({target: 'runner', func: 'sendDescriptionFor', args: [this.path]});
-                  }
-                }
+                  if (this.isExpanded && this.isPartialDescription) this.requestDescription();
+                },
+                requestDescription() {
+                  messageParent({target: 'runner', func: 'sendDescriptionFor', args: [this.path]});
+                },
+                /**
+                 * Shows the menu for this value (eg. Copy as JSON).
+                 * @param {MouseEvent} evt
+                 */
+                openMenu(evt) {
+                  this.$root.openValueMenu(evt, {
+                    path: this.path,
+                    keyPath: this.keyPath,
+                    isPrimitive: this.description.isPrimitive,
+                  });
+                },
               },
               template: `
                 <div :class="classNames">
-                  <div :class="['js-value-header', isExpandable ? 'expandable' : '']" @click="toggleExpanded"><span
+                  <div :class="['js-value-header', isExpandable ? 'expandable' : '']" @click="toggleExpanded" @contextmenu.prevent.stop="openMenu"><span
                     v-if="isExpandable || isEntry" :class="['arrow', isExpandable ? 'expandable' : '', isExpanded ? 'expanded' : '']"></span><template
                     v-if="isEntry"><span :class="['entry-key', isDimName ? 'dim' : '']">{{ name }}</span>: </template><span
                     v-for="part in description.parts" :class="'t-' + part[0]">{{ part[1] }}</span></div>
@@ -2200,6 +2498,7 @@
                           :name="entry[0]"
                           :is-dim-name="group.isDim(entry)"
                           :description="entry[1]"
+                          :key-path="group.getKeyPath(entry)"
                           :path="path.concat([group.key, entryIndex])">
                         </js-value>
                       </template>
@@ -2368,6 +2667,22 @@
           }
           
           /**
+           * Turns property keys into a path like the browser's console's "Copy property
+           * path" (eg. ["people", "0", "first name"] becomes `people[0]["first name"]`).
+           * @param {string[]} keys
+           * @returns {string}
+           */
+          function formatPropertyPath(keys) {
+            return keys.map((key, index) =>
+              /^(0|[1-9]\d*)$/.test(key)
+                ? `[${key}]`
+                : /^[A-Za-z_$][\w$]*$/.test(key)
+                  ? (index ? '.' : '') + key
+                  : `[${JSON.stringify(key)}]`
+            ).join('');
+          }
+          
+          /**
            * Indicates if an import specifier is a package name (eg. "lodash",
            * "lodash@4/fp" or "@scope/pkg") rather than a relative path or a URL (eg.
            * "./utils.js", "https://example.com/x.js" or "node:fs").
@@ -2525,6 +2840,7 @@
                 `${Object(part)[1]}`,
               ]),
               ...sanitizeEntries(description),
+              ...(description.entriesArePropertyKeys != null ? {entriesArePropertyKeys: !!description.entriesArePropertyKeys} : {}),
             };
           }
           
@@ -2615,7 +2931,47 @@
               level = level[groupKey]?.[toIndex(path[i + 1])]?.[1];
             }
           
-            if (level) Object.assign(level, sanitizeEntries(description));
+            if (!level) return;
+            Object.assign(level, sanitizeEntries(description));
+            level.entriesArePropertyKeys = !!Object(description).entriesArePropertyKeys;
+            // A refresh also sends the value's preview.
+            if (Array.isArray(Object(description).parts)) {
+              const {typeName, isPrimitive, parts} = sanitizeDescription(description);
+              Object.assign(level, {typeName, isPrimitive, parts});
+            }
+          }
+          
+          /**
+           * NOTE:  Called via main by the runner with a value converted to JSON (see
+           * requestValueJson()).
+           * @param {{requestId: string, json?: string, circularCount?: number, error?: string}} result
+           */
+          function onValueJson(result) {
+            const {requestId, json, circularCount, error} = Object(result);
+            const resolve = jsonRequests.get(`${requestId}`);
+            if (!resolve) return;
+            jsonRequests.delete(`${requestId}`);
+            resolve({
+              json: json != null ? `${json}` : null,
+              circularCount: +circularCount || 0,
+              error: error != null ? `${error}` : null,
+            });
+          }
+          
+          /**
+           * The functions waiting for values to be converted to JSON by their request
+           * IDs.
+           * @type {Map<string, (result: {json: string?, circularCount: number, error: string?}) => void>}
+           */
+          const jsonRequests = new Map();
+          
+          /**
+           * NOTE:  Called via main by the runner after a value was stored as a global
+           * variable.
+           * @param {string} name
+           */
+          function onStoredAsGlobal(name) {
+            mountedApp.displays.push({type: 'notice', message: `Stored as the global variable ${`${name}`}`});
           }
           
           /**

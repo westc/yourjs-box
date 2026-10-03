@@ -69,6 +69,22 @@ If the editor already has code in it you are asked before it is replaced.
     (eg. an infinite loop) by starting a new worker.
   - **About JS Box**
 
+### Right-Clicking Values
+
+Right-click any value in the output (including values inside of expanded
+objects and arrays) for a menu with:
+
+- **Copy as JSON** and **Save as JSON&hellip;**.  Maps and Sets become arrays
+  and BigInts become strings.  Circular references (an object inside of itself)
+  are left out and a message says how many were left out.
+- **Store as global variable**, which stores the actual value (not a copy) as
+  `temp1`, `temp2`, etc. so that later code can use it (in window mode it is
+  stored on the page's `window`).
+- **Copy property path** (for properties and array items), which copies the
+  path from the logged value like `people[0].name`.
+- **Refresh** (for objects, arrays, etc.), which shows the value as it is now
+  if the code has changed it.  Anything that was expanded stays expanded.
+
 ### Attributes
 
 | Attribute | Description |
@@ -274,4 +290,4 @@ Released under the [MIT License](LICENSE).  You're free to use, modify and
 distribute it, including in commercial projects, as long as the copyright and
 license notice is kept.
 
-Copyright (c) 2023-present Christopher West
+Copyright (c) 2023-present Chris West

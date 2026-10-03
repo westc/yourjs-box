@@ -129,6 +129,10 @@ function init(jsCode, dataset, meta) {
           dividerSize: '8px',
           tempDividerPct: null,
           isMenuOpen: false,
+          /** @type {{x: number, y: number, path: any[], propertyPath: string?, isPrimitive: boolean}?} */
+          valueMenu: null,
+          /** @type {{message: string}?} */
+          toast: null,
           textScale: loadTextScale(),
           isFullscreen: false,
           // Set when full screen isn't allowed so the console fills the page.
@@ -687,14 +691,179 @@ function init(jsCode, dataset, meta) {
           if (this.isMenuOpen && !evt.target.closest('.more-menu, .more-button')) {
             this.closeMenu();
           }
+          if (this.valueMenu && !evt.target.closest('.value-menu')) {
+            this.closeValueMenu();
+          }
         },
         /**
          * @param {KeyboardEvent} evt
          */
         onWindowKeyDown(evt) {
+          if (evt.key === 'Escape' && this.valueMenu) {
+            this.closeValueMenu();
+            return;
+          }
           if (evt.key === 'Escape' && this.isMaximized && !this.isMenuOpen && !this.dialog && !this.isAboutOpen) {
             this.setMaximized(false);
           }
+        },
+        /**
+         * Shows the menu for a value that was right-clicked.
+         * @param {MouseEvent} evt
+         * @param {{path: any[], keyPath: string[]?, isPrimitive: boolean}} value
+         */
+        openValueMenu(evt, {path, keyPath, isPrimitive}) {
+          this.closeMenu();
+          this.valueMenu = {
+            x: evt.clientX,
+            y: evt.clientY,
+            path: path.slice(),
+            // Only properties and items (not logged values themselves) have
+            // a property path.
+            propertyPath: keyPath?.length ? formatPropertyPath(keyPath) : null,
+            fileName: keyPath?.length && /^[\w$-]+$/.test(keyPath[keyPath.length - 1]) ? keyPath[keyPath.length - 1] : 'value',
+            isPrimitive,
+          };
+          // Keeps the menu inside of the window.
+          this.$nextTick(() => {
+            const menu = this.$refs.valueMenu;
+            if (!menu || !this.valueMenu) return;
+            const {width, height} = menu.getBoundingClientRect();
+            this.valueMenu.x = Math.max(4, Math.min(this.valueMenu.x, innerWidth - width - 4));
+            this.valueMenu.y = Math.max(4, Math.min(this.valueMenu.y, innerHeight - height - 4));
+            menu.querySelector('.menu-item')?.focus();
+          });
+        },
+        closeValueMenu() {
+          this.valueMenu = null;
+        },
+        /**
+         * Asks the runner to convert the value to JSON.
+         * @param {any[]} path
+         * @returns {Promise<{json: string?, circularCount: number, error: string?}>}
+         */
+        requestValueJson(path) {
+          const requestId = `${Date.now()}-${Math.random()}`;
+          return new Promise(resolve => {
+            jsonRequests.set(requestId, resolve);
+            messageParent({target: 'runner', func: 'getValueAsJson', args: [path, requestId]});
+          });
+        },
+        /**
+         * Shows a short message (eg. "Copied") for a few seconds.
+         * @param {string} message
+         */
+        showToast(message) {
+          clearTimeout(this.toastTimeout);
+          this.toast = {message};
+          this.toastTimeout = setTimeout(() => this.toast = null, 3500);
+        },
+        /**
+         * @param {{json: string?, circularCount: number, error: string?}} result
+         * @param {string} action
+         *   What was done (eg. "Copied as JSON").
+         */
+        showJsonToast({circularCount, error}, action) {
+          this.showToast(
+            error || action + (circularCount
+              ? ` (${circularCount} circular reference${circularCount === 1 ? ' was' : 's were'} left out)`
+              : '')
+          );
+        },
+        /**
+         * Copies the value as JSON.  The copy is started right away (while
+         * the browser still allows it) with the JSON filled in when it is
+         * ready.
+         */
+        async copyValueAsJson() {
+          // A plain copy because the menu's (reactive) path can't be sent.
+          const path = [...this.valueMenu.path];
+          this.closeValueMenu();
+          const resultPromise = this.requestValueJson(path);
+          try {
+            if (window.ClipboardItem && navigator.clipboard?.write) {
+              await navigator.clipboard.write([new ClipboardItem({
+                'text/plain': resultPromise.then(({json, error}) => {
+                  if (error) throw new Error(error);
+                  return new Blob([json], {type: 'text/plain'});
+                }),
+              })]);
+            }
+            else {
+              const {json, error} = await resultPromise;
+              if (error) throw new Error(error);
+              await navigator.clipboard.writeText(json);
+            }
+            this.showJsonToast(await resultPromise, 'Copied as JSON');
+          }
+          catch (e) {
+            const result = await resultPromise;
+            this.showToast(result.error || 'The value couldn\'t be copied.  Your browser may not allow copying here.');
+          }
+        },
+        /**
+         * Saves the value as a JSON file.  The "Save as" dialog is shown right
+         * away (while the browser still allows it).
+         */
+        async saveValueAsJson() {
+          const {fileName} = this.valueMenu;
+          const path = [...this.valueMenu.path];
+          this.closeValueMenu();
+          const resultPromise = this.requestValueJson(path);
+          const suggestedName = `${fileName}.json`;
+          let handle;
+          if ('function' === typeof window.showSaveFilePicker) {
+            try {
+              handle = await showSaveFilePicker({
+                suggestedName,
+                types: [{description: 'JSON', accept: {'application/json': ['.json']}}],
+              });
+            }
+            catch (e) {
+              if (e?.name === 'AbortError') return;
+            }
+          }
+          const result = await resultPromise;
+          if (result.error) {
+            this.showToast(result.error);
+            return;
+          }
+          const text = result.json + '\n';
+          if (handle) {
+            const writable = await handle.createWritable();
+            await writable.write(text);
+            await writable.close();
+          }
+          else {
+            const url = URL.createObjectURL(new Blob([text], {type: 'application/json'}));
+            Object.assign(document.createElement('a'), {href: url, download: suggestedName}).click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+          }
+          this.showJsonToast(result, 'Saved as JSON');
+        },
+        storeValueAsGlobal() {
+          const path = [...this.valueMenu.path];
+          this.closeValueMenu();
+          messageParent({target: 'runner', func: 'storeAsGlobal', args: [path]});
+        },
+        async copyPropertyPath() {
+          const {propertyPath} = this.valueMenu;
+          this.closeValueMenu();
+          try {
+            await navigator.clipboard.writeText(propertyPath);
+            this.showToast(`Copied ${propertyPath}`);
+          }
+          catch (e) {
+            this.showToast('The property path couldn\'t be copied.  Your browser may not allow copying here.');
+          }
+        },
+        /**
+         * Shows the value as it is now (eg. after the code changed it).
+         */
+        refreshValue() {
+          const path = [...this.valueMenu.path];
+          this.closeValueMenu();
+          messageParent({target: 'runner', func: 'refreshDescription', args: [path]});
         },
         closeDialog(isConfirmed) {
           const {dialog} = this;
@@ -716,6 +885,7 @@ function init(jsCode, dataset, meta) {
           }
         },
         onDisplaysScroll() {
+          this.closeValueMenu();
           const {scrollTop, scrollHeight, clientHeight} = this.$refs.displaysScroller;
           this.isDisplaysScrolledToBottom = scrollHeight - scrollTop - clientHeight < 8;
         },
@@ -1039,6 +1209,9 @@ function getIconComponentProps() {
           // https://icon-sets.iconify.design/mdi/error-outline/
           error: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm1-5C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18a8 8 0 0 1-8-8a8 8 0 0 1 8-8a8 8 0 0 1 8 8a8 8 0 0 1-8 8"/></svg>',
           // Icons similar to those in the browser's console.
+          copy: '<svg viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8" rx="1.25" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 3.5v-.75A1.25 1.25 0 0 0 9.25 1.5h-5A1.25 1.25 0 0 0 3 2.75v5A1.25 1.25 0 0 0 4.25 9h.75" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
+          variable: '<svg viewBox="0 0 16 16"><path d="M5 2.5c-1.5 1.5-2 3.5-2 5.5s.5 4 2 5.5M11 2.5c1.5 1.5 2 3.5 2 5.5s-.5 4-2 5.5M6.5 6l3 4M9.5 6l-3 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+          path: '<svg viewBox="0 0 16 16"><circle cx="3.5" cy="12.5" r="1.5" fill="currentColor"/><circle cx="12.5" cy="3.5" r="1.5" fill="currentColor"/><path d="M3.5 11V8a2 2 0 0 1 2-2h5a2 2 0 0 0 2-2" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
           open: '<svg viewBox="0 0 16 16"><path d="M2 4.5a1 1 0 0 1 1-1h3.2l1.3 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
           save: '<svg viewBox="0 0 16 16"><path d="M8 2.5v7M5 7l3 3 3-3M3 11.5v1.5h10v-1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
           fullscreen: '<svg viewBox="0 0 16 16"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -1066,7 +1239,10 @@ function getIconComponentProps() {
 
 function getJSValueComponentProps() {
   return {
-    props: ['description', 'path', 'name', 'isDimName'],
+    // keyPath is the property keys leading to this value from the logged
+    // value (eg. ["people", "0", "name"]) or null if it can't be reached by
+    // property keys (eg. inside of a Map).
+    props: ['description', 'path', 'name', 'isDimName', 'keyPath'],
     data() {
       return {
         isExpanded: false,
@@ -1078,7 +1254,12 @@ function getJSValueComponentProps() {
         if (newValue && !this.hasBeenExpanded) {
           this.hasBeenExpanded = newValue;
         }
-      }
+      },
+      // When a refresh replaces this value's description, its new contents are
+      // requested if it is still expanded.
+      isPartialDescription(isPartial) {
+        if (isPartial && this.isExpanded) this.requestDescription();
+      },
     },
     computed: {
       isPartialDescription() {
@@ -1099,10 +1280,20 @@ function getJSValueComponentProps() {
         ];
       },
       entryGroups() {
-        // protoEntries only ever contains the [[Prototype]] entry.
+        // protoEntries only ever contains the [[Prototype]] entry whose
+        // members can be reached directly so it adds nothing to the key path.
+        const {keyPath, description} = this;
         return [
-          { key: 'entries', isDim: entry => entry[2] === false },
-          { key: 'protoEntries', isDim: () => true },
+          {
+            key: 'entries',
+            isDim: entry => entry[2] === false,
+            getKeyPath: entry => keyPath && description.entriesArePropertyKeys ? keyPath.concat([entry[0]]) : null,
+          },
+          {
+            key: 'protoEntries',
+            isDim: () => true,
+            getKeyPath: () => keyPath,
+          },
         ];
       }
     },
@@ -1110,14 +1301,26 @@ function getJSValueComponentProps() {
       toggleExpanded() {
         if (!this.isExpandable) return;
         this.isExpanded = !this.isExpanded;
-        if (this.isExpanded && this.isPartialDescription) {
-          messageParent({target: 'runner', func: 'sendDescriptionFor', args: [this.path]});
-        }
-      }
+        if (this.isExpanded && this.isPartialDescription) this.requestDescription();
+      },
+      requestDescription() {
+        messageParent({target: 'runner', func: 'sendDescriptionFor', args: [this.path]});
+      },
+      /**
+       * Shows the menu for this value (eg. Copy as JSON).
+       * @param {MouseEvent} evt
+       */
+      openMenu(evt) {
+        this.$root.openValueMenu(evt, {
+          path: this.path,
+          keyPath: this.keyPath,
+          isPrimitive: this.description.isPrimitive,
+        });
+      },
     },
     template: `
       <div :class="classNames">
-        <div :class="['js-value-header', isExpandable ? 'expandable' : '']" @click="toggleExpanded"><span
+        <div :class="['js-value-header', isExpandable ? 'expandable' : '']" @click="toggleExpanded" @contextmenu.prevent.stop="openMenu"><span
           v-if="isExpandable || isEntry" :class="['arrow', isExpandable ? 'expandable' : '', isExpanded ? 'expanded' : '']"></span><template
           v-if="isEntry"><span :class="['entry-key', isDimName ? 'dim' : '']">{{ name }}</span>: </template><span
           v-for="part in description.parts" :class="'t-' + part[0]">{{ part[1] }}</span></div>
@@ -1130,6 +1333,7 @@ function getJSValueComponentProps() {
                 :name="entry[0]"
                 :is-dim-name="group.isDim(entry)"
                 :description="entry[1]"
+                :key-path="group.getKeyPath(entry)"
                 :path="path.concat([group.key, entryIndex])">
               </js-value>
             </template>
@@ -1298,6 +1502,22 @@ function prepareCode(code, {blockType, importsUrl, findResult}) {
 }
 
 /**
+ * Turns property keys into a path like the browser's console's "Copy property
+ * path" (eg. ["people", "0", "first name"] becomes `people[0]["first name"]`).
+ * @param {string[]} keys
+ * @returns {string}
+ */
+function formatPropertyPath(keys) {
+  return keys.map((key, index) =>
+    /^(0|[1-9]\d*)$/.test(key)
+      ? `[${key}]`
+      : /^[A-Za-z_$][\w$]*$/.test(key)
+        ? (index ? '.' : '') + key
+        : `[${JSON.stringify(key)}]`
+  ).join('');
+}
+
+/**
  * Indicates if an import specifier is a package name (eg. "lodash",
  * "lodash@4/fp" or "@scope/pkg") rather than a relative path or a URL (eg.
  * "./utils.js", "https://example.com/x.js" or "node:fs").
@@ -1455,6 +1675,7 @@ function sanitizeDescription(description) {
       `${Object(part)[1]}`,
     ]),
     ...sanitizeEntries(description),
+    ...(description.entriesArePropertyKeys != null ? {entriesArePropertyKeys: !!description.entriesArePropertyKeys} : {}),
   };
 }
 
@@ -1545,7 +1766,47 @@ function updateDescriptionFor(path, description) {
     level = level[groupKey]?.[toIndex(path[i + 1])]?.[1];
   }
 
-  if (level) Object.assign(level, sanitizeEntries(description));
+  if (!level) return;
+  Object.assign(level, sanitizeEntries(description));
+  level.entriesArePropertyKeys = !!Object(description).entriesArePropertyKeys;
+  // A refresh also sends the value's preview.
+  if (Array.isArray(Object(description).parts)) {
+    const {typeName, isPrimitive, parts} = sanitizeDescription(description);
+    Object.assign(level, {typeName, isPrimitive, parts});
+  }
+}
+
+/**
+ * NOTE:  Called via main by the runner with a value converted to JSON (see
+ * requestValueJson()).
+ * @param {{requestId: string, json?: string, circularCount?: number, error?: string}} result
+ */
+function onValueJson(result) {
+  const {requestId, json, circularCount, error} = Object(result);
+  const resolve = jsonRequests.get(`${requestId}`);
+  if (!resolve) return;
+  jsonRequests.delete(`${requestId}`);
+  resolve({
+    json: json != null ? `${json}` : null,
+    circularCount: +circularCount || 0,
+    error: error != null ? `${error}` : null,
+  });
+}
+
+/**
+ * The functions waiting for values to be converted to JSON by their request
+ * IDs.
+ * @type {Map<string, (result: {json: string?, circularCount: number, error: string?}) => void>}
+ */
+const jsonRequests = new Map();
+
+/**
+ * NOTE:  Called via main by the runner after a value was stored as a global
+ * variable.
+ * @param {string} name
+ */
+function onStoredAsGlobal(name) {
+  mountedApp.displays.push({type: 'notice', message: `Stored as the global variable ${`${name}`}`});
 }
 
 /**

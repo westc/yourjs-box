@@ -163,6 +163,37 @@ class TestContext {
   }
 
   /**
+   * Right-clicks the value whose line starts with the text (the last one if
+   * there are several) and returns the labels in its menu.
+   */
+  async rightClickValue(text) {
+    await this.inViewer(t => {
+      const header = [...document.querySelectorAll('.js-value-header')].filter(h => h.textContent.trim().startsWith(t)).pop();
+      const {left, top} = header.getBoundingClientRect();
+      header.dispatchEvent(new MouseEvent('contextmenu', {bubbles: true, cancelable: true, clientX: left + 5, clientY: top + 5}));
+    }, text);
+    await this.viewer.waitForSelector('.value-menu');
+    return this.inViewer(() => [...document.querySelectorAll('.value-menu .menu-item')].map(item => item.textContent.trim()));
+  }
+
+  /** Clicks the item in the value menu that starts with the text. */
+  async clickValueMenu(text) {
+    await this.inViewer(t => [...document.querySelectorAll('.value-menu .menu-item')].find(item => item.textContent.trim().startsWith(t)).click(), text);
+  }
+
+  /** Expands the value whose line starts with the text and waits for it. */
+  async expand(text) {
+    await this.inViewer(t => [...document.querySelectorAll('.js-value-header.expandable')].filter(h => h.textContent.trim().startsWith(t)).pop().click(), text);
+    await this.viewer.waitForFunction(() => !document.querySelector('.js-value .loading'));
+  }
+
+  /** Waits for a toast message and returns it. */
+  async toast() {
+    await this.viewer.waitForSelector('.toast');
+    return this.inViewer(() => document.querySelector('.toast').textContent.trim());
+  }
+
+  /**
    * Opens the "More" menu and clicks the item that starts with the text.
    */
   async menu(text) {
@@ -780,6 +811,126 @@ test('Open makes a file the code the console starts with', async t => {
   await t.page.waitForTimeout(300);
   assert.equal(await t.editorCode(), opened);
   assert.deepEqual(await t.messages(), ['log: setup']);
+});
+
+test('right-clicking a value shows what can be done with it', async t => {
+  await t.open(`console.log({count: 1})`);
+  await t.run();
+  assert.deepEqual(await t.rightClickValue('{count: 1}'), ['Copy as JSON', 'Save as JSON…', 'Store as global variable', 'Refresh']);
+  await t.inViewer(() => dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape'})));
+  assert.ok(await t.inViewer(() => !document.querySelector('.value-menu')));
+  await t.expand('{count: 1}');
+  assert.deepEqual(await t.rightClickValue('count: 1'), ['Copy as JSON', 'Save as JSON…', 'Store as global variable', 'Copy property path']);
+});
+
+const CIRCULAR_CODE = `
+  const a = {name: 'a', list: [1, 2], shared: null};
+  const shared = {x: 1};
+  a.shared = [shared, shared];
+  a.self = a;
+  a.list.push(a);
+  a.m = new Map([['k', 1]]);
+  a.s = new Set([1]);
+  a.big = 10n;
+  console.log(a);
+`;
+const CIRCULAR_JSON = JSON.stringify({name: 'a', list: [1, 2, null], shared: [{x: 1}, {x: 1}], m: [['k', 1]], s: [1], big: '10'}, null, 2);
+
+test('Copy as JSON leaves out circular references', async t => {
+  await t.open(CIRCULAR_CODE);
+  await t.run();
+  await t.rightClickValue("{name: 'a'");
+  await t.clickValueMenu('Copy as JSON');
+  assert.equal(await t.toast(), 'Copied as JSON (2 circular references were left out)');
+  assert.equal(await t.page.evaluate(() => navigator.clipboard.readText()), CIRCULAR_JSON);
+});
+
+test('Save as JSON saves the value as a file', async t => {
+  await t.open(`console.log({people: [{name: 'Ada'}]})`);
+  await t.run();
+  await t.inViewer(() => window.showSaveFilePicker = async options => {
+    window.saved = {suggestedName: options.suggestedName, text: ''};
+    return {createWritable: async () => ({write: async text => saved.text += text, close: async () => {}})};
+  });
+  await t.expand('{people:');
+  await t.rightClickValue('people:');
+  await t.clickValueMenu('Save as JSON');
+  assert.equal(await t.toast(), 'Saved as JSON');
+  const saved = await t.inViewer(() => saved);
+  assert.deepEqual(saved, {suggestedName: 'people.json', text: JSON.stringify([{name: 'Ada'}], null, 2) + '\n'});
+});
+
+test('Store as global variable lets code use the value', async t => {
+  await t.open(CIRCULAR_CODE);
+  await t.run();
+  await t.rightClickValue("{name: 'a'");
+  await t.clickValueMenu('Store as global variable');
+  await t.viewer.waitForFunction(() => document.querySelector('.notice'));
+  await t.runCode('temp1.self === temp1 && temp1.name');
+  await t.rightClickValue("{name: 'a'");
+  await t.clickValueMenu('Store as global variable');
+  await t.page.waitForTimeout(300);
+  assert.deepEqual((await t.messages()).filter(m => !m.startsWith('log:')), [
+    'notice: Stored as the global variable temp1',
+    "result: 'a'",
+    'notice: Stored as the global variable temp2',
+  ]);
+});
+
+test('Store as global variable puts the variable on the page in window mode', async t => {
+  await t.open(`console.log({fromThePage: true})`, { runner: 'window' });
+  await t.run();
+  await t.rightClickValue('{fromThePage: true}');
+  await t.clickValueMenu('Store as global variable');
+  await t.viewer.waitForFunction(() => document.querySelector('.notice'));
+  assert.deepEqual(await t.page.evaluate(() => window.temp1), {fromThePage: true});
+});
+
+test('Copy property path copies the path to properties and items', async t => {
+  await t.open(String.raw`
+    // Objects \\
+    console.log({people: [{name: 'Ada', 'first name': 'Ada'}], map: new Map([['k', {v: 1}]])});
+    // Prototype members \\
+    class Person { greet() {} }
+    console.log(new Person());
+  `);
+  await t.run(2);
+  const copiedPath = async text => {
+    await t.rightClickValue(text);
+    await t.clickValueMenu('Copy property path');
+    await t.toast();
+    return t.page.evaluate(() => navigator.clipboard.readText());
+  };
+  await t.expand('{people:');
+  await t.expand('people:');
+  await t.expand('0:');
+  assert.equal(await copiedPath("name: 'Ada'"), 'people[0].name');
+  assert.equal(await copiedPath("first name: 'Ada'"), 'people[0]["first name"]');
+  await t.expand('map:');
+  assert.ok(!(await t.rightClickValue("'k':")).includes('Copy property path'));
+  await t.inViewer(() => dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape'})));
+  await t.expand('Person {}');
+  await t.expand('[[Prototype]]');
+  assert.equal(await copiedPath('greet:'), 'greet');
+});
+
+test('Refresh shows the value as it is now', async t => {
+  await t.open(String.raw`
+    // Log it \\
+    globalThis.o = {a: 1};
+    console.log(o);
+    // Change it \\
+    o.a = 10;
+    o.b = 2;
+  `);
+  await t.run();
+  await t.expand('{a: 1}');
+  await t.run();
+  await t.rightClickValue('{a: 1}');
+  await t.clickValueMenu('Refresh');
+  await t.viewer.waitForFunction(() => [...document.querySelectorAll('.js-value-header')].some(h => h.textContent.trim() === '{a: 10, b: 2}'));
+  // It stays expanded and shows the new properties.
+  await t.viewer.waitForFunction(() => [...document.querySelectorAll('.expansion .js-value-header')].some(h => h.textContent.trim() === 'b: 2'));
 });
 
 test('explains when the libraries fail to load', async t => {

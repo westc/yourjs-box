@@ -88,8 +88,8 @@
    * to these calls.
    */
   const RELAYABLE_FUNCS = {
-    viewer: ['appendLog', 'appendError', 'clearDisplays', 'onCodeRan', 'updateDescriptionFor'],
-    runner: ['clearLogs', 'reset', 'runCode', 'sendDescriptionFor'],
+    viewer: ['appendLog', 'appendError', 'clearDisplays', 'onCodeRan', 'onStoredAsGlobal', 'onValueJson', 'updateDescriptionFor'],
+    runner: ['clearLogs', 'getValueAsJson', 'refreshDescription', 'reset', 'runCode', 'sendDescriptionFor', 'storeAsGlobal'],
     // Things that the viewer (but never the runner) can ask this script to do.
     host: ['focusPopOut', 'popIn', 'popOut', 'requestPopIn', 'setMaximized'],
   };

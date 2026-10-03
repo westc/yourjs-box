@@ -517,9 +517,9 @@ function createRunner(send, options) {
     const $entries = [];
     const protoEntries = [];
     const $protoEntries = [];
+    let wasIterated = false;
 
     if (value !== null && ('object' === typeof value || 'function' === typeof value)) {
-      let wasIterated = false;
       try {
         // Map
         if (typeName === 'Map') {
@@ -567,7 +567,9 @@ function createRunner(send, options) {
       }
     }
 
-    return {entries, protoEntries, $entries, $protoEntries};
+    // Map and Set entries (and other iterated values) aren't properties so
+    // they have no property path.
+    return {entries, protoEntries, entriesArePropertyKeys: !wasIterated, $entries, $protoEntries};
   }
 
   // ['123', 0, 'entries', 0]
@@ -678,16 +680,25 @@ function createRunner(send, options) {
    *   entry indices.
    */
   function sendDescriptionFor(path) {
-    // Get the description of the desired value.
-    let level = logArgsById;
-    let pathPartIndex = 0;
-    for (let pathPart of path) {
-      if (pathPartIndex && pathPartIndex % 2 === 0) {
-        pathPart = '$' + pathPart;
-      }
-      level = level?.[pathPart];
-      pathPartIndex++;
-    }
+    sendDescription(path, false);
+  }
+
+  /**
+   * Describes the value again (eg. after the code changed it) including its
+   * preview.
+   * @param {(string|number)[]} path
+   */
+  function refreshDescription(path) {
+    sendDescription(path, true);
+  }
+
+  /**
+   * @param {(string|number)[]} path
+   * @param {boolean} isRefresh
+   *   If `true` the value's preview is included too.
+   */
+  function sendDescription(path, isRefresh) {
+    const level = getLevel(path);
     if (!level) return;
     const description = describe(level.value, 'receiver' in level ? level.receiver : level.value);
 
@@ -695,11 +706,95 @@ function createRunner(send, options) {
     Object.assign(level, description);
 
     // Send the description without values back to the viewer.
+    const summary = isRefresh
+      ? summarize(level.value, path.length > 2 ? 1 : 0, path[path.length - 2] === 'protoEntries')
+      : {};
     send({
       target: 'viewer',
       func: 'updateDescriptionFor',
-      args: [path, without(['$entries', '$protoEntries'], description)],
+      args: [path, {...without(['$entries', '$protoEntries'], description), ...summary}],
     });
+  }
+
+  /**
+   * Finds what is stored for a logged value (or a value within it).
+   * @param {(string|number)[]} path
+   *   The log ID, the argument index and then pairs of entry group keys and
+   *   entry indices.
+   * @returns {{value: *, receiver?: *}|undefined}
+   */
+  function getLevel(path) {
+    let level = logArgsById;
+    path.forEach((pathPart, index) => {
+      level = level?.[index && index % 2 === 0 ? '$' + pathPart : pathPart];
+    });
+    return level;
+  }
+
+  /**
+   * Sends a value as JSON to the viewer (eg. to copy or save it).
+   * @param {(string|number)[]} path
+   * @param {string} requestId
+   */
+  function getValueAsJson(path, requestId) {
+    const level = getLevel(path);
+    let result;
+    try {
+      result = level ? toJson(level.value) : {error: 'The value is no longer available.'};
+    }
+    catch (e) {
+      result = {error: `The value couldn't be converted to JSON (${e?.message ?? e}).`};
+    }
+    send({target: 'viewer', func: 'onValueJson', args: [{requestId, ...result}]});
+  }
+
+  /**
+   * Converts a value to JSON like JSON.stringify() does except that Maps and
+   * Sets become arrays, BigInts become strings and circular references (an
+   * object inside of itself) are left out instead of causing an error.  An
+   * object that appears more than once without being circular is kept.
+   * @param {*} value
+   * @returns {{json?: string, circularCount: number, error?: string}}
+   */
+  function toJson(value) {
+    let circularCount = 0;
+    // The objects currently being converted along with what they were
+    // converted from (eg. a Map is converted to an array).
+    const stack = [];
+    const json = JSON.stringify(value, function(key, val) {
+      // `this` is the object containing `key` so anything after it on the
+      // stack has already been converted.
+      while (stack.length && stack[stack.length - 1].converted !== this) stack.pop();
+
+      if ('bigint' === typeof val) return `${val}`;
+      if (val !== null && 'object' === typeof val) {
+        const original = val;
+        if (stack.some(item => item.original === original)) {
+          circularCount++;
+          return undefined;
+        }
+        if (val instanceof Map || val instanceof Set) val = [...val];
+        stack.push({original, converted: val});
+      }
+      return val;
+    }, 2);
+    return json === undefined
+      ? {error: 'This value can\'t be represented as JSON.', circularCount}
+      : {json, circularCount};
+  }
+
+  /**
+   * Stores a value as a global variable (temp1, temp2, etc.) like the
+   * browser's console does so that code can use it.
+   * @param {(string|number)[]} path
+   */
+  function storeAsGlobal(path) {
+    const level = getLevel(path);
+    if (!level) return;
+    let index = 1;
+    while (`temp${index}` in globalThis) index++;
+    globalThis[`temp${index}`] = level.value;
+    send({target: 'viewer', func: 'onStoredAsGlobal', args: [`temp${index}`]});
   }
 
   /**
@@ -710,5 +805,5 @@ function createRunner(send, options) {
     groupIds = [];
   }
 
-  return {clearLogs, destroy, runCode, sendDescriptionFor};
+  return {clearLogs, destroy, getValueAsJson, refreshDescription, runCode, sendDescriptionFor, storeAsGlobal};
 }

@@ -662,6 +662,33 @@ body {
   margin: 4px 0;
 }
 
+/* The menu shown when a value is right-clicked */
+.value-menu {
+  bottom: auto;
+  min-width: 220px;
+  position: fixed;
+  right: auto;
+  z-index: 850;
+}
+
+/* A short message (eg. "Copied as JSON") */
+.toast {
+  animation: fade-in 0.15s ease-out;
+  background-color: var(--console-text);
+  border-radius: 6px;
+  bottom: 44px;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.25);
+  color: var(--console-bg);
+  font-size: 12px;
+  left: 50%;
+  max-width: calc(100% - 32px);
+  padding: 6px 12px;
+  pointer-events: none;
+  position: fixed;
+  transform: translateX(-50%);
+  z-index: 860;
+}
+
 /* Shown in the page while the console is in a pop-out window */
 .popped-out {
   align-items: center;

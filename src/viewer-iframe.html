@@ -43,6 +43,7 @@
               <js-value
                 v-for="(description, index) in display.descriptions"
                 :description="description"
+                :key-path="[]"
                 :path="[display.logId, index]">
               </js-value>
               <div v-if="display.stack" class="trace-stack">{{ display.stack }}</div>
@@ -115,6 +116,27 @@
       <span class="menu-icon"><icon name="info"></icon></span>About JS Box
     </button>
   </div>
+  <div v-if="valueMenu" class="more-menu value-menu" role="menu" aria-label="Value" ref="valueMenu" :style="{left: valueMenu.x + 'px', top: valueMenu.y + 'px'}" @keydown="onMenuKeyDown">
+    <button class="menu-item" role="menuitem" @click="copyValueAsJson()">
+      <span class="menu-icon"><icon name="copy"></icon></span>Copy as JSON
+    </button>
+    <button class="menu-item" role="menuitem" @click="saveValueAsJson()">
+      <span class="menu-icon"><icon name="save"></icon></span>Save as JSON&hellip;
+    </button>
+    <button class="menu-item" role="menuitem" @click="storeValueAsGlobal()">
+      <span class="menu-icon"><icon name="variable"></icon></span>Store as global variable
+    </button>
+    <button v-if="valueMenu.propertyPath" class="menu-item" role="menuitem" @click="copyPropertyPath()">
+      <span class="menu-icon"><icon name="path"></icon></span>Copy property path
+    </button>
+    <template v-if="!valueMenu.isPrimitive">
+      <div class="menu-separator"></div>
+      <button class="menu-item" role="menuitem" @click="refreshValue()">
+        <span class="menu-icon"><icon name="refresh"></icon></span>Refresh
+      </button>
+    </template>
+  </div>
+  <div v-if="toast" class="toast" role="status">{{ toast.message }}</div>
   <div v-if="isPoppedOut" class="popped-out">
     <div class="popped-out-content">
       <span class="logo logo-medium"><span class="logo-mark">JS</span><span class="logo-text">Box</span></span>
@@ -165,7 +187,7 @@
           <dt><kbd>Esc</kbd></dt><dd>Close this window, the menu or full screen</dd>
         </dl>
         <div class="about-footer">
-          MIT License &copy; 2023-present Christopher West &middot;
+          MIT License &copy; 2023-present Chris West &middot;
           Built with Vue {{ libraryVersions.vue }}, Ace {{ libraryVersions['ace-builds'] }},
           Prism {{ libraryVersions.prismjs }} and Acorn {{ libraryVersions.acorn }}
         </div>
