@@ -259,8 +259,9 @@ between blocks.
 Install the development dependencies by running `npm install`.
 
 - `npm run dev` builds, rebuilds whenever one of the files in `src/` changes
-  and serves the examples at http://localhost:3000/examples/ with the browser
-  reloading automatically after each rebuild.
+  and serves the examples at http://localhost:3000/examples/ (opening them in
+  your default browser) with the browser reloading automatically after each
+  rebuild.  Use `BROWSER=none npm run dev` to keep it from opening a browser.
 - `npm run build` builds the files in `dist/` once.
 - `npm test` builds and then runs the browser tests in `test/run.js` using your
   installed copy of Google Chrome (set `CHROME_PATH` to use another Chromium

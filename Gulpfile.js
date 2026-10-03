@@ -152,7 +152,9 @@ gulp.task('serve', function (done) {
     files: [`${dirDest}/*.js`, 'examples/**/*.html'],
     listen: 'localhost',
     notify: false,
-    open: false,
+    // Opens the examples in the default browser unless BROWSER=none is set
+    // (eg. `BROWSER=none npm run dev`).
+    open: process.env.BROWSER === 'none' ? false : 'local',
     ui: false,
   }, done);
 });
