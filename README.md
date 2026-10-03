@@ -224,7 +224,6 @@ test `dist/yourjs-box.js` or `dist/yourjs-box.min.js` instead of
 - Add `@timeout` annotation to the special comments that will allow you to input the amount of seconds to wait since the last call to a console logging function before automatically running the next comment segmented block.
 - Allow for TypeScript
 - Allow for CoffeeScript
-- Allow code to run in main window.
 
 ## License
 
