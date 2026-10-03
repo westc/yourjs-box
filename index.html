@@ -404,6 +404,11 @@
           color: #ffa657;
         }
       }
+      .subheading {
+        font-size: 20px;
+        letter-spacing: -0.01em;
+        margin: 36px 0 8px;
+      }
       table.attributes {
         border-collapse: collapse;
         font-size: 15px;
@@ -683,6 +688,22 @@
               </tbody>
             </table>
           </div>
+          <h3 class="subheading">Or create consoles with JavaScript</h3>
+          <p class="section-lead">
+            Put the script in your page&rsquo;s <code>&lt;head&gt;</code> and use
+            <code>YourJSBox.create()</code>, which works great with React, Vue and
+            other frameworks.  Try it on the <a href="examples/api.html">API example</a>.
+          </p>
+<pre class="code-block"><code><span class="t">&lt;script</span> <span class="a">src</span>=<span class="s">"https://cdn.jsdelivr.net/npm/yourjs-box@1/dist/yourjs-box.min.js"</span><span class="t">&gt;&lt;/script&gt;</span>
+
+const box = YourJSBox.create({
+  target: <span class="s">'#lesson'</span>,       <span class="c">// an element or a CSS selector</span>
+  placement: <span class="s">'fill'</span>,       <span class="c">// fill | append | prepend | replace | before | after</span>
+  code: <span class="s">"console.log('Hello!');"</span>,
+  theme: <span class="s">'dark'</span>,
+});
+
+box.destroy();  <span class="c">// removes the console</span></code></pre>
           <p class="demo-hint">
             See the <a href="https://github.com/westc/yourjs-box#readme">README</a> for all of the details
             or the <a href="examples/kitchen-sink.html">kitchen sink</a> for every feature in action.

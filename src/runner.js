@@ -37,6 +37,9 @@ function createRunner(send, options) {
   const RESULT_KEY = `yourjs-box.result.${Math.random().toString(36).slice(2)}`;
   globalThis[Symbol.for(RESULT_KEY)] = reportResult;
 
+  // The console functions that were replaced so that they can be restored.
+  const consoleWrappers = [];
+
   // Overrides for console functions.  In window mode this also captures
   // anything else that the page logs, just like the browser's console.
   for (const key of [
@@ -46,12 +49,14 @@ function createRunner(send, options) {
   ]) {
     const original = console[key];
     if ('function' !== typeof original) continue;
-    console[key] = function(...args) {
+    const wrapper = function(...args) {
       handleConsoleCall(key, args);
 
       // Calls and returns the original console function.
       return original.apply(this, arguments);
     };
+    console[key] = wrapper;
+    consoleWrappers.push({key, original, wrapper});
   }
 
   /**
@@ -158,13 +163,29 @@ function createRunner(send, options) {
     if (value !== undefined) addLog('result', [value], {}, 'string' === typeof value ? 1 : 0);
   }
 
-  addEventListener('error', evt => {
+  function onError(evt) {
     reportUncaught(evt.error !== undefined ? evt.error : evt.message);
-  });
-
-  addEventListener('unhandledrejection', evt => {
+  }
+  function onUnhandledRejection(evt) {
     reportUncaught(evt.reason, true);
-  });
+  }
+  addEventListener('error', onError);
+  addEventListener('unhandledrejection', onUnhandledRejection);
+
+  /**
+   * Stops capturing what is logged (used when a console in window mode is
+   * destroyed).  Each console function is restored unless something else has
+   * replaced it since.
+   */
+  function destroy() {
+    removeEventListener('error', onError);
+    removeEventListener('unhandledrejection', onUnhandledRejection);
+    delete globalThis[Symbol.for(RESULT_KEY)];
+    for (const {key, original, wrapper} of consoleWrappers) {
+      if (console[key] === wrapper) console[key] = original;
+    }
+    clearLogs();
+  }
 
   /**
    * @param {*} error
@@ -687,5 +708,5 @@ function createRunner(send, options) {
     groupIds = [];
   }
 
-  return {clearLogs, runCode, sendDescriptionFor};
+  return {clearLogs, destroy, runCode, sendDescriptionFor};
 }

@@ -24,7 +24,8 @@ should be loaded into the console inside of the script tag:
 </div>
 ```
 
-The console fills its container.  The script is also available from unpkg at
+The console fills its container (and is never less than 150px tall).  The
+script is also available from unpkg at
 `https://unpkg.com/yourjs-box@1/dist/yourjs-box.min.js`.
 
 ### Code Blocks
@@ -139,6 +140,43 @@ automatically as soon as all of the code that came before it has run.  It shows
 up in the output as a collapsed block labelled with whatever came after the
 prefix (and optional colon), or "Hidden code" if nothing did.  Clicking the
 label shows or hides the code.
+
+### JavaScript API
+
+Loading the script also provides `YourJSBox` for creating consoles from
+JavaScript (eg. in React, Vue or any page that adds content dynamically).  A
+script tag in the `<head>` only provides the API, while one in the `<body>` is
+also replaced by a console (with the code inside of it) as usual.
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/yourjs-box@1/dist/yourjs-box.min.js"></script>
+```
+
+```js
+const box = YourJSBox.create({
+  target: '#lesson',
+  code: "// Say hello \\\\\nconsole.log('Hello!');",
+  theme: 'dark',
+});
+
+// Later (eg. when a component is removed):
+box.destroy();
+```
+
+`YourJSBox.create(options)` returns `{element, destroy}` where `element` is the
+console's IFRAME and `destroy()` removes it, stops its code and closes its
+pop-out window (in window mode it also restores the page's `console`
+functions).  The options are:
+
+| Option | Description |
+| --- | --- |
+| `target` | Required.  The element (or a CSS selector for it) that the console is placed relative to. |
+| `placement` | Where the console goes:  `"fill"` (default) replaces the target's contents, `"append"` and `"prepend"` add it inside of the target, `"replace"` replaces the target itself and `"before"` and `"after"` add it next to the target. |
+| `height` | The CSS height of the console (a number is treated as pixels).  Defaults to `"100%"` so the console fills its container.  It is never less than 150px. |
+| `code` | The code that the console starts with. |
+| `runner`, `blockType`, `showResults`, `hidePrefix`, `dividerOrient`, `theme`, `librariesUrl` | The same as the `data-*` attributes above. |
+
+`YourJSBox.version` is the version of JS Box that was loaded.
 
 ### Where Code Runs
 

@@ -91,7 +91,7 @@
     }
   }
 
-  function createRunner(e,t){const{mode:n}=t,r=t.ownUrl||("worker"===n?self.location.href:""),o={};let s=0,i=0,c=!0,a;const l={},u={},f={};let p=[],d=0;const g=`yourjs-box.result.${Math.random().toString(36).slice(2)}`;globalThis[Symbol.for(g)]=y;for(const e of["assert","clear","count","countReset","debug","dir","dirxml","error","group","groupCollapsed","groupEnd","info","log","table","time","timeEnd","timeLog","trace","warn"]){const t=console[e];"function"==typeof t&&(console[e]=function(...n){return h(e,n),t.apply(this,arguments)})}function h(t,n){const r=n.length&&void 0!==n[0]?`${n[0]}`:"default";if("clear"===t)U(),p=[],e({target:"viewer",func:"clearDisplays",args:[!0]});else if("assert"===t){if(n[0])return;const e=n.slice(1);m("assert",e.length?"string"==typeof e[0]?["Assertion failed: "+e[0],...e.slice(1)]:["Assertion failed:",...e]:["Assertion failed: console.assert"])}else if("count"===t)u[r]=(u[r]||0)+1,m("count",[`${r}: ${u[r]}`]);else if("countReset"===t)Object.hasOwn(u,r)?u[r]=0:m("warn",[`Count for '${r}' does not exist`]);else if("time"===t)Object.hasOwn(f,r)?m("warn",[`Timer '${r}' already exists`]):f[r]=performance.now();else if("timeLog"===t||"timeEnd"===t){if(!Object.hasOwn(f,r))return void m("warn",[`Timer '${r}' does not exist`]);const e=performance.now()-f[r];"timeEnd"===t&&delete f[r],m(t,[`${r}: ${+e.toFixed(3)} ms`,..."timeLog"===t?n.slice(1):[]])}else if("trace"===t){const e=$((new Error).stack??"").split("\n").slice(1).join("\n");m("trace",n.length?n:["console.trace"],{stack:e})}else if("group"===t||"groupCollapsed"===t){const e=""+ ++d;m(t,n.length?n:["console.group"],{groupId:e,isCollapsed:"groupCollapsed"===t}),p.push(e)}else if("groupEnd"===t)p.pop();else{const e="table"===t?x(n[0],n[1]):null;m(t,e?n.slice(0,1):n,{table:e})}}function m(t,n,r,i=0){const c=""+ ++s;o[c]=n.map((e=>({...N(e,i),value:e}))),e({target:"viewer",func:"appendLog",args:[{logId:c,key:t,descriptions:o[c].map(v(["value"])),groupIds:p.slice(),...r}]})}function y(e){void 0!==e&&m("result",[e],{},"string"==typeof e?1:0)}function b(t,n){const r="classic"===a&&"SyntaxError"===t?.name&&/\bawait\b/.test(t.message)?'\n(To use top-level await, add data-block-type="module" to the script tag.)':"";e({target:"viewer",func:"appendError",args:[{message:(n?"Uncaught (in promise) ":"Uncaught ")+$(t?.stack??`${t?.message??t}`)+r}]})}function $(e){return`${e}`.split("\n").filter((e=>!(r&&/^\s*at\b/.test(e)&&e.includes(r)))).join("\n").replace(/(snippet-\d+\.js):(\d+):(\d+)/g,((e,t,n,r)=>{const o=l[t];return o&&+n===o.line&&+r>o.column?`${t}:${n}:${Math.max(o.column,r-o.shift)}`:e}))}function v(e,t){if(!t)return t=>v(e,t);const n={...t};for(const t of e)delete n[t];return n}function x(e,t){if(null===e||"object"!=typeof e)return null;const n="Value",r=[];let o=!1;const s=Object.keys(e).map((t=>{const n=e[t],s={index:t,values:{},hasValue:!1};if(null===n||"object"!=typeof n&&"function"!=typeof n)o=!0,s.hasValue=!0,s.value=n;else for(const e of Object.keys(n))r.includes(e)||r.push(e),s.values[e]=n[e];return s})),i=Array.isArray(t)?t.map((e=>`${e}`)):r,c=o&&!Array.isArray(t);return{headers:["(index)",...i,...c?[n]:[]],rows:s.map((({index:e,values:t,hasValue:n,value:r})=>({index:e,cells:[...i.map((e=>Object.hasOwn(t,e)?N(t[e],2):null)),...c?[n?N(r,2):null]:[]]})))}}function j(e){if(null==e)return""+e;const t=typeof e;return"object"===t||"undefined"===t?Object.prototype.toString.call(e).slice(8,-1):t}function O(e,t){try{const t=Object.getPrototypeOf(e)?.constructor?.name;if(t&&"string"==typeof t)return t}catch(e){}return t}addEventListener("error",(e=>{b(void 0!==e.error?e.error:e.message)})),addEventListener("unhandledrejection",(e=>{b(e.reason,!0)}));const w=5,E=100;function N(e,t=0,n=!1){const r=j(e),o="function"!==r&&r===r.toLowerCase(),s=undefined;return{typeName:r,isPrimitive:o,parts:n?[["text","Object"!==r?r:O(e,r)]]:k(e,t,r)}}function k(e,t,n=j(e)){if("string"===n)return t?(t>1&&e.length>100&&(e=e.slice(0,99)+"\u2026"),[["string",A(e)]]):[["text",e]];if("number"===n)return[["number",Object.is(e,-0)?"-0":""+e]];if("bigint"===n)return[["number",e+"n"]];if("boolean"===n)return[["number",""+e]];if("null"===n||"undefined"===n)return[["null",n]];if("symbol"===n)return[["symbol",e.toString()]];if("function"===n)return S(e,t);try{return L(e,t,n)}catch(e){return[["text",n]]}}function A(e){const t=JSON.stringify(e);return e.includes("'")?t:`'${t.slice(1,-1).replace(/\\"/g,'"')}'`}function S(e,t){let n="";try{n=Function.prototype.toString.call(e)}catch(e){}const r=/^class\b/.test(n);return t?t>1?[["function","\u0192"]]:[["function",r?`class ${e.name}`:`\u0192 ${e.name}()`]]:[["text",r?n:n.replace(/^(async\s+)?function\b\s*/,"$1\u0192 ")]]}function L(e,t,n){const r=O(e,n),o=/^Array(?:[^a-z]|$)|[^A-Z]Array$/.test(n);if("Date"===n)return[["text",isNaN(e)?"Invalid Date":Date.prototype.toString.call(e)]];if("RegExp"===n)return[["regexp",""+e]];if("Promise"===n)return[["text",`${r} {\u2026}`]];if("undefined"!=typeof Node&&e instanceof Node)return e.nodeType===Node.ELEMENT_NODE?[["node",e.localName+(e.id?"#"+e.id:"")+[...e.classList].map((e=>"."+e)).join("")]]:e.nodeType===Node.TEXT_NODE?[["string",A(e.data)]]:[["node",e.nodeName]];if(e instanceof Error)return[["text",t?`${e.name}: ${e.message}`:$(e.stack??`${e}`)]];if(t>1)return o?[["text",`${r}(${e.length})`]]:"Map"===n||"Set"===n?[["text",`${r}(${e.size})`]]:[["text","Object"===r?"{\u2026}":r]];const s=[],i=(e,t,n)=>{e.forEach(((e,t)=>{t&&s.push(["text",", "]),n(e)})),t>e.length&&s.push(["text",(e.length?", ":"")+"\u2026"])};if(o){const t=e.length;s.push(["text","Array"===n&&"Array"===r?`(${t}) [`:`${r}(${t}) [`]),i(Array.from({length:Math.min(t,E)},((e,t)=>t)),t,(t=>s.push(...t in e?k(e[t],2):[["null","empty"]]))),s.push(["text","]"])}else if("Map"===n||"Set"===n){const t=[...e].slice(0,E);s.push(["text",`${r}(${e.size}) {`]),i(t,e.size,(e=>{"Map"===n?s.push(...k(e[0],2),["text"," => "],...k(e[1],2)):s.push(...k(e,2))})),s.push(["text","}"])}else{const t=Object.keys(e);"Object"!==r&&s.push(["text",r+" "]),"Number"===n||"String"===n||"Boolean"===n?s.push(["text","{"],...k(e.valueOf(),2),["text","}"]):(s.push(["text","{"]),i(t.slice(0,w),t.length,(t=>{const n=Object.getOwnPropertyDescriptor(e,t);s.push(["key",t],["text",": "],..."value"in n?k(n.value,2):[["text","(\u2026)"]])})),s.push(["text","}"]))}return s}function R(e,t=e){const n=j(e),r=[],o=[],s=[],i=[];if(null!==e&&("object"==typeof e||"function"==typeof e)){let c=!1;try{if("Map"===n){for(const[t,n]of[...e])r.push([k(t,2).map((e=>e[1])).join(""),N(n,1)]),o.push({value:n});c=!0}else if("Array"!==n&&"function"!==n&&"function"==typeof e[Symbol.iterator]){let t=0;for(const n of e)r.push([""+t,N(n,1)]),o.push({value:n}),++t;c=!0}}catch(e){r.length=o.length=0}if(!c)for(const n of Object.getOwnPropertyNames(e))try{const s=Object.getOwnPropertyDescriptor(e,n),i="value"in s?s.value:Reflect.get(e,n,t);r.push([n,N(i,1),s.enumerable]),o.push({value:i})}catch(e){}const a=Object.getPrototypeOf(e);null!==a&&(s.push(["[[Prototype]]",N(a,1,!0)]),i.push({value:a,receiver:t}))}return{entries:r,protoEntries:s,$entries:o,$protoEntries:i}}async function C(t,r){const{blockType:o,resultRange:s}=Object(r),c=`snippet-${++i}.js`;if(Array.isArray(s)){const[e,n]=s,r=`globalThis[Symbol.for(${JSON.stringify(g)})]((`,o=t.slice(0,e).split("\n");l[c]={line:o.length,column:o[o.length-1].length+1,shift:r.length},t=t.slice(0,e)+r+t.slice(e,n)+"))"+t.slice(n)}const u=`${t}\n//# sourceURL=${c}`;a="module"===o?"module":"classic";try{if("module"===o)await import("data:text/javascript;charset=utf-8,"+encodeURIComponent(u));else if("worker"===n)T(u);else{const e=document.createElement("script");e.textContent=u,document.head.appendChild(e),e.remove()}}catch(e){b(e)}a=void 0,e({target:"viewer",func:"onCodeRan",args:[]})}function T(e){if(c)try{return void importScripts("data:text/javascript;charset=utf-8,"+encodeURIComponent(e))}catch(e){if("NetworkError"!==e?.name)throw e;c=!1}const t=URL.createObjectURL(new Blob([e],{type:"text/javascript"}));try{importScripts(t)}finally{URL.revokeObjectURL(t)}}function D(t){let n=o,r=0;for(let e of t)r&&r%2==0&&(e="$"+e),n=n?.[e],r++;if(!n)return;const s=R(n.value,"receiver"in n?n.receiver:n.value);Object.assign(n,s),e({target:"viewer",func:"updateDescriptionFor",args:[t,v(["$entries","$protoEntries"],s)]})}function U(){for(const e of Object.keys(o))delete o[e];p=[]}return{clearLogs:U,runCode:C,sendDescriptionFor:D}}
+  function createRunner(e,t){const{mode:n}=t,r=t.ownUrl||("worker"===n?self.location.href:""),o={};let s=0,i=0,c=!0,a;const l={},u={},f={};let p=[],d=0;const g=`yourjs-box.result.${Math.random().toString(36).slice(2)}`;globalThis[Symbol.for(g)]=b;const h=[];for(const e of["assert","clear","count","countReset","debug","dir","dirxml","error","group","groupCollapsed","groupEnd","info","log","table","time","timeEnd","timeLog","trace","warn"]){const t=console[e];if("function"!=typeof t)continue;const n=function(...n){return m(e,n),t.apply(this,arguments)};console[e]=n,h.push({key:e,original:t,wrapper:n})}function m(t,n){const r=n.length&&void 0!==n[0]?`${n[0]}`:"default";if("clear"===t)z(),p=[],e({target:"viewer",func:"clearDisplays",args:[!0]});else if("assert"===t){if(n[0])return;const e=n.slice(1);y("assert",e.length?"string"==typeof e[0]?["Assertion failed: "+e[0],...e.slice(1)]:["Assertion failed:",...e]:["Assertion failed: console.assert"])}else if("count"===t)u[r]=(u[r]||0)+1,y("count",[`${r}: ${u[r]}`]);else if("countReset"===t)Object.hasOwn(u,r)?u[r]=0:y("warn",[`Count for '${r}' does not exist`]);else if("time"===t)Object.hasOwn(f,r)?y("warn",[`Timer '${r}' already exists`]):f[r]=performance.now();else if("timeLog"===t||"timeEnd"===t){if(!Object.hasOwn(f,r))return void y("warn",[`Timer '${r}' does not exist`]);const e=performance.now()-f[r];"timeEnd"===t&&delete f[r],y(t,[`${r}: ${+e.toFixed(3)} ms`,..."timeLog"===t?n.slice(1):[]])}else if("trace"===t){const e=O((new Error).stack??"").split("\n").slice(1).join("\n");y("trace",n.length?n:["console.trace"],{stack:e})}else if("group"===t||"groupCollapsed"===t){const e=""+ ++d;y(t,n.length?n:["console.group"],{groupId:e,isCollapsed:"groupCollapsed"===t}),p.push(e)}else if("groupEnd"===t)p.pop();else{const e="table"===t?E(n[0],n[1]):null;y(t,e?n.slice(0,1):n,{table:e})}}function y(t,n,r,i=0){const c=""+ ++s;o[c]=n.map((e=>({...A(e,i),value:e}))),e({target:"viewer",func:"appendLog",args:[{logId:c,key:t,descriptions:o[c].map(w(["value"])),groupIds:p.slice(),...r}]})}function b(e){void 0!==e&&y("result",[e],{},"string"==typeof e?1:0)}function v(e){j(void 0!==e.error?e.error:e.message)}function $(e){j(e.reason,!0)}function x(){removeEventListener("error",v),removeEventListener("unhandledrejection",$),delete globalThis[Symbol.for(g)];for(const{key:e,original:t,wrapper:n}of h)console[e]===n&&(console[e]=t);z()}function j(t,n){const r="classic"===a&&"SyntaxError"===t?.name&&/\bawait\b/.test(t.message)?'\n(To use top-level await, add data-block-type="module" to the script tag.)':"";e({target:"viewer",func:"appendError",args:[{message:(n?"Uncaught (in promise) ":"Uncaught ")+O(t?.stack??`${t?.message??t}`)+r}]})}function O(e){return`${e}`.split("\n").filter((e=>!(r&&/^\s*at\b/.test(e)&&e.includes(r)))).join("\n").replace(/(snippet-\d+\.js):(\d+):(\d+)/g,((e,t,n,r)=>{const o=l[t];return o&&+n===o.line&&+r>o.column?`${t}:${n}:${Math.max(o.column,r-o.shift)}`:e}))}function w(e,t){if(!t)return t=>w(e,t);const n={...t};for(const t of e)delete n[t];return n}function E(e,t){if(null===e||"object"!=typeof e)return null;const n="Value",r=[];let o=!1;const s=Object.keys(e).map((t=>{const n=e[t],s={index:t,values:{},hasValue:!1};if(null===n||"object"!=typeof n&&"function"!=typeof n)o=!0,s.hasValue=!0,s.value=n;else for(const e of Object.keys(n))r.includes(e)||r.push(e),s.values[e]=n[e];return s})),i=Array.isArray(t)?t.map((e=>`${e}`)):r,c=o&&!Array.isArray(t);return{headers:["(index)",...i,...c?[n]:[]],rows:s.map((({index:e,values:t,hasValue:n,value:r})=>({index:e,cells:[...i.map((e=>Object.hasOwn(t,e)?A(t[e],2):null)),...c?[n?A(r,2):null]:[]]})))}}function k(e){if(null==e)return""+e;const t=typeof e;return"object"===t||"undefined"===t?Object.prototype.toString.call(e).slice(8,-1):t}function L(e,t){try{const t=Object.getPrototypeOf(e)?.constructor?.name;if(t&&"string"==typeof t)return t}catch(e){}return t}addEventListener("error",v),addEventListener("unhandledrejection",$);const N=5,S=100;function A(e,t=0,n=!1){const r=k(e),o="function"!==r&&r===r.toLowerCase(),s=undefined;return{typeName:r,isPrimitive:o,parts:n?[["text","Object"!==r?r:L(e,r)]]:R(e,t,r)}}function R(e,t,n=k(e)){if("string"===n)return t?(t>1&&e.length>100&&(e=e.slice(0,99)+"\u2026"),[["string",C(e)]]):[["text",e]];if("number"===n)return[["number",Object.is(e,-0)?"-0":""+e]];if("bigint"===n)return[["number",e+"n"]];if("boolean"===n)return[["number",""+e]];if("null"===n||"undefined"===n)return[["null",n]];if("symbol"===n)return[["symbol",e.toString()]];if("function"===n)return T(e,t);try{return D(e,t,n)}catch(e){return[["text",n]]}}function C(e){const t=JSON.stringify(e);return e.includes("'")?t:`'${t.slice(1,-1).replace(/\\"/g,'"')}'`}function T(e,t){let n="";try{n=Function.prototype.toString.call(e)}catch(e){}const r=/^class\b/.test(n);return t?t>1?[["function","\u0192"]]:[["function",r?`class ${e.name}`:`\u0192 ${e.name}()`]]:[["text",r?n:n.replace(/^(async\s+)?function\b\s*/,"$1\u0192 ")]]}function D(e,t,n){const r=L(e,n),o=/^Array(?:[^a-z]|$)|[^A-Z]Array$/.test(n);if("Date"===n)return[["text",isNaN(e)?"Invalid Date":Date.prototype.toString.call(e)]];if("RegExp"===n)return[["regexp",""+e]];if("Promise"===n)return[["text",`${r} {\u2026}`]];if("undefined"!=typeof Node&&e instanceof Node)return e.nodeType===Node.ELEMENT_NODE?[["node",e.localName+(e.id?"#"+e.id:"")+[...e.classList].map((e=>"."+e)).join("")]]:e.nodeType===Node.TEXT_NODE?[["string",C(e.data)]]:[["node",e.nodeName]];if(e instanceof Error)return[["text",t?`${e.name}: ${e.message}`:O(e.stack??`${e}`)]];if(t>1)return o?[["text",`${r}(${e.length})`]]:"Map"===n||"Set"===n?[["text",`${r}(${e.size})`]]:[["text","Object"===r?"{\u2026}":r]];const s=[],i=(e,t,n)=>{e.forEach(((e,t)=>{t&&s.push(["text",", "]),n(e)})),t>e.length&&s.push(["text",(e.length?", ":"")+"\u2026"])};if(o){const t=e.length;s.push(["text","Array"===n&&"Array"===r?`(${t}) [`:`${r}(${t}) [`]),i(Array.from({length:Math.min(t,S)},((e,t)=>t)),t,(t=>s.push(...t in e?R(e[t],2):[["null","empty"]]))),s.push(["text","]"])}else if("Map"===n||"Set"===n){const t=[...e].slice(0,S);s.push(["text",`${r}(${e.size}) {`]),i(t,e.size,(e=>{"Map"===n?s.push(...R(e[0],2),["text"," => "],...R(e[1],2)):s.push(...R(e,2))})),s.push(["text","}"])}else{const t=Object.keys(e);"Object"!==r&&s.push(["text",r+" "]),"Number"===n||"String"===n||"Boolean"===n?s.push(["text","{"],...R(e.valueOf(),2),["text","}"]):(s.push(["text","{"]),i(t.slice(0,N),t.length,(t=>{const n=Object.getOwnPropertyDescriptor(e,t);s.push(["key",t],["text",": "],..."value"in n?R(n.value,2):[["text","(\u2026)"]])})),s.push(["text","}"]))}return s}function U(e,t=e){const n=k(e),r=[],o=[],s=[],i=[];if(null!==e&&("object"==typeof e||"function"==typeof e)){let c=!1;try{if("Map"===n){for(const[t,n]of[...e])r.push([R(t,2).map((e=>e[1])).join(""),A(n,1)]),o.push({value:n});c=!0}else if("Array"!==n&&"function"!==n&&"function"==typeof e[Symbol.iterator]){let t=0;for(const n of e)r.push([""+t,A(n,1)]),o.push({value:n}),++t;c=!0}}catch(e){r.length=o.length=0}if(!c)for(const n of Object.getOwnPropertyNames(e))try{const s=Object.getOwnPropertyDescriptor(e,n),i="value"in s?s.value:Reflect.get(e,n,t);r.push([n,A(i,1),s.enumerable]),o.push({value:i})}catch(e){}const a=Object.getPrototypeOf(e);null!==a&&(s.push(["[[Prototype]]",A(a,1,!0)]),i.push({value:a,receiver:t}))}return{entries:r,protoEntries:s,$entries:o,$protoEntries:i}}async function M(t,r){const{blockType:o,resultRange:s}=Object(r),c=`snippet-${++i}.js`;if(Array.isArray(s)){const[e,n]=s,r=`globalThis[Symbol.for(${JSON.stringify(g)})]((`,o=t.slice(0,e).split("\n");l[c]={line:o.length,column:o[o.length-1].length+1,shift:r.length},t=t.slice(0,e)+r+t.slice(e,n)+"))"+t.slice(n)}const u=`${t}\n//# sourceURL=${c}`;a="module"===o?"module":"classic";try{if("module"===o)await import("data:text/javascript;charset=utf-8,"+encodeURIComponent(u));else if("worker"===n)P(u);else{const e=document.createElement("script");e.textContent=u,document.head.appendChild(e),e.remove()}}catch(e){j(e)}a=void 0,e({target:"viewer",func:"onCodeRan",args:[]})}function P(e){if(c)try{return void importScripts("data:text/javascript;charset=utf-8,"+encodeURIComponent(e))}catch(e){if("NetworkError"!==e?.name)throw e;c=!1}const t=URL.createObjectURL(new Blob([e],{type:"text/javascript"}));try{importScripts(t)}finally{URL.revokeObjectURL(t)}}function I(t){let n=o,r=0;for(let e of t)r&&r%2==0&&(e="$"+e),n=n?.[e],r++;if(!n)return;const s=U(n.value,"receiver"in n?n.receiver:n.value);Object.assign(n,s),e({target:"viewer",func:"updateDescriptionFor",args:[t,w(["$entries","$protoEntries"],s)]})}function z(){for(const e of Object.keys(o))delete o[e];p=[]}return{clearLogs:z,destroy:x,runCode:M,sendDescriptionFor:I}}
 
   /**
    * Runs the user's code in a Web Worker.  The worker can be terminated which
@@ -159,6 +159,10 @@
     start();
 
     return {
+      destroy() {
+        worker.terminate();
+        if (blobUrl) URL.revokeObjectURL(blobUrl);
+      },
       apply(func, args) {
         if (func === 'reset') {
           worker.terminate();
@@ -182,6 +186,9 @@
   function createWindowRunner(onMessage) {
     const runner = createRunner(onMessage, {mode: 'window', ownUrl: OWN_URL});
     return {
+      destroy() {
+        runner.destroy();
+      },
       apply(func, args) {
         // Anything the code defined stays defined so a reset can only forget
         // the logged values.
@@ -192,13 +199,20 @@
   }
 
   /**
-   * Function executed when the script is included in a document.
-   * @param {HTMLScriptElement} script
-   *   This is the current script but also the placeholder for where the
-   *   console will be inserted into the DOM.
+   * Creates a console.
+   * @param {Object} options
+   * @param {string} options.code
+   *   The code that the console starts with.
+   * @param {{[name: string]: string}} options.dataset
+   *   The options for the console in the same form as the data attributes of
+   *   a script tag (eg. `{runner: 'window', hidePrefix: 'HIDE'}`).
+   * @param {string=} options.height
+   *   Optional, defaults to `"100%"`.  The CSS height of the console.
+   * @param {(element: HTMLIFrameElement) => void} options.insert
+   *   Puts the console's element into the page.
+   * @returns {{element: HTMLIFrameElement, destroy: () => void}}
    */
-  function main(script) {
-    const dataset = JSON.parse(JSON.stringify(script.dataset));
+  function createConsole({code, dataset, height, insert}) {
     const runnerMode = dataset.runner === 'window' ? 'window' : 'worker';
     const blockType = dataset.blockType === 'module' ? 'module' : 'classic';
     const showResults = dataset.showResults !== 'false';
@@ -302,7 +316,8 @@
     };
 
     // The pop-out window can't work without this page so it is closed too.
-    addEventListener('pagehide', () => popOutWindow?.close());
+    const closePopOut = () => popOutWindow?.close();
+    addEventListener('pagehide', closePopOut);
 
     /**
      * @param {Window=} targetWindow
@@ -343,7 +358,7 @@
         async onReady() {
           // The dataset is passed as is so that the viewer knows which options
           // were actually specified (eg. when copying the console as HTML).
-          this.call('init', script.textContent, dataset, {
+          this.call('init', code, dataset, {
             runnerMode,
             blockType,
             showResults,
@@ -356,7 +371,10 @@
         body: VIEWER_IFRAME_HTML,
         style: {
           width: '100%',
-          height: '100%',
+          // Fills its container unless a height is given but is never
+          // squashed smaller than the default height of an IFRAME.
+          height: height || '100%',
+          minHeight: '150px',
           border: 0,
           display: 'block',
         },
@@ -364,8 +382,122 @@
     }
 
     inlineViewer = activeViewer = createViewer();
-    script.parentNode.insertBefore(inlineViewer.iframe, script);
+    insert(inlineViewer.iframe);
+
+    let isDestroyed = false;
+    return {
+      element: inlineViewer.iframe,
+      /**
+       * Removes the console, stops its code and closes its pop-out window.
+       */
+      destroy() {
+        if (isDestroyed) return;
+        isDestroyed = true;
+        if (popOutWindow) {
+          clearInterval(popOutWatcher);
+          popOutViewer.dispose();
+          popOutWindow.close();
+          popOutWindow = null;
+        }
+        removeEventListener('pagehide', closePopOut);
+        runner.destroy();
+        inlineViewer.dispose();
+        inlineViewer.iframe.remove();
+      },
+    };
   }
+
+  /**
+   * Creates a console in place of a script tag using its code and data
+   * attributes.
+   * @param {HTMLScriptElement} script
+   */
+  function createConsoleFromScript(script) {
+    return createConsole({
+      code: script.textContent,
+      dataset: JSON.parse(JSON.stringify(script.dataset)),
+      insert: element => script.parentNode.insertBefore(element, script),
+    });
+  }
+
+  /**
+   * Where YourJSBox.create() can put a console relative to its target.
+   */
+  const PLACEMENTS = {
+    fill: (target, element) => target.replaceChildren(element),
+    append: (target, element) => target.append(element),
+    prepend: (target, element) => target.prepend(element),
+    replace: (target, element) => target.replaceWith(element),
+    before: (target, element) => target.before(element),
+    after: (target, element) => target.after(element),
+  };
+
+  /**
+   * The options of YourJSBox.create() which are the same as the data
+   * attributes of a script tag.
+   */
+  const CONSOLE_OPTION_NAMES = ['blockType', 'dividerOrient', 'hidePrefix', 'librariesUrl', 'runner', 'showResults', 'theme'];
+
+  /**
+   * The JavaScript API for creating consoles (available as window.YourJSBox).
+   */
+  const YourJSBox = Object.freeze({
+    version: PACKAGE_INFO.version,
+
+    /**
+     * Creates a console.
+     * @param {Object} options
+     * @param {string|Element} options.target
+     *   The element (or a CSS selector for it) that the console is placed
+     *   relative to.
+     * @param {"fill"|"append"|"prepend"|"replace"|"before"|"after"=} options.placement
+     *   Optional, defaults to `"fill"`.  Where the console goes:  "fill"
+     *   replaces the target's contents, "append" and "prepend" add it inside
+     *   of the target, "replace" replaces the target itself and "before" and
+     *   "after" add it next to the target.
+     * @param {(string|number)=} options.height
+     *   Optional, defaults to `"100%"`.  The CSS height of the console (a
+     *   number is treated as pixels).  It is never less than 150px.
+     * @param {string=} options.code
+     *   Optional.  The code that the console starts with.
+     * @param {string=} options.runner
+     * @param {string=} options.blockType
+     * @param {(boolean|string)=} options.showResults
+     * @param {string=} options.hidePrefix
+     * @param {string=} options.dividerOrient
+     * @param {string=} options.theme
+     * @param {string=} options.librariesUrl
+     *   The same as the data attributes of a script tag.
+     * @returns {{element: HTMLIFrameElement, destroy: () => void}}
+     */
+    create(options) {
+      options = Object(options);
+      const {target, placement = 'fill', height, code = ''} = options;
+      const targetElement = 'string' === typeof target ? document.querySelector(target) : target;
+      if (targetElement?.nodeType !== 1) {
+        throw new TypeError(
+          'string' === typeof target
+            ? `YourJSBox.create(): no element matches the target ${JSON.stringify(target)}.`
+            : 'YourJSBox.create(): target must be an element or a CSS selector.'
+        );
+      }
+      if (!Object.hasOwn(PLACEMENTS, placement)) {
+        throw new TypeError(`YourJSBox.create(): placement must be one of ${Object.keys(PLACEMENTS).join(', ')}.`);
+      }
+
+      const dataset = {};
+      for (const name of CONSOLE_OPTION_NAMES) {
+        if (options[name] != null) dataset[name] = `${options[name]}`;
+      }
+
+      return createConsole({
+        code: `${code}`,
+        dataset,
+        height: 'number' === typeof height ? `${height}px` : height != null ? `${height}` : undefined,
+        insert: element => PLACEMENTS[placement](targetElement, element),
+      });
+    },
+  });
 
   // NOTE:  This solution was intentionally written without using newer JS
   // features to make the minified version even smaller.
@@ -654,5 +786,13 @@
     return createCallableFrame;
   })();
 
-  main(document.currentScript);
+  // The first copy of this script that is loaded provides the API.
+  if (!window.YourJSBox) window.YourJSBox = YourJSBox;
+
+  // A script in the body is replaced by a console while a script in the head
+  // only provides the API.
+  const currentScript = document.currentScript;
+  if (currentScript && !document.head?.contains(currentScript)) {
+    createConsoleFromScript(currentScript);
+  }
 })();

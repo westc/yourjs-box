@@ -130,6 +130,9 @@
     const RESULT_KEY = `yourjs-box.result.${Math.random().toString(36).slice(2)}`;
     globalThis[Symbol.for(RESULT_KEY)] = reportResult;
   
+    // The console functions that were replaced so that they can be restored.
+    const consoleWrappers = [];
+  
     // Overrides for console functions.  In window mode this also captures
     // anything else that the page logs, just like the browser's console.
     for (const key of [
@@ -139,12 +142,14 @@
     ]) {
       const original = console[key];
       if ('function' !== typeof original) continue;
-      console[key] = function(...args) {
+      const wrapper = function(...args) {
         handleConsoleCall(key, args);
   
         // Calls and returns the original console function.
         return original.apply(this, arguments);
       };
+      console[key] = wrapper;
+      consoleWrappers.push({key, original, wrapper});
     }
   
     /**
@@ -251,13 +256,29 @@
       if (value !== undefined) addLog('result', [value], {}, 'string' === typeof value ? 1 : 0);
     }
   
-    addEventListener('error', evt => {
+    function onError(evt) {
       reportUncaught(evt.error !== undefined ? evt.error : evt.message);
-    });
-  
-    addEventListener('unhandledrejection', evt => {
+    }
+    function onUnhandledRejection(evt) {
       reportUncaught(evt.reason, true);
-    });
+    }
+    addEventListener('error', onError);
+    addEventListener('unhandledrejection', onUnhandledRejection);
+  
+    /**
+     * Stops capturing what is logged (used when a console in window mode is
+     * destroyed).  Each console function is restored unless something else has
+     * replaced it since.
+     */
+    function destroy() {
+      removeEventListener('error', onError);
+      removeEventListener('unhandledrejection', onUnhandledRejection);
+      delete globalThis[Symbol.for(RESULT_KEY)];
+      for (const {key, original, wrapper} of consoleWrappers) {
+        if (console[key] === wrapper) console[key] = original;
+      }
+      clearLogs();
+    }
   
     /**
      * @param {*} error
@@ -780,7 +801,7 @@
       groupIds = [];
     }
   
-    return {clearLogs, runCode, sendDescriptionFor};
+    return {clearLogs, destroy, runCode, sendDescriptionFor};
   }
   
 
@@ -850,6 +871,10 @@
     start();
 
     return {
+      destroy() {
+        worker.terminate();
+        if (blobUrl) URL.revokeObjectURL(blobUrl);
+      },
       apply(func, args) {
         if (func === 'reset') {
           worker.terminate();
@@ -873,6 +898,9 @@
   function createWindowRunner(onMessage) {
     const runner = createRunner(onMessage, {mode: 'window', ownUrl: OWN_URL});
     return {
+      destroy() {
+        runner.destroy();
+      },
       apply(func, args) {
         // Anything the code defined stays defined so a reset can only forget
         // the logged values.
@@ -883,13 +911,20 @@
   }
 
   /**
-   * Function executed when the script is included in a document.
-   * @param {HTMLScriptElement} script
-   *   This is the current script but also the placeholder for where the
-   *   console will be inserted into the DOM.
+   * Creates a console.
+   * @param {Object} options
+   * @param {string} options.code
+   *   The code that the console starts with.
+   * @param {{[name: string]: string}} options.dataset
+   *   The options for the console in the same form as the data attributes of
+   *   a script tag (eg. `{runner: 'window', hidePrefix: 'HIDE'}`).
+   * @param {string=} options.height
+   *   Optional, defaults to `"100%"`.  The CSS height of the console.
+   * @param {(element: HTMLIFrameElement) => void} options.insert
+   *   Puts the console's element into the page.
+   * @returns {{element: HTMLIFrameElement, destroy: () => void}}
    */
-  function main(script) {
-    const dataset = JSON.parse(JSON.stringify(script.dataset));
+  function createConsole({code, dataset, height, insert}) {
     const runnerMode = dataset.runner === 'window' ? 'window' : 'worker';
     const blockType = dataset.blockType === 'module' ? 'module' : 'classic';
     const showResults = dataset.showResults !== 'false';
@@ -993,7 +1028,8 @@
     };
 
     // The pop-out window can't work without this page so it is closed too.
-    addEventListener('pagehide', () => popOutWindow?.close());
+    const closePopOut = () => popOutWindow?.close();
+    addEventListener('pagehide', closePopOut);
 
     /**
      * @param {Window=} targetWindow
@@ -2478,7 +2514,7 @@
         async onReady() {
           // The dataset is passed as is so that the viewer knows which options
           // were actually specified (eg. when copying the console as HTML).
-          this.call('init', script.textContent, dataset, {
+          this.call('init', code, dataset, {
             runnerMode,
             blockType,
             showResults,
@@ -2491,7 +2527,10 @@
         body: VIEWER_IFRAME_HTML,
         style: {
           width: '100%',
-          height: '100%',
+          // Fills its container unless a height is given but is never
+          // squashed smaller than the default height of an IFRAME.
+          height: height || '100%',
+          minHeight: '150px',
           border: 0,
           display: 'block',
         },
@@ -2499,8 +2538,122 @@
     }
 
     inlineViewer = activeViewer = createViewer();
-    script.parentNode.insertBefore(inlineViewer.iframe, script);
+    insert(inlineViewer.iframe);
+
+    let isDestroyed = false;
+    return {
+      element: inlineViewer.iframe,
+      /**
+       * Removes the console, stops its code and closes its pop-out window.
+       */
+      destroy() {
+        if (isDestroyed) return;
+        isDestroyed = true;
+        if (popOutWindow) {
+          clearInterval(popOutWatcher);
+          popOutViewer.dispose();
+          popOutWindow.close();
+          popOutWindow = null;
+        }
+        removeEventListener('pagehide', closePopOut);
+        runner.destroy();
+        inlineViewer.dispose();
+        inlineViewer.iframe.remove();
+      },
+    };
   }
+
+  /**
+   * Creates a console in place of a script tag using its code and data
+   * attributes.
+   * @param {HTMLScriptElement} script
+   */
+  function createConsoleFromScript(script) {
+    return createConsole({
+      code: script.textContent,
+      dataset: JSON.parse(JSON.stringify(script.dataset)),
+      insert: element => script.parentNode.insertBefore(element, script),
+    });
+  }
+
+  /**
+   * Where YourJSBox.create() can put a console relative to its target.
+   */
+  const PLACEMENTS = {
+    fill: (target, element) => target.replaceChildren(element),
+    append: (target, element) => target.append(element),
+    prepend: (target, element) => target.prepend(element),
+    replace: (target, element) => target.replaceWith(element),
+    before: (target, element) => target.before(element),
+    after: (target, element) => target.after(element),
+  };
+
+  /**
+   * The options of YourJSBox.create() which are the same as the data
+   * attributes of a script tag.
+   */
+  const CONSOLE_OPTION_NAMES = ['blockType', 'dividerOrient', 'hidePrefix', 'librariesUrl', 'runner', 'showResults', 'theme'];
+
+  /**
+   * The JavaScript API for creating consoles (available as window.YourJSBox).
+   */
+  const YourJSBox = Object.freeze({
+    version: PACKAGE_INFO.version,
+
+    /**
+     * Creates a console.
+     * @param {Object} options
+     * @param {string|Element} options.target
+     *   The element (or a CSS selector for it) that the console is placed
+     *   relative to.
+     * @param {"fill"|"append"|"prepend"|"replace"|"before"|"after"=} options.placement
+     *   Optional, defaults to `"fill"`.  Where the console goes:  "fill"
+     *   replaces the target's contents, "append" and "prepend" add it inside
+     *   of the target, "replace" replaces the target itself and "before" and
+     *   "after" add it next to the target.
+     * @param {(string|number)=} options.height
+     *   Optional, defaults to `"100%"`.  The CSS height of the console (a
+     *   number is treated as pixels).  It is never less than 150px.
+     * @param {string=} options.code
+     *   Optional.  The code that the console starts with.
+     * @param {string=} options.runner
+     * @param {string=} options.blockType
+     * @param {(boolean|string)=} options.showResults
+     * @param {string=} options.hidePrefix
+     * @param {string=} options.dividerOrient
+     * @param {string=} options.theme
+     * @param {string=} options.librariesUrl
+     *   The same as the data attributes of a script tag.
+     * @returns {{element: HTMLIFrameElement, destroy: () => void}}
+     */
+    create(options) {
+      options = Object(options);
+      const {target, placement = 'fill', height, code = ''} = options;
+      const targetElement = 'string' === typeof target ? document.querySelector(target) : target;
+      if (targetElement?.nodeType !== 1) {
+        throw new TypeError(
+          'string' === typeof target
+            ? `YourJSBox.create(): no element matches the target ${JSON.stringify(target)}.`
+            : 'YourJSBox.create(): target must be an element or a CSS selector.'
+        );
+      }
+      if (!Object.hasOwn(PLACEMENTS, placement)) {
+        throw new TypeError(`YourJSBox.create(): placement must be one of ${Object.keys(PLACEMENTS).join(', ')}.`);
+      }
+
+      const dataset = {};
+      for (const name of CONSOLE_OPTION_NAMES) {
+        if (options[name] != null) dataset[name] = `${options[name]}`;
+      }
+
+      return createConsole({
+        code: `${code}`,
+        dataset,
+        height: 'number' === typeof height ? `${height}px` : height != null ? `${height}` : undefined,
+        insert: element => PLACEMENTS[placement](targetElement, element),
+      });
+    },
+  });
 
   // NOTE:  This solution was intentionally written without using newer JS
   // features to make the minified version even smaller.
@@ -2789,5 +2942,13 @@
     return createCallableFrame;
   })();
 
-  main(document.currentScript);
+  // The first copy of this script that is loaded provides the API.
+  if (!window.YourJSBox) window.YourJSBox = YourJSBox;
+
+  // A script in the body is replaced by a console while a script in the head
+  // only provides the API.
+  const currentScript = document.currentScript;
+  if (currentScript && !document.head?.contains(currentScript)) {
+    createConsoleFromScript(currentScript);
+  }
 })();

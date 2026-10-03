@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>YourJSBox API Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- In the head the script only provides YourJSBox (no console is created here). -->
+    <script src="../dist/yourjs-box.full.js"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0 auto;
+        max-width: 1000px;
+        padding: 1em;
+      }
+      .controls {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 1em 0;
+      }
+      #target {
+        border: 2px dashed #999;
+        border-radius: 8px;
+        height: 360px;
+        padding: 8px;
+      }
+      #target > p {
+        color: #777;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <p><a href="./">&larr; All examples</a></p>
+    <h1><code>YourJSBox</code> API</h1>
+    <p>
+      This page loads the script in its <code>&lt;head&gt;</code> and creates
+      consoles with <code>YourJSBox.create()</code>.  Pick a placement to see
+      where the console goes relative to the dashed target.
+    </p>
+    <p>
+      The console&rsquo;s height defaults to 100% of its container.  For
+      <code>replace</code>, <code>before</code> and <code>after</code> its
+      container is this page, which has no set height, so the console is its
+      minimum height (150px) unless you give it a height (eg.
+      <code>400px</code>).
+    </p>
+    <div class="controls">
+      <label>
+        Placement
+        <select id="placement">
+          <option>fill</option>
+          <option>append</option>
+          <option>prepend</option>
+          <option>replace</option>
+          <option>before</option>
+          <option>after</option>
+        </select>
+      </label>
+      <label>
+        Height
+        <input id="height" placeholder="100%" size="8" />
+      </label>
+      <button id="create">Create</button>
+      <button id="destroy" disabled>Destroy</button>
+      <span id="version"></span>
+    </div>
+    <div id="target"><p>The target</p></div>
+
+    <script>
+      const TARGET_HTML = document.querySelector('#target').outerHTML;
+      let box = null;
+
+      document.querySelector('#version').textContent = `Version ${YourJSBox.version}`;
+
+      document.querySelector('#create').addEventListener('click', () => {
+        destroy();
+        box = YourJSBox.create({
+          target: '#target',
+          placement: document.querySelector('#placement').value,
+          height: document.querySelector('#height').value || undefined,
+          code: "console.log('Hello from YourJSBox.create()!');\n[1, 2, 3].map(n => n * 2)",
+        });
+        document.querySelector('#destroy').disabled = false;
+      });
+
+      document.querySelector('#destroy').addEventListener('click', destroy);
+
+      // Removes the console and puts the target back the way it was.
+      function destroy() {
+        if (!box) return;
+        box.destroy();
+        box = null;
+        const target = document.querySelector('#target');
+        if (target) target.outerHTML = TARGET_HTML;
+        else document.querySelector('.controls').insertAdjacentHTML('afterend', TARGET_HTML);
+        document.querySelector('#destroy').disabled = true;
+      }
+    </script>
+  </body>
+</html>

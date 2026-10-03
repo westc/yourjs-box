@@ -61,6 +61,15 @@ class TestContext {
    * @param {{width?: number, routes?: [string, Function][]}=} options
    */
   async open(code, attributes = {}, options = {}) {
+    await this.newPage(options);
+    return this.load(code, attributes);
+  }
+
+  /**
+   * Creates a new browser context with a blank page on the test server.
+   * @param {{width?: number, routes?: [string, Function][]}=} options
+   */
+  async newPage(options = {}) {
     this.context = await this.browser.newContext({
       viewport: { width: options.width ?? 1200, height: 800 },
       permissions: ['clipboard-read', 'clipboard-write'],
@@ -78,7 +87,22 @@ class TestContext {
       this.dialogs.push(dialog.message());
       dialog.dismiss();
     });
-    return this.load(code, attributes);
+  }
+
+  /**
+   * Replaces the page's content with the HTML (the dist file can be included
+   * with `<script src="SRC">`) and waits for it to load.
+   */
+  async setPage(html) {
+    await this.page.setContent(html.replace(/SRC/g, `${this.baseUrl}/dist/yourjs-box.min.js`), { waitUntil: 'load' });
+  }
+
+  /**
+   * Uses the console in the given IFRAME (eg. one made by YourJSBox.create()).
+   */
+  async useConsole(iframeSelector) {
+    this.viewer = await (await this.page.waitForSelector(iframeSelector)).contentFrame();
+    await this.waitForConsole(this.viewer);
   }
 
   /**
@@ -538,6 +562,118 @@ test('pop out keeps the worker\'s variables and can be brought back', async t =>
   await popOut.waitForEvent('close', { timeout: 5000 }).catch(() => {});
   assert.ok(popOut.isClosed());
   assert.deepEqual(await t.messages(), ['result: 10']);
+});
+
+test('a script in the head only provides YourJSBox', async t => {
+  await t.newPage();
+  await t.setPage('<!DOCTYPE html><html><head><script src="SRC"></script></head><body><div id="lesson"></div></body></html>');
+  assert.equal(await t.page.evaluate(() => document.querySelectorAll('iframe').length), 0);
+  const version = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).version;
+  assert.deepEqual(await t.page.evaluate(() => [YourJSBox.version, Object.isFrozen(YourJSBox), typeof YourJSBox.create]), [version, true, 'function']);
+});
+
+test('a script in the body creates a console and provides YourJSBox', async t => {
+  await t.open(`1`);
+  assert.equal(await t.page.evaluate(() => typeof YourJSBox.create), 'function');
+});
+
+test('YourJSBox.create() fills a target found by a selector', async t => {
+  await t.newPage();
+  await t.setPage('<!DOCTYPE html><html><head><script src="SRC"></script></head><body><div id="lesson" style="height: 320px"><p>Loading...</p></div></body></html>');
+  await t.page.evaluate(() => YourJSBox.create({target: '#lesson', code: '2 + 2', theme: 'dark'}));
+  await t.useConsole('#lesson > iframe');
+  assert.deepEqual(await t.page.evaluate(() => [...document.querySelector('#lesson').children].map(e => e.tagName)), ['IFRAME']);
+  assert.equal(await t.page.evaluate(() => document.querySelector('#lesson > iframe').getBoundingClientRect().height), 320);
+  await t.run();
+  assert.deepEqual(await t.messages(), ['result: 4']);
+  assert.equal(await t.inViewer(() => document.documentElement.dataset.theme), 'dark');
+});
+
+test('YourJSBox.create() supports every placement', async t => {
+  await t.newPage();
+  await t.setPage('<!DOCTYPE html><html><head><script src="SRC"></script></head><body><div id="wrap"></div></body></html>');
+  const structures = await t.page.evaluate(() => {
+    const describe = el => el.id ? `${el.tagName}#${el.id}` : el.tagName;
+    const result = {};
+    for (const placement of ['fill', 'append', 'prepend', 'replace', 'before', 'after']) {
+      const wrap = document.querySelector('#wrap');
+      wrap.innerHTML = '<p></p><div id="target"><span></span></div><p></p>';
+      const box = YourJSBox.create({target: document.querySelector('#target'), placement});
+      result[placement] = [...wrap.children].map(el => describe(el) + (el.id === 'target' ? `(${[...el.children].map(describe).join(',')})` : '')).join(' ');
+      box.destroy();
+    }
+    return result;
+  });
+  assert.deepEqual(structures, {
+    fill: 'P DIV#target(IFRAME) P',
+    append: 'P DIV#target(SPAN,IFRAME) P',
+    prepend: 'P DIV#target(IFRAME,SPAN) P',
+    replace: 'P IFRAME P',
+    before: 'P IFRAME DIV#target(SPAN) P',
+    after: 'P DIV#target(SPAN) IFRAME P',
+  });
+});
+
+test('YourJSBox.create() heights default to 100% with a 150px minimum', async t => {
+  await t.newPage();
+  await t.setPage('<!DOCTYPE html><html><head><script src="SRC"></script></head><body><div id="tall" style="height: 300px"></div><div id="auto"></div><div id="short" style="height: 50px"></div><div id="sized"></div></body></html>');
+  const heights = await t.page.evaluate(() => {
+    const heightOf = box => box.element.getBoundingClientRect().height;
+    return {
+      tall: heightOf(YourJSBox.create({target: '#tall'})),
+      auto: heightOf(YourJSBox.create({target: '#auto'})),
+      short: heightOf(YourJSBox.create({target: '#short'})),
+      sized: heightOf(YourJSBox.create({target: '#sized', height: 250})),
+    };
+  });
+  assert.deepEqual(heights, {tall: 300, auto: 150, short: 150, sized: 250});
+});
+
+test('YourJSBox.create() explains bad targets and placements', async t => {
+  await t.newPage();
+  await t.setPage('<!DOCTYPE html><html><head><script src="SRC"></script></head><body><div id="lesson"></div></body></html>');
+  const errors = await t.page.evaluate(() => [
+    {target: '#missing'},
+    {target: 42},
+    {target: '#lesson', placement: 'inside'},
+  ].map(options => {
+    try {
+      YourJSBox.create(options);
+      return 'no error';
+    }
+    catch (e) {
+      return `${e.name}: ${e.message}`;
+    }
+  }));
+  assert.deepEqual(errors, [
+    'TypeError: YourJSBox.create(): no element matches the target "#missing".',
+    'TypeError: YourJSBox.create(): target must be an element or a CSS selector.',
+    'TypeError: YourJSBox.create(): placement must be one of fill, append, prepend, replace, before, after.',
+  ]);
+});
+
+test('destroy() removes the console and restores the page\'s console in window mode', async t => {
+  await t.newPage();
+  await t.setPage('<!DOCTYPE html><html><head><script src="SRC"></script></head><body><div id="lesson" style="height: 300px"></div></body></html>');
+  await t.page.evaluate(() => window.box = YourJSBox.create({target: '#lesson', runner: 'window', code: 'console.log(1)'}));
+  await t.useConsole('#lesson > iframe');
+  const isNative = () => t.page.evaluate(() => ['log', 'warn', 'error', 'table'].every(key => /\[native code\]/.test(console[key])));
+  assert.equal(await isNative(), false);
+  await t.page.evaluate(() => box.destroy());
+  assert.equal(await t.page.evaluate(() => document.querySelectorAll('iframe').length), 0);
+  assert.equal(await isNative(), true);
+});
+
+test('Copy as HTML includes the options given to YourJSBox.create()', async t => {
+  await t.newPage();
+  await t.setPage('<!DOCTYPE html><html><head><script src="SRC"></script></head><body><div id="lesson" style="height: 400px"></div></body></html>');
+  await t.page.evaluate(() => YourJSBox.create({target: '#lesson', code: 'console.log(1)', theme: 'dark', hidePrefix: 'SETUP', showResults: false}));
+  await t.useConsole('#lesson > iframe');
+  await t.click('#bottomNav .logo-button');
+  await t.inViewer(() => [...document.querySelectorAll('.tab')].find(tab => tab.textContent === 'Copy as HTML').click());
+  await t.viewer.waitForFunction(() => document.querySelector('.export-preview .ace_editor'));
+  const html = await t.inViewer(() => ace.edit(document.querySelector('.export-preview .ace_editor')).getValue());
+  assert.match(html, /<script src="[^"]+" data-hide-prefix="SETUP" data-show-results="false" data-theme="dark">/);
 });
 
 test('explains when the libraries fail to load', async t => {
