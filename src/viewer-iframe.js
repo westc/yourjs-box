@@ -268,7 +268,7 @@ function init(jsCode, dataset, meta) {
         /**
          * The data attributes for the copied console.  data-libraries-url is
          * left out because it usually points to files on this site while the
-         * copied console loads JS Box from a CDN.
+         * copied console loads YourJS Box from a CDN.
          */
         exportDataset() {
           const {librariesUrl, ...exportDataset} = dataset;
@@ -616,7 +616,7 @@ function init(jsCode, dataset, meta) {
         async saveFile() {
           this.closeMenu();
           const code = this.currentCode + '\n';
-          const suggestedName = this.fileName || (this.isTypeScript ? 'js-box.ts' : 'js-box.js');
+          const suggestedName = this.fileName || (this.isTypeScript ? 'yourjs-box-code.ts' : 'yourjs-box-code.js');
           const fileType = this.isTypeScript
             ? {description: 'TypeScript', accept: {'text/typescript': ['.ts', '.mts']}}
             : {description: 'JavaScript', accept: {'text/javascript': ['.js', '.mjs']}};
@@ -713,7 +713,7 @@ function init(jsCode, dataset, meta) {
             isFullPage: true,
           });
           const url = URL.createObjectURL(new Blob([html], {type: 'text/html'}));
-          Object.assign(document.createElement('a'), {href: url, download: 'js-box.html'}).click();
+          Object.assign(document.createElement('a'), {href: url, download: 'yourjs-box.html'}).click();
           setTimeout(() => URL.revokeObjectURL(url), 1000);
         },
         /**
@@ -1900,7 +1900,7 @@ function buildConsoleHtml({code, dataset, packageInfo, isFullPage}) {
         '  <head>',
         '    <meta charset="utf-8">',
         '    <meta name="viewport" content="width=device-width, initial-scale=1">',
-        '    <title>JS Box</title>',
+        '    <title>YourJS Box</title>',
         '    <style>',
         '      html, body { height: 100%; margin: 0; }',
         '    </style>',

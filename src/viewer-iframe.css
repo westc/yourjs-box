@@ -10,6 +10,11 @@ body {
   background-color: var(--console-bg);
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
+.svg-defs {
+  height: 0;
+  position: absolute;
+  width: 0;
+}
 #vueApp {
   display: flex;
   flex-direction: column;
@@ -223,32 +228,30 @@ body {
   line-height: 1;
 }
 .logo-mark {
-  align-items: flex-end;
-  background-color: #f7df1e;
-  border-radius: 3px;
-  box-sizing: border-box;
-  color: #1a1a1a;
-  display: inline-flex;
-  font-size: 9.5px;
-  font-weight: 800;
+  flex: none;
   height: 18px;
-  justify-content: flex-end;
-  letter-spacing: -0.02em;
-  padding: 0 2px 2px 0;
   width: 18px;
 }
 .logo-text {
   font-size: 14px;
+  white-space: nowrap;
+}
+/* Narrow consoles only have room for the box in the toolbar. */
+@media (max-width: 440px) {
+  #bottomNav .logo-text {
+    display: none;
+  }
+}
+.logo-your {
+  font-weight: 400;
+  opacity: 0.8;
 }
 .logo-large {
   gap: 12px;
 }
 .logo-large > .logo-mark {
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
-  font-size: 24px;
+  filter: drop-shadow(0 6px 12px rgb(0 0 0 / 0.18));
   height: 56px;
-  padding: 0 6px 5px 0;
   width: 56px;
 }
 .logo-large > .logo-text {
@@ -450,10 +453,7 @@ body {
   gap: 12px;
 }
 .logo-medium > .logo-mark {
-  border-radius: 7px;
-  font-size: 16px;
   height: 40px;
-  padding: 0 4px 4px 0;
   width: 40px;
 }
 .logo-medium > .logo-text {
@@ -462,12 +462,6 @@ body {
 .about-name {
   font-size: 17px;
   font-weight: 700;
-}
-.about-aka {
-  color: var(--muted-text);
-  font-size: 13px;
-  font-weight: 400;
-  margin-left: 4px;
 }
 .about-version {
   color: var(--muted-text);

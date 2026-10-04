@@ -378,7 +378,7 @@
           libraryUrl('prism-themes', 'themes/prism-vsc-dark-plus.min.css'),
           libraryUrl('prismjs', 'plugins/match-braces/prism-match-braces.min.css'),
         ],
-        head: targetWindow ? '<meta charset="utf-8"><title>JS Box</title>' : '',
+        head: targetWindow ? '<meta charset="utf-8"><title>YourJS Box</title>' : '',
         htmlAttributes: 'data-theme="' + theme + '"',
         targetWindow,
         onMessage(message) {

@@ -12,9 +12,9 @@
     <meta property="og:image" content="https://westc.github.io/yourjs-box/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="JS Box: a JavaScript console you can drop into any page" />
+    <meta property="og:image:alt" content="YourJS Box: a JavaScript console you can drop into any page" />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23f7df1e'/%3E%3Ctext x='29' y='28' font-family='Arial,sans-serif' font-weight='800' font-size='15' text-anchor='end' fill='%231a1a1a'%3EJS%3C/text%3E%3C/svg%3E" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolygon points='1,10 8,3 31,3 24,10' fill='%234a4a4a'/%3E%3Cpolygon points='8,3 31,3 29,5 10,5' fill='%232e2e2e'/%3E%3Cpolygon points='24,10 31,3 31,24 24,31' fill='%23c7b000'/%3E%3Crect x='1' y='10' width='23' height='21' rx='1.5' fill='%23f7df1e'/%3E%3Ctext x='22' y='28.5' text-anchor='end' font-family='Arial,sans-serif' font-size='11.5' font-weight='800' letter-spacing='-0.3' fill='%231a1a1a'%3EJS%3C/text%3E%3C/svg%3E" />
     <style>
       :root {
         color-scheme: light;
@@ -128,21 +128,16 @@
         text-decoration: none;
       }
       .logo-mark {
-        align-items: flex-end;
-        background-color: #f7df1e;
-        border-radius: 5px;
-        color: #1a1a1a;
-        display: inline-flex;
-        font-size: 12px;
-        font-weight: 800;
+        flex: none;
         height: 26px;
-        justify-content: flex-end;
-        letter-spacing: -0.02em;
-        padding: 0 3px 3px 0;
         width: 26px;
       }
       .logo-text {
         font-size: 19px;
+      }
+      .logo-your {
+        font-weight: 400;
+        opacity: 0.8;
       }
 
       /* Hero */
@@ -473,7 +468,7 @@
   <body>
     <header>
       <div class="container">
-        <a class="logo" href="./"><span class="logo-mark">JS</span><span class="logo-text">Box</span></a>
+        <a class="logo" href="./"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><polygon points="1,10 8,3 31,3 24,10" fill="#4a4a4a"/><polygon points="8,3 31,3 29,5 10,5" fill="#2e2e2e"/><polygon points="24,10 31,3 31,24 24,31" fill="#c7b000"/><rect x="1" y="10" width="23" height="21" rx="1.5" fill="#f7df1e"/><text x="22" y="28.5" text-anchor="end" font-size="11.5" font-weight="800" letter-spacing="-0.3" fill="#1a1a1a">JS</text></svg><span class="logo-text"><span class="logo-your">Your</span>JS Box</span></a>
         <nav>
           <a class="optional" href="#demo">Demo</a>
           <a class="optional" href="#features">Features</a>
@@ -568,7 +563,7 @@
               <p>Run the code to change me.</p>
             </div>
             <div class="console-frame">
-              <script src="dist/yourjs-box.min.js" data-runner="window">
+              <script src="dist/yourjs-box.min.js" data-runner="window" data-divider-orient="horizontal">
                 // Find an element on this page \\
                 const card = document.querySelector('#demo-card');
                 console.log(card);

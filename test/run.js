@@ -778,7 +778,7 @@ test('Save saves the current code', async t => {
   await t.menu('Save');
   await t.viewer.waitForFunction(() => window.saved?.text);
   const saved = await t.inViewer(() => saved);
-  assert.equal(saved.suggestedName, 'js-box.js');
+  assert.equal(saved.suggestedName, 'yourjs-box-code.js');
   assert.equal(saved.text, String.raw`// One \\` + '\nconsole.log(1);\n\n' + String.raw`// Two \\` + '\nconsole.log(2);\n');
 
   // Without the dialog the file is downloaded (named after the last save).
@@ -1076,7 +1076,7 @@ test('TypeScript module blocks keep imports unless they only import types', asyn
   });
   await t.menu('Save');
   await t.viewer.waitForFunction(() => window.saved);
-  assert.deepEqual(await t.inViewer(() => [saved.suggestedName, saved.types[0].accept]), ['js-box.ts', {'text/typescript': ['.ts', '.mts']}]);
+  assert.deepEqual(await t.inViewer(() => [saved.suggestedName, saved.types[0].accept]), ['yourjs-box-code.ts', {'text/typescript': ['.ts', '.mts']}]);
 
   await t.click('#bottomNav .logo-button');
   assert.match(await t.inViewer(() => document.querySelector('.about-body').innerText), /Language\s+TypeScript[\s\S]*Babel 7\./);

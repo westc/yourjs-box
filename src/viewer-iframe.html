@@ -1,9 +1,19 @@
+<svg class="svg-defs" aria-hidden="true">
+  <!-- The logo: an open box whose front is the yellow JS square. -->
+  <symbol id="logo-mark" viewBox="0 0 32 32">
+    <polygon points="1,10 8,3 31,3 24,10" fill="#4a4a4a"/>
+    <polygon points="8,3 31,3 29,5 10,5" fill="#2e2e2e"/>
+    <polygon points="24,10 31,3 31,24 24,31" fill="#c7b000"/>
+    <rect x="1" y="10" width="23" height="21" rx="1.5" fill="#f7df1e"/>
+    <text x="22" y="28.5" text-anchor="end" font-size="11.5" font-weight="800" letter-spacing="-0.3" fill="#1a1a1a">JS</text>
+  </symbol>
+</svg>
 <div id="splash" aria-label="Loading">
   <div class="splash-content">
-    <span class="logo logo-large"><span class="logo-mark">JS</span><span class="logo-text">Box</span></span>
+    <span class="logo logo-large"><svg class="logo-mark"><use href="#logo-mark"/></svg><span class="logo-text"><span class="logo-your">Your</span>JS Box</span></span>
     <div class="splash-progress"><div></div></div>
     <div class="splash-message splash-slow">Still loading&hellip;</div>
-    <div class="splash-message splash-error">JS Box couldn&rsquo;t load.  Please check your connection and reload the page.</div>
+    <div class="splash-message splash-error">YourJS Box couldn&rsquo;t load.  Please check your connection and reload the page.</div>
   </div>
 </div>
 <div id="vueApp" v-cloak>
@@ -73,7 +83,7 @@
   </div>
   <div id="bottomNav">
     <div class="brand">
-      <button class="logo-button" title="About JS Box" @click="openAbout('about')"><span class="logo"><span class="logo-mark">JS</span><span class="logo-text">Box</span></span></button>
+      <button class="logo-button" title="About YourJS Box" @click="openAbout('about')"><span class="logo"><svg class="logo-mark"><use href="#logo-mark"/></svg><span class="logo-text"><span class="logo-your">Your</span>JS Box</span></span></button>
       <span class="runner-badge" :title="runnerMode === 'window' ? 'Code runs directly in this page' : 'Code runs in a Web Worker (no DOM access)'">{{ runnerMode === 'window' ? 'Window' : 'Worker' }}</span>
     </div>
     <div class="buttons">
@@ -115,7 +125,7 @@
     </button>
     <div class="menu-separator"></div>
     <button class="menu-item" role="menuitem" @click="closeMenu(); openAbout('about')">
-      <span class="menu-icon"><icon name="info"></icon></span>About JS Box
+      <span class="menu-icon"><icon name="info"></icon></span>About YourJS Box
     </button>
   </div>
   <div v-if="isHistoryOpen" class="more-menu history-panel" role="menu" aria-label="History" ref="historyPanel" @keydown="onMenuKeyDown">
@@ -150,7 +160,7 @@
   <div v-if="toast" class="toast" role="status">{{ toast.message }}</div>
   <div v-if="isPoppedOut" class="popped-out">
     <div class="popped-out-content">
-      <span class="logo logo-medium"><span class="logo-mark">JS</span><span class="logo-text">Box</span></span>
+      <span class="logo logo-medium"><svg class="logo-mark"><use href="#logo-mark"/></svg><span class="logo-text"><span class="logo-your">Your</span>JS Box</span></span>
       <div class="popped-out-title">This console is open in a separate window</div>
       <div class="popped-out-text">Its code still runs in this page.</div>
       <div class="dialog-buttons">
@@ -160,7 +170,7 @@
     </div>
   </div>
   <div v-if="isAboutOpen" class="dialog-backdrop" @mousedown.self="closeAbout" @keydown.esc="closeAbout">
-    <div :class="['dialog', 'about-dialog', aboutTab === 'html' ? 'is-export' : '']" role="dialog" aria-modal="true" aria-label="About JS Box">
+    <div :class="['dialog', 'about-dialog', aboutTab === 'html' ? 'is-export' : '']" role="dialog" aria-modal="true" aria-label="About YourJS Box">
       <div class="about-header">
         <div class="tabs" role="tablist">
           <button role="tab" :aria-selected="aboutTab === 'about'" :class="['tab', aboutTab === 'about' ? 'active' : '']" @click="aboutTab = 'about'">About</button>
@@ -170,9 +180,9 @@
       </div>
       <div v-if="aboutTab === 'about'" class="about-body">
         <div class="about-title">
-          <span class="logo logo-medium"><span class="logo-mark">JS</span><span class="logo-text">Box</span></span>
+          <span class="logo logo-medium"><svg class="logo-mark"><use href="#logo-mark"/></svg><span class="logo-text"><span class="logo-your">Your</span>JS Box</span></span>
           <div>
-            <div class="about-name">YourJS Box <span class="about-aka">aka JS Box</span></div>
+            <div class="about-name">YourJS Box</div>
             <div class="about-version">Version {{ packageInfo.version }}</div>
           </div>
         </div>

@@ -7,7 +7,7 @@ Worker or the page itself.  TypeScript works too.
 **[Live demo](https://westc.github.io/yourjs-box/)** &middot;
 [Examples](https://westc.github.io/yourjs-box/examples/)
 
-![JS Box running code one block at a time, expanding an object, showing a table and an error](demo.gif)
+![YourJS Box running code one block at a time, expanding an object, showing a table and an error](demo.gif)
 
 ## Usage
 
@@ -78,7 +78,7 @@ If the editor already has code in it you are asked before it is replaced.
   - **Reset**, which clears the console and puts the original code back into
     the editor.  In worker mode this also stops any code that is still running
     (eg. an infinite loop) by starting a new worker.
-  - **About JS Box**
+  - **About YourJS Box**
 
 ### Right-Clicking Values
 
@@ -219,7 +219,7 @@ npm install vue@3.5.43 ace-builds@1.44.0 prismjs@1.30.0 prism-themes@1.9.0 acorn
 npm install @babel/standalone@7.29.9
 ```
 
-The About window lists the versions that each version of JS Box uses.
+The About window lists the versions that each version of YourJS Box uses.
 
 ### Console Functions
 
@@ -327,6 +327,8 @@ Install the development dependencies by running `npm install`.
   `--dry-run` to see what it would do or `--skip-tests` to skip the tests.
 - `npm run record-demo` records `demo.gif` (shown at the top of this README)
   from the built files.  It needs [ffmpeg](https://ffmpeg.org/).
+- `npm run og-image` makes `og-image.png` (the picture shown when the landing
+  page is shared) from the built files.
 - `npm run purge-cdn` purges jsDelivr's cache so that URLs like
   `yourjs-box@1` point to the latest version right away.
 - In VS Code, **Terminal &rarr; Run Task&hellip;** has tasks for all of these

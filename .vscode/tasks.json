@@ -57,6 +57,13 @@
       "problemMatcher": []
     },
     {
+      "label": "Make share image",
+      "detail": "Builds and then makes og-image.png for the landing page.",
+      "type": "shell",
+      "command": "npm run build && npm run og-image",
+      "problemMatcher": []
+    },
+    {
       "label": "Purge jsDelivr cache",
       "detail": "Makes yourjs-box@1 style URLs point to the latest version right away.",
       "type": "npm",
