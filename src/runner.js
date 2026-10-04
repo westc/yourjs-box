@@ -24,6 +24,9 @@ function createRunner(send, options) {
   // How wrapping the last expression of each block shifted the columns on its
   // line so that stack traces can show the original columns.
   const columnShiftsBySnippet = {};
+  // For TypeScript, where each position in the code that ran came from in the
+  // TypeScript code (see runCode()).
+  const sourceMapsBySnippet = {};
 
   const counts = {};
   const timers = {};
@@ -220,13 +223,38 @@ function createRunner(send, options) {
       .split('\n')
       .filter(line => !(ownUrl && /^\s*at\b/.test(line) && line.includes(ownUrl)))
       .join('\n')
-      // Undoes the shift in columns caused by wrapping the last expression.
-      .replace(/(snippet-\d+\.js):(\d+):(\d+)/g, (match, name, line, column) => {
+      .replace(/(snippet-\d+\.[jt]s):(\d+):(\d+)/g, (match, name, line, column) => {
+        line = +line;
+        column = +column;
+        // Undoes the shift in columns caused by wrapping the last expression.
         const info = columnShiftsBySnippet[name];
-        return info && +line === info.line && +column > info.column
-          ? `${name}:${line}:${Math.max(info.column, column - info.shift)}`
-          : match;
+        if (info && line === info.line && column > info.column) {
+          column = Math.max(info.column, column - info.shift);
+        }
+        [line, column] = toSourcePosition(sourceMapsBySnippet[name], line, column);
+        return `${name}:${line}:${column}`;
       });
+  }
+
+  /**
+   * Finds where a position in compiled code came from in the original code.
+   * @param {number[][][]=} sourceMap
+   *   For each line of the compiled code, its mappings as [compiled column,
+   *   original line, original column] (all starting at 0) sorted by column.
+   * @param {number} line
+   * @param {number} column
+   * @returns {[number, number]}
+   *   The original line and column (both starting at 1) or the given ones if
+   *   the position isn't mapped.
+   */
+  function toSourcePosition(sourceMap, line, column) {
+    const mappings = sourceMap?.[line - 1];
+    let best;
+    for (const mapping of mappings ?? []) {
+      if (mapping[0] > column - 1) break;
+      best = mapping;
+    }
+    return best ? [best[1] + 1, best[2] + 1 + (column - 1 - best[0])] : [line, column];
   }
 
   function without(props, obj) {
@@ -595,12 +623,22 @@ function createRunner(send, options) {
    * @param {[number, number]=} runOptions.resultRange
    *   The start and end index of the last expression in the code whose value
    *   should be shown.
+   * @param {"javascript"|"typescript"=} runOptions.language
+   *   The language that the code was written in.  TypeScript is compiled to
+   *   JavaScript before it is sent here.
+   * @param {number[][][]=} runOptions.sourceMap
+   *   For TypeScript, where the compiled code came from (see
+   *   toSourcePosition()).
+   * @param {{message: string, line: number, column: number}=} runOptions.compileError
+   *   For TypeScript, the syntax error that kept the code from being compiled
+   *   which is reported instead of running the code.
    */
   async function runCode(jsCode, runOptions) {
-    const {blockType, resultRange} = Object(runOptions);
+    const {blockType, resultRange, language, sourceMap, compileError} = Object(runOptions);
 
     // Names the code so that stack traces refer to it by this name.
-    const snippetName = `snippet-${++snippetCount}.js`;
+    const snippetName = `snippet-${++snippetCount}.${language === 'typescript' ? 'ts' : 'js'}`;
+    if (Array.isArray(sourceMap)) sourceMapsBySnippet[snippetName] = sourceMap;
 
     // Wraps the last expression so that its value is reported.  This keeps
     // everything on the same lines so that line numbers in errors still match
@@ -621,7 +659,17 @@ function createRunner(send, options) {
 
     runningBlockType = blockType === 'module' ? 'module' : 'classic';
     try {
-      if (blockType === 'module') {
+      if (compileError) {
+        // Reported here so that it shows up after anything logged by the code
+        // that ran before it.
+        const {message, line, column} = compileError;
+        reportUncaught({
+          name: 'SyntaxError',
+          message: `${message}`,
+          stack: `SyntaxError: ${message}\n    at ${snippetName}:${+line}:${+column}`,
+        });
+      }
+      else if (blockType === 'module') {
         // Waits for the module to finish (including any top-level await).
         await import('data:text/javascript;charset=utf-8,' + encodeURIComponent(source));
       }

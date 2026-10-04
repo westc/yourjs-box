@@ -166,6 +166,34 @@
     </section>
 
     <section>
+      <h2>TypeScript (<code>data-language="typescript"</code>)</h2>
+      <p>Babel removes the types (without checking them) before each block runs.  Errors point to the TypeScript code.</p>
+      <div class="console">
+        <script type="text/x-console" data-language="typescript">
+          // Interfaces and generics \\
+          interface Person { name: string; born: number }
+          const people: Person[] = [{name: 'Ada', born: 1815}, {name: 'Grace', born: 1906}];
+          function oldest<T extends Person>(list: T[]): T {
+            return list.reduce((a, b) => a.born <= b.born ? a : b);
+          }
+          oldest(people)
+
+          // Enums and classes with parameter properties \\
+          enum Role { Student, Teacher }
+          class Member {
+            constructor(public name: string, private role: Role = Role.Student) {}
+            describe(): string { return `${this.name} is a ${Role[this.role]}`; }
+          }
+          new Member('Ada', Role.Teacher).describe()
+
+          // Errors point to the TypeScript line and column \\
+          const member: Member | null = null;
+          member!.describe();
+        </script>
+      </div>
+    </section>
+
+    <section>
       <h2>Hidden code (<code>data-hide-prefix="HIDE"</code>)</h2>
       <div class="console">
         <script type="text/x-console" data-hide-prefix="HIDE">

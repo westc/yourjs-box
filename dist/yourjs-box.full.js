@@ -14,7 +14,7 @@
    * Viewer IFRAME's HTML code
    * @type {string}
    */
-  const VIEWER_IFRAME_HTML = "<div id=\"splash\" aria-label=\"Loading\"><div class=\"splash-content\"><span class=\"logo logo-large\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div class=\"splash-progress\"><div></div></div><div class=\"splash-message splash-slow\">Still loading&hellip;</div><div class=\"splash-message splash-error\">JS Box couldn&rsquo;t load. Please check your connection and reload the page.</div></div></div><div id=\"vueApp\" v-cloak><input type=\"file\" ref=\"fileInput\" class=\"file-input\" accept=\".js,.mjs,.cjs,.txt,text/javascript,text/plain\" tabindex=\"-1\" aria-hidden=\"true\" @change=\"onFileChosen\"><div id=\"main\" ref=\"main\" :class=\"mainElemClassNames\" :style=\"mainElemStyles\" @mousedown=\"onMainElemMouseDown\"><div id=\"displays\"><div ref=\"displaysScroller\" @scroll=\"onDisplaysScroll\"><template v-for=\"display in displays\"><div v-if=\"display.type === 'prism'\"><div v-if=\"display.isHidden\" class=\"code-header toggleable no-select\" @click=\"display.isCodeShown = !display.isCodeShown\" :title=\"display.isCodeShown ? 'Hide Code' : 'Show Code'\"><span :class=\"['arrow', 'expandable', display.isCodeShown ? 'expanded' : '']\"></span>{{ display.header || 'Hidden code' }}</div><div v-else-if=\"display.header\" class=\"code-header\">{{ display.header }}</div><div v-if=\"display.isCodeShown\" class=\"console-row code-row\"><span class=\"row-icon\"><icon name=\"chevron\"></icon></span><prism language=\"javascript\" :code=\"display.value\" :is-dark=\"theme === 'dark'\" match-braces></prism><button class=\"copy-to-editor-button\" title=\"Copy to editor\" @click=\"copyToEditor(display.value)\"><icon name=\"copyToEditor\"></icon></button></div></div><div v-if=\"display.type === 'log' &amp;&amp; !isInCollapsedGroup(display)\" :class=\"['console-row', 'log-' + display.key, display.groupId ? 'group-header' : '']\" :style=\"{'--depth': display.groupIds.length}\" :title=\"display.name\" @click=\"onLogRowClick(display, $event)\"><span v-if=\"display.key === 'error' || display.key === 'assert'\" class=\"row-icon\"><icon name=\"consoleError\"></icon></span><span v-else-if=\"display.key === 'warn'\" class=\"row-icon\"><icon name=\"consoleWarning\"></icon></span><span v-else-if=\"display.key === 'result'\" class=\"row-icon\"><icon name=\"result\"></icon></span><span v-else-if=\"display.groupId\" :class=\"['row-icon', 'arrow', 'expandable', display.isCollapsed ? '' : 'expanded']\"></span><div class=\"row-content\"><table v-if=\"display.table\" class=\"console-table\"><thead><tr><th v-for=\"header in display.table.headers\">{{ header }}</th></tr></thead><tbody><tr v-for=\"row in display.table.rows\"><td>{{ row.index }}</td><td v-for=\"cell in row.cells\"><template v-if=\"cell\"><span v-for=\"part in cell.parts\" :class=\"'t-' + part[0]\">{{ part[1] }}</span></template></td></tr></tbody></table><js-value v-for=\"(description, index) in display.descriptions\" :description=\"description\" :key-path=\"[]\" :path=\"[display.logId, index]\"></js-value><div v-if=\"display.stack\" class=\"trace-stack\">{{ display.stack }}</div></div></div><div v-if=\"display.type === 'notice'\" class=\"console-row notice\">{{ display.message }}</div><div v-if=\"display.type === 'error'\" class=\"console-row log-error\"><span class=\"row-icon\"><icon name=\"consoleError\"></icon></span><div class=\"row-content\">{{ display.message }}</div></div></template></div></div><div class=\"divider\" ref=\"mainDivider\"></div><div id=\"editor\"><ace-editor ref=\"editor\" v-model=\"jsCode\" language=\"javascript\" :theme=\"theme\" :font-size=\"Math.round(12 * textScale)\" @key-combo=\"onEditorKeyCombo\" @history-key=\"onEditorHistoryKey\" height=\"100%\"></ace-editor></div></div><div id=\"bottomNav\"><div class=\"brand\"><button class=\"logo-button\" title=\"About JS Box\" @click=\"openAbout('about')\"><span class=\"logo\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span></button> <span class=\"runner-badge\" :title=\"runnerMode === 'window' ? 'Code runs directly in this page' : 'Code runs in a Web Worker (no DOM access)'\">{{ runnerMode === 'window' ? 'Window' : 'Worker' }}</span></div><div class=\"buttons\"><template v-for=\"bottomButton in bottomButtons\"><span v-if=\"bottomButton.isSeparator\" class=\"separator\"></span> <button v-else :class=\"bottomButton.className\" @click=\"bottomButton.callback.call(this, $event)\" :title=\"bottomButton.title\" :disabled=\"bottomButton.disableIf &amp;&amp; bottomButton.disableIf.call(this)\"><icon :name=\"bottomButton.iconName\"></icon><span v-if=\"bottomButton.label\" class=\"label\">{{ bottomButton.label }}</span></button></template></div></div><div v-if=\"isMenuOpen\" class=\"more-menu\" role=\"menu\" aria-label=\"More\" ref=\"moreMenu\" @keydown=\"onMenuKeyDown\"><div class=\"menu-row\" role=\"group\" aria-label=\"Text size\"><span class=\"menu-row-label\">Text size</span> <button class=\"menu-item menu-step\" role=\"menuitem\" title=\"Smaller text\" aria-label=\"Smaller text\" :disabled=\"!canShrinkText\" @click=\"changeTextScale(-1)\">A&minus;</button> <button class=\"menu-item menu-step menu-percent\" role=\"menuitem\" title=\"Reset the text size\" aria-label=\"Reset the text size\" @click=\"setTextScale(1)\">{{ Math.round(textScale * 100) }}%</button> <button class=\"menu-item menu-step\" role=\"menuitem\" title=\"Bigger text\" aria-label=\"Bigger text\" :disabled=\"!canGrowText\" @click=\"changeTextScale(1)\">A+</button></div><div class=\"menu-separator\"></div><button class=\"menu-item\" role=\"menuitem\" @click=\"openFile()\"><span class=\"menu-icon\"><icon name=\"open\"></icon></span>Open&hellip;</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"saveFile()\"><span class=\"menu-icon\"><icon name=\"save\"></icon></span>Save&hellip;</button><div class=\"menu-separator\"></div><button v-if=\"isPopOut\" class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); bringBack()\"><span class=\"menu-icon\"><icon name=\"popIn\"></icon></span>Bring back into the page</button> <button v-else class=\"menu-item\" role=\"menuitem\" @click=\"popOut()\"><span class=\"menu-icon\"><icon name=\"popOut\"></icon></span>Pop out into a window</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); openAbout('html')\"><span class=\"menu-icon\"><icon name=\"code\"></icon></span>Copy as HTML&hellip;</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); resetConsole()\"><span class=\"menu-icon\"><icon name=\"refresh\"></icon></span>Reset&hellip;</button><div class=\"menu-separator\"></div><button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); openAbout('about')\"><span class=\"menu-icon\"><icon name=\"info\"></icon></span>About JS Box</button></div><div v-if=\"isHistoryOpen\" class=\"more-menu history-panel\" role=\"menu\" aria-label=\"History\" ref=\"historyPanel\" @keydown=\"onMenuKeyDown\"><div class=\"history-title\">History</div><div v-if=\"!historyEntries.length\" class=\"history-empty\">Code that you run will show up here.</div><button v-for=\"entry in historyEntries\" class=\"menu-item history-item\" role=\"menuitem\" :title=\"commandHistory[entry.index]\" @click=\"recallHistory(entry.index)\"><span class=\"history-label\">{{ entry.label }}</span> <span class=\"history-detail\">{{ entry.detail }}</span></button><div class=\"history-hint\">Tip: press &uarr; at the start of the editor (or &darr; at the end) to go through the history.</div></div><div v-if=\"valueMenu\" class=\"more-menu value-menu\" role=\"menu\" aria-label=\"Value\" ref=\"valueMenu\" :style=\"{left: valueMenu.x + 'px', top: valueMenu.y + 'px'}\" @keydown=\"onMenuKeyDown\"><button class=\"menu-item\" role=\"menuitem\" @click=\"copyValueAsJson()\"><span class=\"menu-icon\"><icon name=\"copy\"></icon></span>Copy as JSON</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"saveValueAsJson()\"><span class=\"menu-icon\"><icon name=\"save\"></icon></span>Save as JSON&hellip;</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"storeValueAsGlobal()\"><span class=\"menu-icon\"><icon name=\"variable\"></icon></span>Store as global variable</button> <button v-if=\"valueMenu.propertyPath\" class=\"menu-item\" role=\"menuitem\" @click=\"copyPropertyPath()\"><span class=\"menu-icon\"><icon name=\"path\"></icon></span>Copy property path</button><template v-if=\"!valueMenu.isPrimitive\"><div class=\"menu-separator\"></div><button class=\"menu-item\" role=\"menuitem\" @click=\"refreshValue()\"><span class=\"menu-icon\"><icon name=\"refresh\"></icon></span>Refresh</button></template></div><div v-if=\"toast\" class=\"toast\" role=\"status\">{{ toast.message }}</div><div v-if=\"isPoppedOut\" class=\"popped-out\"><div class=\"popped-out-content\"><span class=\"logo logo-medium\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div class=\"popped-out-title\">This console is open in a separate window</div><div class=\"popped-out-text\">Its code still runs in this page.</div><div class=\"dialog-buttons\"><button class=\"dialog-button\" @click=\"focusPopOut\">Show the window</button> <button class=\"dialog-button primary\" @click=\"requestPopIn\">Bring it back</button></div></div></div><div v-if=\"isAboutOpen\" class=\"dialog-backdrop\" @mousedown.self=\"closeAbout\" @keydown.esc=\"closeAbout\"><div :class=\"['dialog', 'about-dialog', aboutTab === 'html' ? 'is-export' : '']\" role=\"dialog\" aria-modal=\"true\" aria-label=\"About JS Box\"><div class=\"about-header\"><div class=\"tabs\" role=\"tablist\"><button role=\"tab\" :aria-selected=\"aboutTab === 'about'\" :class=\"['tab', aboutTab === 'about' ? 'active' : '']\" @click=\"aboutTab = 'about'\">About</button> <button role=\"tab\" :aria-selected=\"aboutTab === 'html'\" :class=\"['tab', aboutTab === 'html' ? 'active' : '']\" @click=\"aboutTab = 'html'\">Copy as HTML</button></div><button class=\"close-button\" ref=\"aboutCloseButton\" title=\"Close\" @click=\"closeAbout\"><icon name=\"close\"></icon></button></div><div v-if=\"aboutTab === 'about'\" class=\"about-body\"><div class=\"about-title\"><span class=\"logo logo-medium\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div><div class=\"about-name\">YourJS Box <span class=\"about-aka\">aka JS Box</span></div><div class=\"about-version\">Version {{ packageInfo.version }}</div></div></div><p class=\"about-description\">An interactive JavaScript console that can be embedded in any web page with a single script tag.</p><div class=\"about-links\"><a :href=\"packageInfo.homepage\" target=\"_blank\" rel=\"noopener\">Website</a> <a :href=\"packageInfo.repoUrl\" target=\"_blank\" rel=\"noopener\">GitHub</a> <a :href=\"packageInfo.repoUrl + '#readme'\" target=\"_blank\" rel=\"noopener\">Documentation</a> <a :href=\"packageInfo.bugsUrl\" target=\"_blank\" rel=\"noopener\">Report an issue</a></div><h3>This console</h3><dl class=\"about-details\"><dt>Code runs in</dt><dd>{{ runnerDescription }}</dd><dt>Theme</dt><dd>{{ themeDescription }}</dd><dt>Code blocks run as</dt><dd>{{ blockTypeDescription }}</dd><dt>Imports</dt><dd>{{ importsUrl ? 'Packages imported by name load from ' + importsUrl.replace('{specifier}', '\u2026') : 'Only URLs and paths can be imported' }}</dd><dt>Results</dt><dd>{{ showResults ? 'The value of the last expression is shown' : 'Not shown' }}</dd><dt>Layout</dt><dd>{{ layoutDescription }}</dd></dl><h3>Keyboard shortcuts</h3><dl class=\"about-details\"><dt><kbd>{{ modKey }}</kbd> + <kbd>Enter</kbd></dt><dd>Run the next block of code</dd><dt><kbd>&uarr;</kbd> / <kbd>&darr;</kbd></dt><dd>Go through the code that was run (at the very start or end of the editor)</dd><dt><kbd>{{ modKey === 'Ctrl' ? 'Alt' : '&#8997;' }}</kbd> + <kbd>H</kbd></dt><dd>Show the history</dd><dt><kbd>Esc</kbd></dt><dd>Close this window, the menu or full screen</dd></dl><div class=\"about-footer\">MIT License &copy; 2023-present Chris West &middot; Built with Vue {{ libraryVersions.vue }}, Ace {{ libraryVersions['ace-builds'] }}, Prism {{ libraryVersions.prismjs }} and Acorn {{ libraryVersions.acorn }}</div></div><div v-else class=\"about-body export-body\"><div class=\"export-options\"><div class=\"segmented\" role=\"radiogroup\" aria-label=\"Code\"><button v-for=\"option in exportCodeOptions\" role=\"radio\" :aria-checked=\"exportCode === option.value\" :class=\"exportCode === option.value ? 'active' : ''\" @click=\"exportCode = option.value\">{{ option.label }}</button></div><div class=\"segmented\" role=\"radiogroup\" aria-label=\"Format\"><button v-for=\"option in exportFormatOptions\" role=\"radio\" :aria-checked=\"exportFormat === option.value\" :class=\"exportFormat === option.value ? 'active' : ''\" @click=\"exportFormat = option.value\">{{ option.label }}</button></div></div><div class=\"export-note\">{{ exportNote }}</div><div class=\"export-preview\"><ace-editor :model-value=\"exportHtml\" language=\"html\" :theme=\"theme\" height=\"100%\" :read-only=\"true\"></ace-editor></div><div class=\"export-actions\"><button class=\"dialog-button\" @click=\"downloadExport\">Download page</button> <button class=\"dialog-button primary\" @click=\"copyExport\">{{ copyLabel }}</button></div></div></div></div><div v-if=\"dialog\" class=\"dialog-backdrop\" @mousedown.self=\"closeDialog(false)\" @keydown.esc=\"closeDialog(false)\"><div class=\"dialog\" role=\"alertdialog\" aria-modal=\"true\" :aria-label=\"dialog.title\"><div class=\"dialog-title\">{{ dialog.title }}</div><div class=\"dialog-message\">{{ dialog.message }}</div><div class=\"dialog-buttons\"><button class=\"dialog-button\" @click=\"closeDialog(false)\">Cancel</button> <button class=\"dialog-button primary\" ref=\"dialogConfirmButton\" @click=\"closeDialog(true)\">{{ dialog.confirmText }}</button></div></div></div></div>";
+  const VIEWER_IFRAME_HTML = "<div id=\"splash\" aria-label=\"Loading\"><div class=\"splash-content\"><span class=\"logo logo-large\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div class=\"splash-progress\"><div></div></div><div class=\"splash-message splash-slow\">Still loading&hellip;</div><div class=\"splash-message splash-error\">JS Box couldn&rsquo;t load. Please check your connection and reload the page.</div></div></div><div id=\"vueApp\" v-cloak><input type=\"file\" ref=\"fileInput\" class=\"file-input\" accept=\".js,.mjs,.cjs,.ts,.mts,.cts,.txt,text/javascript,text/plain\" tabindex=\"-1\" aria-hidden=\"true\" @change=\"onFileChosen\"><div id=\"main\" ref=\"main\" :class=\"mainElemClassNames\" :style=\"mainElemStyles\" @mousedown=\"onMainElemMouseDown\"><div id=\"displays\"><div ref=\"displaysScroller\" @scroll=\"onDisplaysScroll\"><template v-for=\"display in displays\"><div v-if=\"display.type === 'prism'\"><div v-if=\"display.isHidden\" class=\"code-header toggleable no-select\" @click=\"display.isCodeShown = !display.isCodeShown\" :title=\"display.isCodeShown ? 'Hide Code' : 'Show Code'\"><span :class=\"['arrow', 'expandable', display.isCodeShown ? 'expanded' : '']\"></span>{{ display.header || 'Hidden code' }}</div><div v-else-if=\"display.header\" class=\"code-header\">{{ display.header }}</div><div v-if=\"display.isCodeShown\" class=\"console-row code-row\"><span class=\"row-icon\"><icon name=\"chevron\"></icon></span><prism :language=\"language\" :code=\"display.value\" :is-dark=\"theme === 'dark'\" match-braces></prism><button class=\"copy-to-editor-button\" title=\"Copy to editor\" @click=\"copyToEditor(display.value)\"><icon name=\"copyToEditor\"></icon></button></div></div><div v-if=\"display.type === 'log' &amp;&amp; !isInCollapsedGroup(display)\" :class=\"['console-row', 'log-' + display.key, display.groupId ? 'group-header' : '']\" :style=\"{'--depth': display.groupIds.length}\" :title=\"display.name\" @click=\"onLogRowClick(display, $event)\"><span v-if=\"display.key === 'error' || display.key === 'assert'\" class=\"row-icon\"><icon name=\"consoleError\"></icon></span><span v-else-if=\"display.key === 'warn'\" class=\"row-icon\"><icon name=\"consoleWarning\"></icon></span><span v-else-if=\"display.key === 'result'\" class=\"row-icon\"><icon name=\"result\"></icon></span><span v-else-if=\"display.groupId\" :class=\"['row-icon', 'arrow', 'expandable', display.isCollapsed ? '' : 'expanded']\"></span><div class=\"row-content\"><table v-if=\"display.table\" class=\"console-table\"><thead><tr><th v-for=\"header in display.table.headers\">{{ header }}</th></tr></thead><tbody><tr v-for=\"row in display.table.rows\"><td>{{ row.index }}</td><td v-for=\"cell in row.cells\"><template v-if=\"cell\"><span v-for=\"part in cell.parts\" :class=\"'t-' + part[0]\">{{ part[1] }}</span></template></td></tr></tbody></table><js-value v-for=\"(description, index) in display.descriptions\" :description=\"description\" :key-path=\"[]\" :path=\"[display.logId, index]\"></js-value><div v-if=\"display.stack\" class=\"trace-stack\">{{ display.stack }}</div></div></div><div v-if=\"display.type === 'notice'\" class=\"console-row notice\">{{ display.message }}</div><div v-if=\"display.type === 'error'\" class=\"console-row log-error\"><span class=\"row-icon\"><icon name=\"consoleError\"></icon></span><div class=\"row-content\">{{ display.message }}</div></div></template></div></div><div class=\"divider\" ref=\"mainDivider\"></div><div id=\"editor\"><ace-editor ref=\"editor\" v-model=\"jsCode\" :language=\"language\" :theme=\"theme\" :font-size=\"Math.round(12 * textScale)\" @key-combo=\"onEditorKeyCombo\" @history-key=\"onEditorHistoryKey\" height=\"100%\"></ace-editor></div></div><div id=\"bottomNav\"><div class=\"brand\"><button class=\"logo-button\" title=\"About JS Box\" @click=\"openAbout('about')\"><span class=\"logo\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span></button> <span class=\"runner-badge\" :title=\"runnerMode === 'window' ? 'Code runs directly in this page' : 'Code runs in a Web Worker (no DOM access)'\">{{ runnerMode === 'window' ? 'Window' : 'Worker' }}</span></div><div class=\"buttons\"><template v-for=\"bottomButton in bottomButtons\"><span v-if=\"bottomButton.isSeparator\" class=\"separator\"></span> <button v-else :class=\"bottomButton.className\" @click=\"bottomButton.callback.call(this, $event)\" :title=\"bottomButton.title\" :disabled=\"bottomButton.disableIf &amp;&amp; bottomButton.disableIf.call(this)\"><icon :name=\"bottomButton.iconName\"></icon><span v-if=\"bottomButton.label\" class=\"label\">{{ bottomButton.label }}</span></button></template></div></div><div v-if=\"isMenuOpen\" class=\"more-menu\" role=\"menu\" aria-label=\"More\" ref=\"moreMenu\" @keydown=\"onMenuKeyDown\"><div class=\"menu-row\" role=\"group\" aria-label=\"Text size\"><span class=\"menu-row-label\">Text size</span> <button class=\"menu-item menu-step\" role=\"menuitem\" title=\"Smaller text\" aria-label=\"Smaller text\" :disabled=\"!canShrinkText\" @click=\"changeTextScale(-1)\">A&minus;</button> <button class=\"menu-item menu-step menu-percent\" role=\"menuitem\" title=\"Reset the text size\" aria-label=\"Reset the text size\" @click=\"setTextScale(1)\">{{ Math.round(textScale * 100) }}%</button> <button class=\"menu-item menu-step\" role=\"menuitem\" title=\"Bigger text\" aria-label=\"Bigger text\" :disabled=\"!canGrowText\" @click=\"changeTextScale(1)\">A+</button></div><div class=\"menu-separator\"></div><button class=\"menu-item\" role=\"menuitem\" @click=\"openFile()\"><span class=\"menu-icon\"><icon name=\"open\"></icon></span>Open&hellip;</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"saveFile()\"><span class=\"menu-icon\"><icon name=\"save\"></icon></span>Save&hellip;</button><div class=\"menu-separator\"></div><button v-if=\"isPopOut\" class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); bringBack()\"><span class=\"menu-icon\"><icon name=\"popIn\"></icon></span>Bring back into the page</button> <button v-else class=\"menu-item\" role=\"menuitem\" @click=\"popOut()\"><span class=\"menu-icon\"><icon name=\"popOut\"></icon></span>Pop out into a window</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); openAbout('html')\"><span class=\"menu-icon\"><icon name=\"code\"></icon></span>Copy as HTML&hellip;</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); resetConsole()\"><span class=\"menu-icon\"><icon name=\"refresh\"></icon></span>Reset&hellip;</button><div class=\"menu-separator\"></div><button class=\"menu-item\" role=\"menuitem\" @click=\"closeMenu(); openAbout('about')\"><span class=\"menu-icon\"><icon name=\"info\"></icon></span>About JS Box</button></div><div v-if=\"isHistoryOpen\" class=\"more-menu history-panel\" role=\"menu\" aria-label=\"History\" ref=\"historyPanel\" @keydown=\"onMenuKeyDown\"><div class=\"history-title\">History</div><div v-if=\"!historyEntries.length\" class=\"history-empty\">Code that you run will show up here.</div><button v-for=\"entry in historyEntries\" class=\"menu-item history-item\" role=\"menuitem\" :title=\"commandHistory[entry.index]\" @click=\"recallHistory(entry.index)\"><span class=\"history-label\">{{ entry.label }}</span> <span class=\"history-detail\">{{ entry.detail }}</span></button><div class=\"history-hint\">Tip: press &uarr; at the start of the editor (or &darr; at the end) to go through the history.</div></div><div v-if=\"valueMenu\" class=\"more-menu value-menu\" role=\"menu\" aria-label=\"Value\" ref=\"valueMenu\" :style=\"{left: valueMenu.x + 'px', top: valueMenu.y + 'px'}\" @keydown=\"onMenuKeyDown\"><button class=\"menu-item\" role=\"menuitem\" @click=\"copyValueAsJson()\"><span class=\"menu-icon\"><icon name=\"copy\"></icon></span>Copy as JSON</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"saveValueAsJson()\"><span class=\"menu-icon\"><icon name=\"save\"></icon></span>Save as JSON&hellip;</button> <button class=\"menu-item\" role=\"menuitem\" @click=\"storeValueAsGlobal()\"><span class=\"menu-icon\"><icon name=\"variable\"></icon></span>Store as global variable</button> <button v-if=\"valueMenu.propertyPath\" class=\"menu-item\" role=\"menuitem\" @click=\"copyPropertyPath()\"><span class=\"menu-icon\"><icon name=\"path\"></icon></span>Copy property path</button><template v-if=\"!valueMenu.isPrimitive\"><div class=\"menu-separator\"></div><button class=\"menu-item\" role=\"menuitem\" @click=\"refreshValue()\"><span class=\"menu-icon\"><icon name=\"refresh\"></icon></span>Refresh</button></template></div><div v-if=\"toast\" class=\"toast\" role=\"status\">{{ toast.message }}</div><div v-if=\"isPoppedOut\" class=\"popped-out\"><div class=\"popped-out-content\"><span class=\"logo logo-medium\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div class=\"popped-out-title\">This console is open in a separate window</div><div class=\"popped-out-text\">Its code still runs in this page.</div><div class=\"dialog-buttons\"><button class=\"dialog-button\" @click=\"focusPopOut\">Show the window</button> <button class=\"dialog-button primary\" @click=\"requestPopIn\">Bring it back</button></div></div></div><div v-if=\"isAboutOpen\" class=\"dialog-backdrop\" @mousedown.self=\"closeAbout\" @keydown.esc=\"closeAbout\"><div :class=\"['dialog', 'about-dialog', aboutTab === 'html' ? 'is-export' : '']\" role=\"dialog\" aria-modal=\"true\" aria-label=\"About JS Box\"><div class=\"about-header\"><div class=\"tabs\" role=\"tablist\"><button role=\"tab\" :aria-selected=\"aboutTab === 'about'\" :class=\"['tab', aboutTab === 'about' ? 'active' : '']\" @click=\"aboutTab = 'about'\">About</button> <button role=\"tab\" :aria-selected=\"aboutTab === 'html'\" :class=\"['tab', aboutTab === 'html' ? 'active' : '']\" @click=\"aboutTab = 'html'\">Copy as HTML</button></div><button class=\"close-button\" ref=\"aboutCloseButton\" title=\"Close\" @click=\"closeAbout\"><icon name=\"close\"></icon></button></div><div v-if=\"aboutTab === 'about'\" class=\"about-body\"><div class=\"about-title\"><span class=\"logo logo-medium\"><span class=\"logo-mark\">JS</span><span class=\"logo-text\">Box</span></span><div><div class=\"about-name\">YourJS Box <span class=\"about-aka\">aka JS Box</span></div><div class=\"about-version\">Version {{ packageInfo.version }}</div></div></div><p class=\"about-description\">An interactive JavaScript console that can be embedded in any web page with a single script tag.</p><div class=\"about-links\"><a :href=\"packageInfo.homepage\" target=\"_blank\" rel=\"noopener\">Website</a> <a :href=\"packageInfo.repoUrl\" target=\"_blank\" rel=\"noopener\">GitHub</a> <a :href=\"packageInfo.repoUrl + '#readme'\" target=\"_blank\" rel=\"noopener\">Documentation</a> <a :href=\"packageInfo.bugsUrl\" target=\"_blank\" rel=\"noopener\">Report an issue</a></div><h3>This console</h3><dl class=\"about-details\"><dt>Code runs in</dt><dd>{{ runnerDescription }}</dd><dt>Theme</dt><dd>{{ themeDescription }}</dd><dt>Language</dt><dd>{{ isTypeScript ? 'TypeScript (types are removed by Babel, not checked)' : 'JavaScript' }}</dd><dt>Code blocks run as</dt><dd>{{ blockTypeDescription }}</dd><dt>Imports</dt><dd>{{ importsUrl ? 'Packages imported by name load from ' + importsUrl.replace('{specifier}', '\u2026') : 'Only URLs and paths can be imported' }}</dd><dt>Results</dt><dd>{{ showResults ? 'The value of the last expression is shown' : 'Not shown' }}</dd><dt>Layout</dt><dd>{{ layoutDescription }}</dd></dl><h3>Keyboard shortcuts</h3><dl class=\"about-details\"><dt><kbd>{{ modKey }}</kbd> + <kbd>Enter</kbd></dt><dd>Run the next block of code</dd><dt><kbd>&uarr;</kbd> / <kbd>&darr;</kbd></dt><dd>Go through the code that was run (at the very start or end of the editor)</dd><dt><kbd>{{ modKey === 'Ctrl' ? 'Alt' : '&#8997;' }}</kbd> + <kbd>H</kbd></dt><dd>Show the history</dd><dt><kbd>Esc</kbd></dt><dd>Close this window, the menu or full screen</dd></dl><div class=\"about-footer\">MIT License &copy; 2023-present Chris West &middot; Built with {{ builtWith }}</div></div><div v-else class=\"about-body export-body\"><div class=\"export-options\"><div class=\"segmented\" role=\"radiogroup\" aria-label=\"Code\"><button v-for=\"option in exportCodeOptions\" role=\"radio\" :aria-checked=\"exportCode === option.value\" :class=\"exportCode === option.value ? 'active' : ''\" @click=\"exportCode = option.value\">{{ option.label }}</button></div><div class=\"segmented\" role=\"radiogroup\" aria-label=\"Format\"><button v-for=\"option in exportFormatOptions\" role=\"radio\" :aria-checked=\"exportFormat === option.value\" :class=\"exportFormat === option.value ? 'active' : ''\" @click=\"exportFormat = option.value\">{{ option.label }}</button></div></div><div class=\"export-note\">{{ exportNote }}</div><div class=\"export-preview\"><ace-editor :model-value=\"exportHtml\" language=\"html\" :theme=\"theme\" height=\"100%\" :read-only=\"true\"></ace-editor></div><div class=\"export-actions\"><button class=\"dialog-button\" @click=\"downloadExport\">Download page</button> <button class=\"dialog-button primary\" @click=\"copyExport\">{{ copyLabel }}</button></div></div></div></div><div v-if=\"dialog\" class=\"dialog-backdrop\" @mousedown.self=\"closeDialog(false)\" @keydown.esc=\"closeDialog(false)\"><div class=\"dialog\" role=\"alertdialog\" aria-modal=\"true\" :aria-label=\"dialog.title\"><div class=\"dialog-title\">{{ dialog.title }}</div><div class=\"dialog-message\">{{ dialog.message }}</div><div class=\"dialog-buttons\"><button class=\"dialog-button\" @click=\"closeDialog(false)\">Cancel</button> <button class=\"dialog-button primary\" ref=\"dialogConfirmButton\" @click=\"closeDialog(true)\">{{ dialog.confirmText }}</button></div></div></div></div>";
   /**
    * The URL of this script which is used to remove this script's lines from the
    * stack traces of errors in window mode.
@@ -33,6 +33,8 @@
    * was tested with.
    */
   const LIBRARY_VERSIONS = {
+    // Only loaded by TypeScript consoles.
+    '@babel/standalone': '7.29.9',
     'ace-builds': '1.44.0',
     'acorn': '8.18.0',
     'prism-themes': '1.9.0',
@@ -138,6 +140,9 @@
     // How wrapping the last expression of each block shifted the columns on its
     // line so that stack traces can show the original columns.
     const columnShiftsBySnippet = {};
+    // For TypeScript, where each position in the code that ran came from in the
+    // TypeScript code (see runCode()).
+    const sourceMapsBySnippet = {};
   
     const counts = {};
     const timers = {};
@@ -334,13 +339,38 @@
         .split('\n')
         .filter(line => !(ownUrl && /^\s*at\b/.test(line) && line.includes(ownUrl)))
         .join('\n')
-        // Undoes the shift in columns caused by wrapping the last expression.
-        .replace(/(snippet-\d+\.js):(\d+):(\d+)/g, (match, name, line, column) => {
+        .replace(/(snippet-\d+\.[jt]s):(\d+):(\d+)/g, (match, name, line, column) => {
+          line = +line;
+          column = +column;
+          // Undoes the shift in columns caused by wrapping the last expression.
           const info = columnShiftsBySnippet[name];
-          return info && +line === info.line && +column > info.column
-            ? `${name}:${line}:${Math.max(info.column, column - info.shift)}`
-            : match;
+          if (info && line === info.line && column > info.column) {
+            column = Math.max(info.column, column - info.shift);
+          }
+          [line, column] = toSourcePosition(sourceMapsBySnippet[name], line, column);
+          return `${name}:${line}:${column}`;
         });
+    }
+  
+    /**
+     * Finds where a position in compiled code came from in the original code.
+     * @param {number[][][]=} sourceMap
+     *   For each line of the compiled code, its mappings as [compiled column,
+     *   original line, original column] (all starting at 0) sorted by column.
+     * @param {number} line
+     * @param {number} column
+     * @returns {[number, number]}
+     *   The original line and column (both starting at 1) or the given ones if
+     *   the position isn't mapped.
+     */
+    function toSourcePosition(sourceMap, line, column) {
+      const mappings = sourceMap?.[line - 1];
+      let best;
+      for (const mapping of mappings ?? []) {
+        if (mapping[0] > column - 1) break;
+        best = mapping;
+      }
+      return best ? [best[1] + 1, best[2] + 1 + (column - 1 - best[0])] : [line, column];
     }
   
     function without(props, obj) {
@@ -709,12 +739,22 @@
      * @param {[number, number]=} runOptions.resultRange
      *   The start and end index of the last expression in the code whose value
      *   should be shown.
+     * @param {"javascript"|"typescript"=} runOptions.language
+     *   The language that the code was written in.  TypeScript is compiled to
+     *   JavaScript before it is sent here.
+     * @param {number[][][]=} runOptions.sourceMap
+     *   For TypeScript, where the compiled code came from (see
+     *   toSourcePosition()).
+     * @param {{message: string, line: number, column: number}=} runOptions.compileError
+     *   For TypeScript, the syntax error that kept the code from being compiled
+     *   which is reported instead of running the code.
      */
     async function runCode(jsCode, runOptions) {
-      const {blockType, resultRange} = Object(runOptions);
+      const {blockType, resultRange, language, sourceMap, compileError} = Object(runOptions);
   
       // Names the code so that stack traces refer to it by this name.
-      const snippetName = `snippet-${++snippetCount}.js`;
+      const snippetName = `snippet-${++snippetCount}.${language === 'typescript' ? 'ts' : 'js'}`;
+      if (Array.isArray(sourceMap)) sourceMapsBySnippet[snippetName] = sourceMap;
   
       // Wraps the last expression so that its value is reported.  This keeps
       // everything on the same lines so that line numbers in errors still match
@@ -735,7 +775,17 @@
   
       runningBlockType = blockType === 'module' ? 'module' : 'classic';
       try {
-        if (blockType === 'module') {
+        if (compileError) {
+          // Reported here so that it shows up after anything logged by the code
+          // that ran before it.
+          const {message, line, column} = compileError;
+          reportUncaught({
+            name: 'SyntaxError',
+            message: `${message}`,
+            stack: `SyntaxError: ${message}\n    at ${snippetName}:${+line}:${+column}`,
+          });
+        }
+        else if (blockType === 'module') {
           // Waits for the module to finish (including any top-level await).
           await import('data:text/javascript;charset=utf-8,' + encodeURIComponent(source));
         }
@@ -1045,6 +1095,7 @@
   function createConsole({code, dataset, height, insert}) {
     const runnerMode = dataset.runner === 'window' ? 'window' : 'worker';
     const blockType = dataset.blockType === 'module' ? 'module' : 'classic';
+    const language = dataset.language === 'typescript' ? 'typescript' : 'javascript';
     const showResults = dataset.showResults !== 'false';
     // An empty data-imports-url turns off loading packages by name.
     const importsUrl = dataset.importsUrl == null
@@ -1236,6 +1287,12 @@
            */
           function init(jsCode, dataset, meta) {
             if (IS_MISSING_LIBRARIES) return;
+            // TypeScript can't run without Babel.
+            if (meta.language === 'typescript' && !window.Babel) {
+              document.querySelector('#splash').classList.add('failed');
+              return;
+            }
+            Prism.plugins.autoloader.loadLanguages(meta.language);
           
             const hidePrefix = dataset.hidePrefix ?? '';
             const darkSchemeQuery = matchMedia('(prefers-color-scheme: dark)');
@@ -1259,6 +1316,7 @@
                     // The name of the file that was last opened or saved.
                     fileName: null,
                     blockType: meta.blockType,
+                    language: meta.language,
                     showResults: meta.showResults,
                     packageInfo: meta.packageInfo,
                     libraryVersions: meta.libraryVersions,
@@ -1333,6 +1391,21 @@
                   themeDescription() {
                     const name = this.theme === 'dark' ? 'Dark' : 'Light';
                     return `${name} (${this.forcedTheme ? 'set by data-theme' : 'follows your system'})`;
+                  },
+                  isTypeScript() {
+                    return this.language === 'typescript';
+                  },
+                  /** The libraries (and their versions) that this console uses. */
+                  builtWith() {
+                    const versions = this.libraryVersions;
+                    const names = [
+                      `Vue ${versions.vue}`,
+                      `Ace ${versions['ace-builds']}`,
+                      `Prism ${versions.prismjs}`,
+                      `Acorn ${versions.acorn}`,
+                      ...this.isTypeScript ? [`Babel ${versions['@babel/standalone']}`] : [],
+                    ];
+                    return names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
                   },
                   blockTypeDescription() {
                     return this.blockType === 'module'
@@ -1663,17 +1736,29 @@
                       this.commandHistory.push(historyCode);
                       if (this.commandHistory.length > 200) this.commandHistory.shift();
                     }
-                    const {code, resultRange} = prepareCode(group.lines, {
-                      blockType: this.blockType,
-                      importsUrl: this.importsUrl,
-                      // Like the browser's console, show the value of the last
-                      // expression (except for hidden code).
-                      findResult: this.showResults && !isHidden,
-                    });
+                    const {language, blockType} = this;
+                    const compiled = language === 'typescript'
+                      ? compileTypeScript(group.lines, {blockType})
+                      : {code: group.lines};
+                    const {code, resultRange} = compiled.error
+                      ? {code: '', resultRange: null}
+                      : prepareCode(compiled.code, {
+                        blockType,
+                        importsUrl: this.importsUrl,
+                        // Like the browser's console, show the value of the last
+                        // expression (except for hidden code).
+                        findResult: this.showResults && !isHidden,
+                      });
                     messageParent({
                       target: 'runner',
                       func: 'runCode',
-                      args: [code, {blockType: this.blockType, resultRange}],
+                      args: [code, {
+                        blockType,
+                        resultRange,
+                        language,
+                        sourceMap: compiled.sourceMap,
+                        compileError: compiled.error,
+                      }],
                     });
                   },
                   clearConsole() {
@@ -1747,14 +1832,17 @@
                   async saveFile() {
                     this.closeMenu();
                     const code = this.currentCode + '\n';
-                    const suggestedName = this.fileName || 'js-box.js';
+                    const suggestedName = this.fileName || (this.isTypeScript ? 'js-box.ts' : 'js-box.js');
+                    const fileType = this.isTypeScript
+                      ? {description: 'TypeScript', accept: {'text/typescript': ['.ts', '.mts']}}
+                      : {description: 'JavaScript', accept: {'text/javascript': ['.js', '.mjs']}};
           
                     // Shows a "Save as" dialog where it is supported.
                     if ('function' === typeof window.showSaveFilePicker) {
                       try {
                         const handle = await showSaveFilePicker({
                           suggestedName,
-                          types: [{description: 'JavaScript', accept: {'text/javascript': ['.js', '.mjs']}}],
+                          types: [fileType],
                         });
                         const writable = await handle.createWritable();
                         await writable.write(code);
@@ -1768,7 +1856,7 @@
                       }
                     }
           
-                    const url = URL.createObjectURL(new Blob([code], {type: 'text/javascript'}));
+                    const url = URL.createObjectURL(new Blob([code], {type: Object.keys(fileType.accept)[0]}));
                     Object.assign(document.createElement('a'), {href: url, download: suggestedName}).click();
                     setTimeout(() => URL.revokeObjectURL(url), 1000);
                   },
@@ -2510,7 +2598,7 @@
           
                   codeElem.textContent = this.code;
           
-                  codeElem.className = `language-javascript`;
+                  codeElem.className = `language-${this.language ?? 'javascript'}`;
                   preElem.className = '';
           
                   for (const propName of ['lineNumbers', 'matchBraces']) {
@@ -2781,6 +2869,88 @@
               visibleCode: visibleGroups.map(g => g.allLines).join('\n'),
               hiddenGroups,
             };
+          }
+          
+          /**
+           * Compiles TypeScript to JavaScript by removing the types (without checking
+           * them) using Babel.  Every line stays on the same line so that line numbers
+           * in errors still match.
+           * @param {string} code
+           * @param {Object} options
+           * @param {"classic"|"module"} options.blockType
+           * @returns {{code: string, sourceMap?: number[][][], error?: {message: string, line: number, column: number}}}
+           *   The JavaScript code and, for each of its lines, where it came from (see
+           *   decodeSourceMap()) or the syntax error that kept it from being compiled.
+           */
+          function compileTypeScript(code, {blockType}) {
+            try {
+              const result = Babel.transform(code, {
+                filename: 'snippet.ts',
+                presets: [['typescript', {
+                  allExtensions: true,
+                  // Only `import type` is removed so that an import is never dropped
+                  // just because it isn't used yet.
+                  onlyRemoveTypeImports: true,
+                }]],
+                sourceType: blockType === 'module' ? 'module' : 'script',
+                // Allows `export` in a namespace in classic blocks.  Imports in classic
+                // blocks are left in so that running them shows the usual error.
+                parserOpts: {allowImportExportEverywhere: blockType !== 'module'},
+                retainLines: true,
+                sourceMaps: true,
+              });
+              return {code: result.code, sourceMap: decodeSourceMap(result.map.mappings)};
+            }
+            catch (e) {
+              if (e?.name !== 'SyntaxError' || !e.loc) throw e;
+              return {
+                code,
+                error: {
+                  // Babel's message starts with the file name and ends with the
+                  // position and the code where the error is.
+                  message: `${e.message}`.split('\n')[0].replace(/^\/?snippet\.ts:\s*/, '').replace(/\s*\(\d+:\d+\)$/, ''),
+                  line: e.loc.line,
+                  column: e.loc.column + 1,
+                },
+              };
+            }
+          }
+          
+          /**
+           * Decodes the mappings of a source map (for a single source).
+           * @param {string} mappings
+           * @returns {number[][][]}
+           *   For each line of the compiled code, its mappings as [compiled column,
+           *   original line, original column] (all starting at 0) sorted by column.
+           */
+          function decodeSourceMap(mappings) {
+            const BASE64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+            const totals = [0, 0, 0, 0, 0];
+            return mappings.split(';').map(line => {
+              totals[0] = 0;
+              const lineMappings = [];
+              for (const segment of line.split(',')) {
+                if (!segment) continue;
+                const fields = [];
+                let value = 0, shift = 0;
+                for (const char of segment) {
+                  const digit = BASE64.indexOf(char);
+                  value += (digit & 31) << shift;
+                  if (digit & 32) {
+                    shift += 5;
+                  }
+                  else {
+                    fields.push(value & 1 ? -(value >>> 1) : value >>> 1);
+                    value = shift = 0;
+                  }
+                }
+                // The fields are the compiled column, the source index, the original
+                // line and the original column, each relative to the previous one.
+                fields.forEach((field, index) => totals[index] += field);
+                if (fields.length >= 4) lineMappings.push([totals[0], totals[2], totals[3]]);
+              }
+              return lineMappings.sort((a, b) => a[0] - b[0]);
+            });
           }
           
           /**
@@ -3223,6 +3393,8 @@
           // Used to find the last expression in each block of code (so that its
           // value can be shown) and the packages that it imports.
           libraryUrl('acorn', 'dist/acorn.js'),
+          // Removes the types from TypeScript code before it is run.
+          ...language === 'typescript' ? [libraryUrl('@babel/standalone', 'babel.min.js')] : [],
         ],
         cssUrls: [
           'data:text/css,' + encodeURIComponent(VIEWER_IFRAME_CSS),
@@ -3241,6 +3413,7 @@
           this.call('init', code, dataset, {
             runnerMode,
             blockType,
+            language,
             showResults,
             importsUrl,
             packageInfo: PACKAGE_INFO,
@@ -3317,7 +3490,7 @@
    * The options of YourJSBox.create() which are the same as the data
    * attributes of a script tag.
    */
-  const CONSOLE_OPTION_NAMES = ['blockType', 'dividerOrient', 'hidePrefix', 'importsUrl', 'librariesUrl', 'runner', 'showResults', 'theme'];
+  const CONSOLE_OPTION_NAMES = ['blockType', 'dividerOrient', 'hidePrefix', 'importsUrl', 'language', 'librariesUrl', 'runner', 'showResults', 'theme'];
 
   /**
    * The JavaScript API for creating consoles (available as window.YourJSBox).
@@ -3343,6 +3516,7 @@
      *   Optional.  The code that the console starts with.
      * @param {string=} options.runner
      * @param {string=} options.blockType
+     * @param {string=} options.language
      * @param {(boolean|string)=} options.showResults
      * @param {string=} options.hidePrefix
      * @param {string=} options.dividerOrient

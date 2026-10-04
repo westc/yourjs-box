@@ -7,7 +7,7 @@
   </div>
 </div>
 <div id="vueApp" v-cloak>
-  <input type="file" ref="fileInput" class="file-input" accept=".js,.mjs,.cjs,.txt,text/javascript,text/plain" tabindex="-1" aria-hidden="true" @change="onFileChosen">
+  <input type="file" ref="fileInput" class="file-input" accept=".js,.mjs,.cjs,.ts,.mts,.cts,.txt,text/javascript,text/plain" tabindex="-1" aria-hidden="true" @change="onFileChosen">
   <div id="main" ref="main" :class="mainElemClassNames" :style="mainElemStyles" @mousedown="onMainElemMouseDown">
     <div id="displays">
       <div ref="displaysScroller" @scroll="onDisplaysScroll">
@@ -19,7 +19,7 @@
             <div v-else-if="display.header" class="code-header">{{ display.header }}</div>
             <div v-if="display.isCodeShown" class="console-row code-row">
               <span class="row-icon"><icon name="chevron"></icon></span>
-              <prism language="javascript" :code="display.value" :is-dark="theme === 'dark'" match-braces></prism>
+              <prism :language="language" :code="display.value" :is-dark="theme === 'dark'" match-braces></prism>
               <button class="copy-to-editor-button" title="Copy to editor" @click="copyToEditor(display.value)"><icon name="copyToEditor"></icon></button>
             </div>
           </div>
@@ -62,7 +62,7 @@
       <ace-editor
         ref="editor"
         v-model="jsCode"
-        language="javascript"
+        :language="language"
         :theme="theme"
         :font-size="Math.round(12 * textScale)"
         @key-combo="onEditorKeyCombo"
@@ -187,6 +187,7 @@
         <dl class="about-details">
           <dt>Code runs in</dt><dd>{{ runnerDescription }}</dd>
           <dt>Theme</dt><dd>{{ themeDescription }}</dd>
+          <dt>Language</dt><dd>{{ isTypeScript ? 'TypeScript (types are removed by Babel, not checked)' : 'JavaScript' }}</dd>
           <dt>Code blocks run as</dt><dd>{{ blockTypeDescription }}</dd>
           <dt>Imports</dt><dd>{{ importsUrl ? 'Packages imported by name load from ' + importsUrl.replace('{specifier}', '…') : 'Only URLs and paths can be imported' }}</dd>
           <dt>Results</dt><dd>{{ showResults ? 'The value of the last expression is shown' : 'Not shown' }}</dd>
@@ -201,8 +202,7 @@
         </dl>
         <div class="about-footer">
           MIT License &copy; 2023-present Chris West &middot;
-          Built with Vue {{ libraryVersions.vue }}, Ace {{ libraryVersions['ace-builds'] }},
-          Prism {{ libraryVersions.prismjs }} and Acorn {{ libraryVersions.acorn }}
+          Built with {{ builtWith }}
         </div>
       </div>
       <div v-else class="about-body export-body">

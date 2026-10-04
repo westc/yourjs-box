@@ -71,6 +71,12 @@ function getAutoDividerOrient() {
  */
 function init(jsCode, dataset, meta) {
   if (IS_MISSING_LIBRARIES) return;
+  // TypeScript can't run without Babel.
+  if (meta.language === 'typescript' && !window.Babel) {
+    document.querySelector('#splash').classList.add('failed');
+    return;
+  }
+  Prism.plugins.autoloader.loadLanguages(meta.language);
 
   const hidePrefix = dataset.hidePrefix ?? '';
   const darkSchemeQuery = matchMedia('(prefers-color-scheme: dark)');
@@ -94,6 +100,7 @@ function init(jsCode, dataset, meta) {
           // The name of the file that was last opened or saved.
           fileName: null,
           blockType: meta.blockType,
+          language: meta.language,
           showResults: meta.showResults,
           packageInfo: meta.packageInfo,
           libraryVersions: meta.libraryVersions,
@@ -168,6 +175,21 @@ function init(jsCode, dataset, meta) {
         themeDescription() {
           const name = this.theme === 'dark' ? 'Dark' : 'Light';
           return `${name} (${this.forcedTheme ? 'set by data-theme' : 'follows your system'})`;
+        },
+        isTypeScript() {
+          return this.language === 'typescript';
+        },
+        /** The libraries (and their versions) that this console uses. */
+        builtWith() {
+          const versions = this.libraryVersions;
+          const names = [
+            `Vue ${versions.vue}`,
+            `Ace ${versions['ace-builds']}`,
+            `Prism ${versions.prismjs}`,
+            `Acorn ${versions.acorn}`,
+            ...this.isTypeScript ? [`Babel ${versions['@babel/standalone']}`] : [],
+          ];
+          return names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
         },
         blockTypeDescription() {
           return this.blockType === 'module'
@@ -498,17 +520,29 @@ function init(jsCode, dataset, meta) {
             this.commandHistory.push(historyCode);
             if (this.commandHistory.length > 200) this.commandHistory.shift();
           }
-          const {code, resultRange} = prepareCode(group.lines, {
-            blockType: this.blockType,
-            importsUrl: this.importsUrl,
-            // Like the browser's console, show the value of the last
-            // expression (except for hidden code).
-            findResult: this.showResults && !isHidden,
-          });
+          const {language, blockType} = this;
+          const compiled = language === 'typescript'
+            ? compileTypeScript(group.lines, {blockType})
+            : {code: group.lines};
+          const {code, resultRange} = compiled.error
+            ? {code: '', resultRange: null}
+            : prepareCode(compiled.code, {
+              blockType,
+              importsUrl: this.importsUrl,
+              // Like the browser's console, show the value of the last
+              // expression (except for hidden code).
+              findResult: this.showResults && !isHidden,
+            });
           messageParent({
             target: 'runner',
             func: 'runCode',
-            args: [code, {blockType: this.blockType, resultRange}],
+            args: [code, {
+              blockType,
+              resultRange,
+              language,
+              sourceMap: compiled.sourceMap,
+              compileError: compiled.error,
+            }],
           });
         },
         clearConsole() {
@@ -582,14 +616,17 @@ function init(jsCode, dataset, meta) {
         async saveFile() {
           this.closeMenu();
           const code = this.currentCode + '\n';
-          const suggestedName = this.fileName || 'js-box.js';
+          const suggestedName = this.fileName || (this.isTypeScript ? 'js-box.ts' : 'js-box.js');
+          const fileType = this.isTypeScript
+            ? {description: 'TypeScript', accept: {'text/typescript': ['.ts', '.mts']}}
+            : {description: 'JavaScript', accept: {'text/javascript': ['.js', '.mjs']}};
 
           // Shows a "Save as" dialog where it is supported.
           if ('function' === typeof window.showSaveFilePicker) {
             try {
               const handle = await showSaveFilePicker({
                 suggestedName,
-                types: [{description: 'JavaScript', accept: {'text/javascript': ['.js', '.mjs']}}],
+                types: [fileType],
               });
               const writable = await handle.createWritable();
               await writable.write(code);
@@ -603,7 +640,7 @@ function init(jsCode, dataset, meta) {
             }
           }
 
-          const url = URL.createObjectURL(new Blob([code], {type: 'text/javascript'}));
+          const url = URL.createObjectURL(new Blob([code], {type: Object.keys(fileType.accept)[0]}));
           Object.assign(document.createElement('a'), {href: url, download: suggestedName}).click();
           setTimeout(() => URL.revokeObjectURL(url), 1000);
         },
@@ -1345,7 +1382,7 @@ function getPrismComponentProps() {
 
         codeElem.textContent = this.code;
 
-        codeElem.className = `language-javascript`;
+        codeElem.className = `language-${this.language ?? 'javascript'}`;
         preElem.className = '';
 
         for (const propName of ['lineNumbers', 'matchBraces']) {
@@ -1616,6 +1653,88 @@ function extractHiddenGroups(jsCode, hidePrefix) {
     visibleCode: visibleGroups.map(g => g.allLines).join('\n'),
     hiddenGroups,
   };
+}
+
+/**
+ * Compiles TypeScript to JavaScript by removing the types (without checking
+ * them) using Babel.  Every line stays on the same line so that line numbers
+ * in errors still match.
+ * @param {string} code
+ * @param {Object} options
+ * @param {"classic"|"module"} options.blockType
+ * @returns {{code: string, sourceMap?: number[][][], error?: {message: string, line: number, column: number}}}
+ *   The JavaScript code and, for each of its lines, where it came from (see
+ *   decodeSourceMap()) or the syntax error that kept it from being compiled.
+ */
+function compileTypeScript(code, {blockType}) {
+  try {
+    const result = Babel.transform(code, {
+      filename: 'snippet.ts',
+      presets: [['typescript', {
+        allExtensions: true,
+        // Only `import type` is removed so that an import is never dropped
+        // just because it isn't used yet.
+        onlyRemoveTypeImports: true,
+      }]],
+      sourceType: blockType === 'module' ? 'module' : 'script',
+      // Allows `export` in a namespace in classic blocks.  Imports in classic
+      // blocks are left in so that running them shows the usual error.
+      parserOpts: {allowImportExportEverywhere: blockType !== 'module'},
+      retainLines: true,
+      sourceMaps: true,
+    });
+    return {code: result.code, sourceMap: decodeSourceMap(result.map.mappings)};
+  }
+  catch (e) {
+    if (e?.name !== 'SyntaxError' || !e.loc) throw e;
+    return {
+      code,
+      error: {
+        // Babel's message starts with the file name and ends with the
+        // position and the code where the error is.
+        message: `${e.message}`.split('\n')[0].replace(/^\/?snippet\.ts:\s*/, '').replace(/\s*\(\d+:\d+\)$/, ''),
+        line: e.loc.line,
+        column: e.loc.column + 1,
+      },
+    };
+  }
+}
+
+/**
+ * Decodes the mappings of a source map (for a single source).
+ * @param {string} mappings
+ * @returns {number[][][]}
+ *   For each line of the compiled code, its mappings as [compiled column,
+ *   original line, original column] (all starting at 0) sorted by column.
+ */
+function decodeSourceMap(mappings) {
+  const BASE64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  const totals = [0, 0, 0, 0, 0];
+  return mappings.split(';').map(line => {
+    totals[0] = 0;
+    const lineMappings = [];
+    for (const segment of line.split(',')) {
+      if (!segment) continue;
+      const fields = [];
+      let value = 0, shift = 0;
+      for (const char of segment) {
+        const digit = BASE64.indexOf(char);
+        value += (digit & 31) << shift;
+        if (digit & 32) {
+          shift += 5;
+        }
+        else {
+          fields.push(value & 1 ? -(value >>> 1) : value >>> 1);
+          value = shift = 0;
+        }
+      }
+      // The fields are the compiled column, the source index, the original
+      // line and the original column, each relative to the previous one.
+      fields.forEach((field, index) => totals[index] += field);
+      if (fields.length >= 4) lineMappings.push([totals[0], totals[2], totals[3]]);
+    }
+    return lineMappings.sort((a, b) => a[0] - b[0]);
+  });
 }
 
 /**

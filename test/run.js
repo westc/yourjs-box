@@ -698,13 +698,13 @@ test('destroy() removes the console and restores the page\'s console in window m
 test('Copy as HTML includes the options given to YourJSBox.create()', async t => {
   await t.newPage();
   await t.setPage('<!DOCTYPE html><html><head><script src="SRC"></script></head><body><div id="lesson" style="height: 400px"></div></body></html>');
-  await t.page.evaluate(() => YourJSBox.create({target: '#lesson', code: 'console.log(1)', theme: 'dark', hidePrefix: 'SETUP', showResults: false}));
+  await t.page.evaluate(() => YourJSBox.create({target: '#lesson', code: 'console.log(1)', theme: 'dark', hidePrefix: 'SETUP', showResults: false, language: 'typescript'}));
   await t.useConsole('#lesson > iframe');
   await t.click('#bottomNav .logo-button');
   await t.inViewer(() => [...document.querySelectorAll('.tab')].find(tab => tab.textContent === 'Copy as HTML').click());
   await t.viewer.waitForFunction(() => document.querySelector('.export-preview .ace_editor'));
   const html = await t.inViewer(() => ace.edit(document.querySelector('.export-preview .ace_editor')).getValue());
-  assert.match(html, /<script src="[^"]+" data-hide-prefix="SETUP" data-show-results="false" data-theme="dark">/);
+  assert.match(html, /<script src="[^"]+" data-hide-prefix="SETUP" data-language="typescript" data-show-results="false" data-theme="dark">/);
 });
 
 /**
@@ -1010,6 +1010,76 @@ test('the toolbar buttons are in order', async t => {
   await t.open(`1`);
   const titles = await t.inViewer(() => [...document.querySelectorAll('#bottomNav .buttons button')].map(b => b.title.replace(/ \(.*\)$/, '')));
   assert.deepEqual(titles, ['More', 'Clear console', 'History', 'Show the editor below the console', 'Full screen', 'Run the next block of code']);
+});
+
+test('TypeScript has its types removed before it runs', async t => {
+  await t.open(String.raw`
+    // Types \\
+    interface Person { name: string; age?: number }
+    enum Color { Red, Green }
+    const people: Person[] = [{name: 'Ann'}];
+    function first<T>(items: T[]): T { return items[0]; }
+    first<Person>(people).name as string
+    // Declarations are shared between classic blocks \\
+    namespace Shapes { export const sides = 4; }
+    [Color.Green, Color[0], Shapes.sides]
+  `, { language: 'typescript' });
+  await t.run(2);
+  assert.deepEqual(await t.messages(), ["result: 'Ann'", "result: (3) [1, 'Red', 4]"]);
+  assert.deepEqual(await t.inViewer(() => [
+    ace.edit(document.querySelector('#editor .ace_editor')).session.getMode().$id,
+    document.querySelector('.code-row code').className,
+  ]), ['ace/mode/typescript', 'language-typescript']);
+  assert.ok(t.requestedUrls.some(url => url.includes('/@babel/standalone@')));
+});
+
+test('JavaScript consoles do not load Babel', async t => {
+  await t.open(`1`);
+  assert.ok(!t.requestedUrls.some(url => url.includes('babel')));
+});
+
+test('TypeScript errors point to the TypeScript code', async t => {
+  await t.open(String.raw`
+    // Runtime error \\
+    function getX(a: number, point: {x: number} | null): number { return point!.x; }
+    getX(1, null)
+    // Syntax error \\
+    let count: = 1;
+  `, { language: 'typescript' });
+  await t.run(2);
+  const [runtime, syntax] = await t.messages();
+  // The columns are the ones in the TypeScript code (not the compiled code).
+  assert.match(runtime, /^error: Uncaught TypeError: .* \| at getX \(snippet-1\.ts:1:77\) \| at snippet-1\.ts:2:1$/);
+  assert.equal(syntax, 'error: Uncaught SyntaxError: Unexpected token | at snippet-2.ts:1:12');
+});
+
+test('TypeScript classic blocks explain how to use top-level await', async t => {
+  await t.open(`const n: number = await 1;`, { language: 'typescript' });
+  await t.run();
+  assert.match((await t.messages())[0], /^error: Uncaught SyntaxError: 'await' .*data-block-type="module"/);
+});
+
+test('TypeScript module blocks keep imports unless they only import types', async t => {
+  await t.open(String.raw`
+    import type { Thing } from 'not-a-real-package';
+    import seven from 'data:text/javascript,export default 7';
+    const value: number = await Promise.resolve(seven * 6);
+    value
+  `, { language: 'typescript', blockType: 'module' });
+  await t.run();
+  assert.deepEqual(await t.messages(), ['result: 42']);
+  assert.ok(!t.requestedUrls.some(url => url.includes('not-a-real-package')));
+
+  await t.inViewer(() => window.showSaveFilePicker = async options => {
+    window.saved = options;
+    return {name: 'lesson.ts', createWritable: async () => ({write: async () => {}, close: async () => {}})};
+  });
+  await t.menu('Save');
+  await t.viewer.waitForFunction(() => window.saved);
+  assert.deepEqual(await t.inViewer(() => [saved.suggestedName, saved.types[0].accept]), ['js-box.ts', {'text/typescript': ['.ts', '.mts']}]);
+
+  await t.click('#bottomNav .logo-button');
+  assert.match(await t.inViewer(() => document.querySelector('.about-body').innerText), /Language\s+TypeScript[\s\S]*Babel 7\./);
 });
 
 test('explains when the libraries fail to load', async t => {

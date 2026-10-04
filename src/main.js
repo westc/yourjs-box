@@ -32,6 +32,8 @@
    * was tested with.
    */
   const LIBRARY_VERSIONS = {
+    // Only loaded by TypeScript consoles.
+    '@babel/standalone': '7.29.9',
     'ace-builds': '1.44.0',
     'acorn': '8.18.0',
     'prism-themes': '1.9.0',
@@ -235,6 +237,7 @@
   function createConsole({code, dataset, height, insert}) {
     const runnerMode = dataset.runner === 'window' ? 'window' : 'worker';
     const blockType = dataset.blockType === 'module' ? 'module' : 'classic';
+    const language = dataset.language === 'typescript' ? 'typescript' : 'javascript';
     const showResults = dataset.showResults !== 'false';
     // An empty data-imports-url turns off loading packages by name.
     const importsUrl = dataset.importsUrl == null
@@ -367,6 +370,8 @@
           // Used to find the last expression in each block of code (so that its
           // value can be shown) and the packages that it imports.
           libraryUrl('acorn', 'dist/acorn.js'),
+          // Removes the types from TypeScript code before it is run.
+          ...language === 'typescript' ? [libraryUrl('@babel/standalone', 'babel.min.js')] : [],
         ],
         cssUrls: [
           'data:text/css,' + encodeURIComponent(VIEWER_IFRAME_CSS),
@@ -385,6 +390,7 @@
           this.call('init', code, dataset, {
             runnerMode,
             blockType,
+            language,
             showResults,
             importsUrl,
             packageInfo: PACKAGE_INFO,
@@ -461,7 +467,7 @@
    * The options of YourJSBox.create() which are the same as the data
    * attributes of a script tag.
    */
-  const CONSOLE_OPTION_NAMES = ['blockType', 'dividerOrient', 'hidePrefix', 'importsUrl', 'librariesUrl', 'runner', 'showResults', 'theme'];
+  const CONSOLE_OPTION_NAMES = ['blockType', 'dividerOrient', 'hidePrefix', 'importsUrl', 'language', 'librariesUrl', 'runner', 'showResults', 'theme'];
 
   /**
    * The JavaScript API for creating consoles (available as window.YourJSBox).
@@ -487,6 +493,7 @@
      *   Optional.  The code that the console starts with.
      * @param {string=} options.runner
      * @param {string=} options.blockType
+     * @param {string=} options.language
      * @param {(boolean|string)=} options.showResults
      * @param {string=} options.hidePrefix
      * @param {string=} options.dividerOrient

@@ -2,7 +2,7 @@
 
 Embed an interactive JavaScript console on any web page with one script tag.
 Step-by-step code blocks, DevTools-style output, and code that runs in a Web
-Worker or the page itself.
+Worker or the page itself.  TypeScript works too.
 
 **[Live demo](https://westc.github.io/yourjs-box/)** &middot;
 [Examples](https://westc.github.io/yourjs-box/examples/)
@@ -61,10 +61,10 @@ If the editor already has code in it you are asked before it is replaced.
   history.
 - The **&#8943;** menu has:
   - **Text size**, which is remembered for every console on the same site.
-  - **Open**, which loads a JavaScript file as the code that the console starts
+  - **Open**, which loads a JavaScript (or TypeScript) file as the code that the console starts
     with (its hidden blocks are hidden and Reset goes back to it).
   - **Save**, which saves the code that already ran and the code in the editor
-    as a JavaScript file that can be opened later.
+    as a JavaScript (or TypeScript) file that can be opened later.
   - **Pop out into a window**, which moves the console into a separate window
     while the code keeps running in the page (so in window mode the code can
     still change the page).  Close the window or click **Bring it back** to
@@ -99,9 +99,10 @@ objects and arrays) for a menu with:
 | Attribute | Description |
 | --- | --- |
 | `data-block-type` | `"classic"` (default) runs each block like a regular `<script>` so top-level declarations are shared between blocks.  `"module"` runs each block like a `<script type="module">`.  See below. |
+| `data-language` | `"javascript"` (default) or `"typescript"`.  See "TypeScript" below. |
 | `data-show-results` | `"false"` stops the value of the last expression in each block from being shown. |
 | `data-imports-url` | Where packages imported by name are loaded from.  See "Importing Packages" below. |
-| `data-libraries-url` | Where to load Vue, Ace, Prism and Acorn from.  See "Self-Hosting the Libraries" below. |
+| `data-libraries-url` | Where to load Vue, Ace, Prism, Acorn and Babel from.  See "Self-Hosting the Libraries" below. |
 | `data-runner` | `"worker"` (default) runs the code in a Web Worker.  `"window"` runs it directly in the page.  See below. |
 | `data-divider-orient` | `"vertical"` puts the editor beside the output and `"horizontal"` puts it below.  If not specified the editor is beside the output unless the console is narrower than 600px. |
 | `data-hide-prefix` | Any block whose header starts with this prefix is hidden. See below. |
@@ -125,6 +126,36 @@ one block can be used in the next, but `await` can only be used inside of
 - `import` works (eg. `import {camelCase} from 'lodash-es';`).
 - Top-level declarations stay inside of their block, just like in a module.
   Use `globalThis` to share values between blocks.
+
+### TypeScript
+
+Add `data-language="typescript"` to write the code in TypeScript:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/yourjs-box@1/dist/yourjs-box.min.js" data-language="typescript">
+  // Describe a person \\
+  interface Person { name: string; born: number }
+  const people: Person[] = [{name: 'Ada', born: 1815}, {name: 'Grace', born: 1906}];
+
+  // Find the oldest \\
+  function oldest<T extends Person>(list: T[]): T {
+    return list.reduce((a, b) => a.born <= b.born ? a : b);
+  }
+  oldest(people)
+</script>
+```
+
+Before each block runs, [Babel](https://babeljs.io/) removes the types, which
+is how most TypeScript tools run code without a build step.  The types aren't
+checked, so code with type errors still runs, just like it would in
+JavaScript.  Enums, namespaces and parameter properties all work, and errors
+point to the lines and columns in the TypeScript code.
+
+TypeScript works with both block types.  Only type imports are removed (eg.
+`import type {Options} from 'x'` or the `type Options` part of
+`import {type Options, format} from 'x'`), so an import is never dropped just
+because nothing uses it yet.  Babel is only downloaded by consoles that use
+TypeScript.
 
 ### Importing Packages
 
@@ -158,7 +189,8 @@ To load packages from somewhere else set `data-imports-url` to a URL where
 
 The console's interface uses [Vue](https://vuejs.org/),
 [Ace](https://ace.c9.io/), [Prism](https://prismjs.com/) and
-[Acorn](https://github.com/acornjs/acorn), which are loaded from unpkg by
+[Acorn](https://github.com/acornjs/acorn) (plus
+[Babel](https://babeljs.io/) for TypeScript), which are loaded from unpkg by
 default.  Exact versions are always used so that a new release of one of them
 can't change how the console works.
 
@@ -179,6 +211,9 @@ next to their main files):
 
 ```bash
 npm install vue@3.5.43 ace-builds@1.44.0 prismjs@1.30.0 prism-themes@1.9.0 acorn@8.18.0
+
+# Only needed for TypeScript consoles
+npm install @babel/standalone@7.29.9
 ```
 
 The About window lists the versions that each version of JS Box uses.
@@ -232,7 +267,7 @@ functions).  The options are:
 | `placement` | Where the console goes:  `"fill"` (default) replaces the target's contents, `"append"` and `"prepend"` add it inside of the target, `"replace"` replaces the target itself and `"before"` and `"after"` add it next to the target. |
 | `height` | The CSS height of the console (a number is treated as pixels).  Defaults to `"100%"` so the console fills its container.  It is never less than 150px. |
 | `code` | The code that the console starts with. |
-| `runner`, `blockType`, `showResults`, `hidePrefix`, `dividerOrient`, `theme`, `importsUrl`, `librariesUrl` | The same as the `data-*` attributes above. |
+| `runner`, `blockType`, `language`, `showResults`, `hidePrefix`, `dividerOrient`, `theme`, `importsUrl`, `librariesUrl` | The same as the `data-*` attributes above. |
 
 `YourJSBox.version` is the version of JS Box that was loaded.
 
@@ -285,14 +320,6 @@ The kitchen sink example (`examples/kitchen-sink.html`) has several consoles
 which cover every feature.  Add `?build=standard` or `?build=min` to its URL to
 test `dist/yourjs-box.js` or `dist/yourjs-box.min.js` instead of
 `dist/yourjs-box.full.js`.
-
-## Roadmap
-
-- Open button - Load a JS file from the filesystem.
-- Save button - Save the current inputs as a JS file that can be opened later.
-- Add `@timeout` annotation to the special comments that will allow you to input the amount of seconds to wait since the last call to a console logging function before automatically running the next comment segmented block.
-- Allow for TypeScript
-- Allow for CoffeeScript
 
 ## License
 
