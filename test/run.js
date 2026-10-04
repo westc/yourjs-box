@@ -1114,6 +1114,47 @@ test('the kitchen sink switches examples and options', async t => {
   assert.equal(await t.page.textContent('#page-box'), 'Changed by the console!');
 });
 
+test('consoles load when they are about to be scrolled into view', async t => {
+  await t.newPage();
+  await t.setPage(`<!DOCTYPE html><html><body style="margin:0">
+    <div style="height:3000px">Spacer</div>
+    <div style="height:400px"><script src="SRC" data-runner="window">console.log('loaded')</script></div>
+  </body></html>`);
+  await t.page.waitForTimeout(500);
+  // Nothing is loaded and the page's console isn't captured yet.
+  assert.equal(await t.page.evaluate(() => document.querySelector('iframe').srcdoc), '');
+  assert.ok(!t.requestedUrls.some(url => url.includes('/vue@')));
+  assert.ok(await t.page.evaluate(() => `${console.log}`.includes('[native code]')));
+
+  await t.page.evaluate(() => document.querySelector('iframe').scrollIntoView());
+  await t.useConsole('iframe');
+  await t.run();
+  assert.deepEqual(await t.messages(), ['log: loaded']);
+});
+
+test('data-loading="eager" loads consoles that are out of view', async t => {
+  await t.newPage();
+  await t.setPage(`<!DOCTYPE html><html><body style="margin:0">
+    <div style="height:3000px">Spacer</div>
+    <div style="height:400px"><script src="SRC" data-loading="eager">1 + 1</script></div>
+  </body></html>`);
+  await t.useConsole('iframe');
+  await t.run();
+  assert.deepEqual(await t.messages(), ['result: 2']);
+});
+
+test('a console in a hidden element loads once it is shown', async t => {
+  await t.newPage();
+  await t.setPage('<!DOCTYPE html><html><head><script src="SRC"></script></head><body><div id="tab" style="display:none;height:400px"></div></body></html>');
+  await t.page.evaluate(() => YourJSBox.create({target: '#tab', code: '"sho" + "wn"'}));
+  await t.page.waitForTimeout(500);
+  assert.equal(await t.page.evaluate(() => document.querySelector('#tab iframe').srcdoc), '');
+  await t.page.evaluate(() => document.querySelector('#tab').style.display = 'block');
+  await t.useConsole('#tab iframe');
+  await t.run();
+  assert.deepEqual(await t.messages(), ["result: 'shown'"]);
+});
+
 test('explains when the libraries fail to load', async t => {
   await t.open(`1`, {}, { routes: [['https://unpkg.com/**', route => route.abort()]] });
   assert.ok(await t.inViewer(() => document.querySelector('#splash').classList.contains('failed')));

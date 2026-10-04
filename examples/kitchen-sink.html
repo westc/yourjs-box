@@ -230,6 +230,13 @@
           </select>
         </label>
         <label class="field">
+          <span>Loading</span>
+          <select name="loading">
+            <option value="lazy">When scrolled into view</option>
+            <option value="eager">Right away</option>
+          </select>
+        </label>
+        <label class="field">
           <span>Imports</span>
           <select name="imports">
             <option value="esm">esm.sh</option>
@@ -493,6 +500,7 @@
           theme: 'system',
           layout: 'auto',
           build: 'full',
+          loading: 'lazy',
           imports: 'esm',
           libraries: 'unpkg',
         };
@@ -547,6 +555,7 @@
           if (state.results !== 'on') attributes.showResults = 'false';
           if (state.theme !== 'system') attributes.theme = state.theme;
           if (state.layout !== 'auto') attributes.dividerOrient = state.layout;
+          if (state.loading !== 'lazy') attributes.loading = state.loading;
           if (state.imports in IMPORTS_URLS) attributes.importsUrl = IMPORTS_URLS[state.imports];
           if (state.libraries in LIBRARIES_URLS) attributes.librariesUrl = LIBRARIES_URLS[state.libraries];
           return attributes;

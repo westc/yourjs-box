@@ -256,9 +256,8 @@
     let popOutWatcher;
     let activeViewer;
     const sendToViewer = data => relayMessage(data, {viewer: activeViewer});
-    const runner = runnerMode === 'window'
-      ? createWindowRunner(sendToViewer)
-      : createWorkerRunner(sendToViewer);
+    // Created once the console is loaded (see load()).
+    let runner = null;
 
     // The theme is determined up front so that the loading screen uses it.
     const theme = /^(light|dark)$/.test(dataset.theme)
@@ -355,6 +354,7 @@
      */
     function createViewer(targetWindow, state) {
       return createCallableFrame({
+        deferLoad: !targetWindow,
         jsCode() {
           [[JS_VIEWER_IFRAME_FILE_PLACEHOLDER]]
         },
@@ -416,6 +416,37 @@
     insert(inlineViewer.iframe);
 
     let isDestroyed = false;
+
+    /**
+     * Loads the viewer and starts the runner (which, in window mode, is when
+     * the page's console functions start being captured).
+     */
+    function load() {
+      if (runner || isDestroyed) return;
+      runner = runnerMode === 'window'
+        ? createWindowRunner(sendToViewer)
+        : createWorkerRunner(sendToViewer);
+      inlineViewer.load();
+    }
+
+    // Unless data-loading="eager" is given, nothing is loaded until the console
+    // is about to be scrolled into view (or a hidden console is shown).
+    /** @type {IntersectionObserver?} */
+    let loadObserver = null;
+    if (dataset.loading !== 'eager' && 'function' === typeof window.IntersectionObserver) {
+      loadObserver = new IntersectionObserver(entries => {
+        if (entries.some(entry => entry.isIntersecting)) {
+          loadObserver.disconnect();
+          loadObserver = null;
+          load();
+        }
+      }, {rootMargin: '200px'});
+      loadObserver.observe(inlineViewer.iframe);
+    }
+    else {
+      load();
+    }
+
     return {
       element: inlineViewer.iframe,
       /**
@@ -431,7 +462,8 @@
           popOutWindow = null;
         }
         removeEventListener('pagehide', closePopOut);
-        runner.destroy();
+        loadObserver?.disconnect();
+        runner?.destroy();
         inlineViewer.dispose();
         inlineViewer.iframe.remove();
       },
@@ -467,7 +499,7 @@
    * The options of YourJSBox.create() which are the same as the data
    * attributes of a script tag.
    */
-  const CONSOLE_OPTION_NAMES = ['blockType', 'dividerOrient', 'hidePrefix', 'importsUrl', 'language', 'librariesUrl', 'runner', 'showResults', 'theme'];
+  const CONSOLE_OPTION_NAMES = ['blockType', 'dividerOrient', 'hidePrefix', 'importsUrl', 'language', 'librariesUrl', 'loading', 'runner', 'showResults', 'theme'];
 
   /**
    * The JavaScript API for creating consoles (available as window.YourJSBox).
@@ -500,6 +532,7 @@
      * @param {string=} options.theme
      * @param {string=} options.librariesUrl
      * @param {string=} options.importsUrl
+     * @param {string=} options.loading
      *   The same as the data attributes of a script tag.
      * @returns {{element: HTMLIFrameElement, destroy: () => void}}
      */
@@ -584,6 +617,8 @@
      * @param {Window=} options.targetWindow
      *   If given the page is written into this (same origin) window (eg. a
      *   pop-out window) instead of into a new IFRAME.
+     * @param {boolean=} options.deferLoad
+     *   If true the IFRAME's page isn't loaded until `load()` is called.
      * @param {((this: R, event: MessageEvent) => void)=} options.onMessage
      * @param {((this: R, event: MessageEvent) => void)=} options.onReady
      * @returns {R}
@@ -665,9 +700,9 @@
         TARGET_WINDOW.document.close();
       }
       else {
-        IFRAME.srcdoc = HTML_CODE;
         // Allows the console to go full screen.
         IFRAME.setAttribute('allow', 'fullscreen');
+        if (!options.deferLoad) IFRAME.srcdoc = HTML_CODE;
       }
 
       // Set the style of the iframe.
@@ -729,6 +764,10 @@
         },
         iframe: IFRAME,
         window: TARGET_WINDOW,
+        // Loads the IFRAME's page if it was deferred.
+        load: function() {
+          if (IFRAME && !IFRAME.srcdoc) IFRAME.srcdoc = HTML_CODE;
+        },
         // Stops listening for messages from the frame.
         dispose: function() {
           removeEventListener('message', onWindowMessage);
@@ -742,6 +781,7 @@
      * @property {(funcName: string, ...args: any[]) => void} call
      * @property {HTMLIFrameElement?} iframe
      * @property {Window=} window
+     * @property {() => void} load
      * @property {() => void} dispose
      */
 

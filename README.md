@@ -7,6 +7,8 @@ Worker or the page itself.  TypeScript works too.
 **[Live demo](https://westc.github.io/yourjs-box/)** &middot;
 [Examples](https://westc.github.io/yourjs-box/examples/)
 
+![JS Box running code one block at a time, expanding an object, showing a table and an error](demo.gif)
+
 ## Usage
 
 Add the script wherever you want the console to appear and put the code that
@@ -106,6 +108,7 @@ objects and arrays) for a menu with:
 | `data-runner` | `"worker"` (default) runs the code in a Web Worker.  `"window"` runs it directly in the page.  See below. |
 | `data-divider-orient` | `"vertical"` puts the editor beside the output and `"horizontal"` puts it below.  If not specified the editor is beside the output unless the console is narrower than 600px. |
 | `data-hide-prefix` | Any block whose header starts with this prefix is hidden. See below. |
+| `data-loading` | `"lazy"` (default) waits to load the console until it is about to be scrolled into view (or, if it is hidden, shown).  `"eager"` loads it right away.  See "Loading" below. |
 | `data-theme` | `"light"` or `"dark"`.  Defaults to following the system's color scheme like the browser's dev tools. |
 
 ### Results
@@ -225,14 +228,27 @@ The About window lists the versions that each version of JS Box uses.
 `timeLog()`, `timeEnd()`, `trace()`, `group()`, `groupCollapsed()`,
 `groupEnd()` and `clear()` are all shown in the console.
 
+### Loading
+
+Like `<img loading="lazy">`, a console isn't loaded until it is about to be
+scrolled into view, so a page with many consoles (eg. a long tutorial) only
+loads the ones that are read.  A console that is hidden (eg. in a closed tab)
+loads once it is shown.  Its space in the page is kept while it waits, so
+nothing moves around when it loads.
+
+Until a console loads none of its code runs, including hidden blocks, and in
+window mode the page's `console` functions aren't captured yet.  Add
+`data-loading="eager"` to load a console right away (eg. if its hidden blocks
+set up something that the page needs).
+
 ### Hidden Code
 
 If `data-hide-prefix="HIDE"` is specified then a block with a header like
 `// HIDE: Setup \\` will not be shown in the editor.  Instead it runs
-automatically as soon as all of the code that came before it has run.  It shows
-up in the output as a collapsed block labelled with whatever came after the
-prefix (and optional colon), or "Hidden code" if nothing did.  Clicking the
-label shows or hides the code.
+automatically (once the console loads) as soon as all of the code that came
+before it has run.  It shows up in the output as a collapsed block labelled
+with whatever came after the prefix (and optional colon), or "Hidden code" if
+nothing did.  Clicking the label shows or hides the code.
 
 ### JavaScript API
 
@@ -267,7 +283,7 @@ functions).  The options are:
 | `placement` | Where the console goes:  `"fill"` (default) replaces the target's contents, `"append"` and `"prepend"` add it inside of the target, `"replace"` replaces the target itself and `"before"` and `"after"` add it next to the target. |
 | `height` | The CSS height of the console (a number is treated as pixels).  Defaults to `"100%"` so the console fills its container.  It is never less than 150px. |
 | `code` | The code that the console starts with. |
-| `runner`, `blockType`, `language`, `showResults`, `hidePrefix`, `dividerOrient`, `theme`, `importsUrl`, `librariesUrl` | The same as the `data-*` attributes above. |
+| `runner`, `blockType`, `language`, `showResults`, `hidePrefix`, `dividerOrient`, `theme`, `importsUrl`, `librariesUrl`, `loading` | The same as the `data-*` attributes above. |
 
 `YourJSBox.version` is the version of JS Box that was loaded.
 
@@ -309,6 +325,8 @@ Install the development dependencies by running `npm install`.
   Pages doesn't always deploy when they are pushed together), publishes to npm
   and, once npm lists the new version, purges jsDelivr's cache.  Add
   `--dry-run` to see what it would do or `--skip-tests` to skip the tests.
+- `npm run record-demo` records `demo.gif` (shown at the top of this README)
+  from the built files.  It needs [ffmpeg](https://ffmpeg.org/).
 - `npm run purge-cdn` purges jsDelivr's cache so that URLs like
   `yourjs-box@1` point to the latest version right away.
 - In VS Code, **Terminal &rarr; Run Task&hellip;** has tasks for all of these

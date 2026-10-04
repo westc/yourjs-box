@@ -50,6 +50,13 @@
       "problemMatcher": []
     },
     {
+      "label": "Record demo GIF",
+      "detail": "Builds and then records demo.gif for the README (needs ffmpeg).",
+      "type": "shell",
+      "command": "npm run build && npm run record-demo",
+      "problemMatcher": []
+    },
+    {
       "label": "Purge jsDelivr cache",
       "detail": "Makes yourjs-box@1 style URLs point to the latest version right away.",
       "type": "npm",
