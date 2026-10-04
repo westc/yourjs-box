@@ -368,6 +368,19 @@ The options are kept in the URL so the page can be reloaded or shared as is.
 
 Ideas for future versions, roughly from easiest to hardest:
 
+- **Minified Ace:** load Ace's minified build (`src-min-noconflict`) instead
+  of the unminified one (`src-noconflict`).  This sends about 50 KB less (127
+  KB instead of 176 KB compressed), which is about 15% of what each console
+  loads.
+- **Non-blocking stylesheets:** the Prism stylesheets come from the CDN in the
+  viewer's `<head>`, so nothing (not even the loading screen) shows until they
+  arrive.  Loading them after the loading screen would show it right away on
+  slow connections.
+- **Smaller Acorn:** Acorn's package only has an unminified build (about 60 KB
+  compressed).  A minified copy is about 35 KB (jsDelivr makes one
+  automatically, but unpkg and self-hosted copies don't), so Acorn could be
+  loaded from jsDelivr by default or a minified copy could be published with
+  this package.
 - **`data-autorun`:** run every visible block when the page loads.
 - **Autocomplete:** turn on Ace's keyword and snippet completion in the editor.
 - **`data-remember`:** save the editor's code and history in the browser so
