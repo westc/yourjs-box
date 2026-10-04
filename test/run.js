@@ -1082,6 +1082,38 @@ test('TypeScript module blocks keep imports unless they only import types', asyn
   assert.match(await t.inViewer(() => document.querySelector('.about-body').innerText), /Language\s+TypeScript[\s\S]*Babel 7\./);
 });
 
+test('the kitchen sink switches examples and options', async t => {
+  await t.newPage();
+  await t.page.goto(`${t.baseUrl}/examples/kitchen-sink.html`);
+  await t.useConsole('#console > iframe');
+  assert.match(await t.page.textContent('#version'), /^v\d+\.\d+\.\d+ · yourjs-box\.full\.js$/);
+
+  // An example sets the options that it needs.
+  await t.page.selectOption('#example', 'typescript');
+  await t.useConsole('#console > iframe');
+  assert.equal(await t.page.inputValue('select[name="language"]'), 'typescript');
+  assert.equal(await t.inViewer(() => ace.edit(document.querySelector('#editor .ace_editor')).session.getMode().$id), 'ace/mode/typescript');
+  await t.page.selectOption('select[name="theme"]', 'dark');
+  await t.useConsole('#console > iframe');
+  assert.equal(await t.inViewer(() => document.documentElement.dataset.theme), 'dark');
+  assert.match(await t.page.textContent('#embed-code'), /data-language="typescript"\n\s+data-theme="dark">/);
+  assert.equal(new URL(t.page.url()).search, '?example=typescript&language=typescript&theme=dark');
+
+  // The options are kept when the page is reloaded (eg. to switch builds).
+  await t.page.selectOption('select[name="build"]', 'min');
+  await t.page.waitForURL(/build=min/);
+  await t.useConsole('#console > iframe');
+  assert.match(await t.page.textContent('#version'), /yourjs-box\.min\.js$/);
+  assert.equal(await t.page.inputValue('#example'), 'typescript');
+  assert.equal(await t.inViewer(() => document.documentElement.dataset.theme), 'dark');
+
+  // Window mode can change the page.
+  await t.page.selectOption('#example', 'window');
+  await t.useConsole('#console > iframe');
+  await t.run(2);
+  assert.equal(await t.page.textContent('#page-box'), 'Changed by the console!');
+});
+
 test('explains when the libraries fail to load', async t => {
   await t.open(`1`, {}, { routes: [['https://unpkg.com/**', route => route.abort()]] });
   assert.ok(await t.inViewer(() => document.querySelector('#splash').classList.contains('failed')));

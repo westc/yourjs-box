@@ -316,10 +316,10 @@ Install the development dependencies by running `npm install`.
 - `npm start` builds and then rebuilds whenever one of the files in `src/`
   changes (without serving anything).
 
-The kitchen sink example (`examples/kitchen-sink.html`) has several consoles
-which cover every feature.  Add `?build=standard` or `?build=min` to its URL to
-test `dist/yourjs-box.js` or `dist/yourjs-box.min.js` instead of
-`dist/yourjs-box.full.js`.
+The kitchen sink example (`examples/kitchen-sink.html`) has a sidebar for
+choosing an example and every option, including which build is loaded
+(`dist/yourjs-box.full.js`, `dist/yourjs-box.js` or `dist/yourjs-box.min.js`).
+The options are kept in the URL so the page can be reloaded or shared as is.
 
 ## License
 
