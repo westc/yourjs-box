@@ -1,4 +1,4 @@
-# yourjs-box
+# YourJS Box
 
 Embed an interactive JavaScript console on any web page with one script tag.
 Step-by-step code blocks, DevTools-style output, and code that runs in a Web
