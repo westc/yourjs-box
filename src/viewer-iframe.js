@@ -116,6 +116,8 @@ function init(jsCode, dataset, meta) {
           // The number of groups of code sent to the runner that haven't
           // finished running yet.
           runningCount: 0,
+          // Set while running all of the remaining blocks (one at a time).
+          isRunningAll: false,
           /** @type {{title: string, message: string, confirmText: string, resolve: (isConfirmed: boolean) => void}?} */
           dialog: null,
           isDisplaysScrolledToBottom: true,
@@ -293,7 +295,7 @@ function init(jsCode, dataset, meta) {
             },
             {
               iconName: 'clear',
-              title: 'Clear console',
+              title: 'Clear console (Ctrl+L)',
               callback() { this.clearConsole(); },
             },
             {
@@ -323,7 +325,8 @@ function init(jsCode, dataset, meta) {
               iconName: this.runningCount ? 'spinner' : 'play',
               label: 'Run',
               className: 'primary',
-              title: `Run the next block of code (${isMac ? '\u2318' : 'Ctrl+'}Enter)`,
+              title: `Run the next block of code (${isMac ? '\u2318' : 'Ctrl+'}Enter)`
+                + ` or all of the blocks (${isMac ? '\u21e7\u2318' : 'Ctrl+Shift+'}Enter)`,
               callback() { this.runCode(); },
               disableIf() { return !this.canRunCode; }
             },
@@ -372,7 +375,29 @@ function init(jsCode, dataset, meta) {
          */
         onEditorKeyCombo(evt) {
           if ((evt.ctrlKey || evt.metaKey) && evt.key === 'Enter' && this.canRunCode) {
-            this.runCode();
+            if (evt.shiftKey) this.runAll();
+            else this.runCode();
+          }
+        },
+        /**
+         * Runs the remaining blocks one after another.  Each block runs once
+         * the one before it (and any hidden blocks after it) finished so that
+         * the output stays in order (see onGroupRan()).
+         */
+        runAll() {
+          if (!this.canRunCode) return;
+          this.isRunningAll = true;
+          if (!this.runningCount) this.runCode();
+        },
+        /**
+         * Called once the runner finished running a group of code.
+         */
+        onGroupRan() {
+          this.runningCount = Math.max(0, this.runningCount - 1);
+          this.runHiddenGroups();
+          if (this.isRunningAll && !this.runningCount) {
+            if (this.canRunCode) this.runCode();
+            else this.isRunningAll = false;
           }
         },
         runCode() {
@@ -572,6 +597,7 @@ function init(jsCode, dataset, meta) {
           this.hiddenGroups = hiddenGroups.map(group => ({...group}));
           this.runCount = 0;
           this.runningCount = 0;
+          this.isRunningAll = false;
           this.runHistory = [];
           this.stopNavigatingHistory();
           messageParent({target: 'runner', func: 'reset', args: []});
@@ -892,6 +918,14 @@ function init(jsCode, dataset, meta) {
             evt.preventDefault();
             evt.stopPropagation();
             this.toggleHistory();
+            return;
+          }
+          // Like the browser's console, Ctrl+L clears the console (even on a
+          // Mac).
+          if (evt.ctrlKey && !evt.altKey && !evt.metaKey && !evt.shiftKey && evt.code === 'KeyL') {
+            evt.preventDefault();
+            evt.stopPropagation();
+            this.clearConsole();
             return;
           }
           if (evt.key === 'Escape' && this.valueMenu) {
@@ -1422,6 +1456,7 @@ function getIconComponentProps() {
           horizontalView: '<svg viewBox="0 0 15 15"><path fill="currentColor" fill-rule="evenodd" d="M1.5 2h12a.5.5 0 0 1 .5.5V7H1V2.5a.5.5 0 0 1 .5-.5M1 8v4.5a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5V8zM0 2.5A1.5 1.5 0 0 1 1.5 1h12A1.5 1.5 0 0 1 15 2.5v10a1.5 1.5 0 0 1-1.5 1.5h-12A1.5 1.5 0 0 1 0 12.5z" clip-rule="evenodd"/></svg>',
           // https://icon-sets.iconify.design/radix-icons/view-vertical/
           verticalView: '<svg viewBox="0 0 15 15"><path fill="currentColor" fill-rule="evenodd" d="M8 2h5.5a.5.5 0 0 1 .5.5v10a.5.5 0 0 1-.5.5H8zM7 2H1.5a.5.5 0 0 0-.5.5v10a.5.5 0 0 0 .5.5H7zm-7 .5A1.5 1.5 0 0 1 1.5 1h12A1.5 1.5 0 0 1 15 2.5v10a1.5 1.5 0 0 1-1.5 1.5h-12A1.5 1.5 0 0 1 0 12.5z" clip-rule="evenodd"/></svg>',
+          runAll: '<svg viewBox="0 0 16 16"><path fill="currentColor" d="M1 2.5v11L7.5 8zM8 2.5v11L14.5 8z"/></svg>',
           // https://icon-sets.iconify.design/vaadin/play/
           play: '<svg viewBox="0 0 16 16"><path fill="currentColor" d="M2 1v14l12-7z"/></svg>',
           // https://icon-sets.iconify.design/mdi/error-outline/
@@ -2010,11 +2045,16 @@ function sanitizeEntries(description) {
  */
 function appendLog({logId, key, descriptions, table, groupIds, groupId, isCollapsed, stack}) {
   key = `${key}`;
-  mountedApp.displays.push({
+  const display = {
     type: 'log',
     key,
     name: key === 'result' ? 'Result' : `console.${key}`,
-    descriptions: Array.from(descriptions, sanitizeDescription),
+    descriptions: Array.from(descriptions, description => ({
+      ...sanitizeDescription(description),
+      // From format specifiers (see formatArgs() in the runner).
+      style: sanitizeLogStyle(Object(description).style),
+      isJoined: !!Object(description).isJoined,
+    })),
     table: table ? {
       headers: Array.from(table.headers, h => `${h}`),
       rows: Array.from(table.rows, row => ({
@@ -2029,7 +2069,43 @@ function appendLog({logId, key, descriptions, table, groupIds, groupId, isCollap
     isCollapsed: !!isCollapsed,
     stack: stack != null ? `${stack}` : null,
     logId: `${logId}`,
-  });
+    // How many times in a row this message was logged.
+    count: 1,
+  };
+
+  // Like the browser, a message that is the same as the one before it is
+  // shown once with a count.  Only messages made up of primitives are
+  // compared because objects may have changed in between.
+  const lastDisplay = mountedApp.displays[mountedApp.displays.length - 1];
+  const getRepeatKey = d => !d.table && !d.groupId && !d.stack && d.descriptions.every(desc => desc.isPrimitive)
+    ? JSON.stringify([d.key, d.groupIds, d.descriptions])
+    : null;
+  const repeatKey = getRepeatKey(display);
+  if (repeatKey && lastDisplay?.type === 'log' && getRepeatKey(lastDisplay) === repeatKey) {
+    lastDisplay.count = (lastDisplay.count || 1) + 1;
+  }
+  else {
+    mountedApp.displays.push(display);
+  }
+}
+
+/**
+ * Only allows the CSS properties (from %c) that the browser's console allows
+ * and never anything that loads a URL.
+ * @param {*} style
+ * @returns {string}
+ */
+function sanitizeLogStyle(style) {
+  if ('string' !== typeof style || !style.trim()) return '';
+  const elem = document.createElement('span');
+  elem.style.cssText = style;
+  const allowed = /^(-webkit-)?(background|border|box-decoration-break|box-shadow|clear|color|cursor|display|float|font|letter-spacing|line-height|margin|outline|padding|text|white-space|word|writing-mode)(-|$)/;
+  return Array.from(elem.style)
+    .filter(name => allowed.test(name))
+    .map(name => [name, elem.style.getPropertyValue(name)])
+    .filter(([, value]) => !/\b(url|image|image-set|cross-fade|element)\s*\(/i.test(value))
+    .map(([name, value]) => `${name}: ${value}`)
+    .join('; ');
 }
 
 /**
@@ -2040,11 +2116,18 @@ function appendLog({logId, key, descriptions, table, groupIds, groupId, isCollap
  * @param {number=} options.column
  */
 function appendError({message, line, column}) {
+  message = `${message}`;
+  const lastDisplay = mountedApp.displays[mountedApp.displays.length - 1];
+  if (lastDisplay?.type === 'error' && lastDisplay.message === message) {
+    lastDisplay.count = (lastDisplay.count || 1) + 1;
+    return;
+  }
   mountedApp.displays.push({
     type: 'error',
-    message: `${message}`,
+    message,
     line: +line,
     column: +column,
+    count: 1,
   });
 }
 
@@ -2114,8 +2197,7 @@ function onStoredAsGlobal(name) {
  * NOTE:  Called via main by the runner once it has run a group of code.
  */
 function onCodeRan() {
-  mountedApp.runningCount = Math.max(0, mountedApp.runningCount - 1);
-  mountedApp.runHiddenGroups();
+  mountedApp.onGroupRan();
 }
 
 /**

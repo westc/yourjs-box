@@ -35,6 +35,9 @@ script is also available from unpkg at
 A comment line that ends with `\\` is a header.  Headers split the code into
 blocks which are run one at a time each time the run button is clicked (or
 <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>Enter</kbd> is pressed in the editor).
+<kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> (or **Run all
+blocks** in the **&#8943;** menu) runs all of the remaining blocks, one after
+another and in order with any hidden blocks.
 
 Hovering over code that already ran shows a "Copy to editor" button which
 copies that code into the editor so that it can be run again, as is or modified.
@@ -43,8 +46,8 @@ If the editor already has code in it you are asked before it is replaced.
 ### Toolbar
 
 - The **&#8943;** button opens a menu (see below).
-- **Clear** removes everything from the console.  Code can also call
-  `console.clear()`.
+- **Clear** (or <kbd>Ctrl</kbd>+<kbd>L</kbd>) removes everything from the
+  console.  Code can also call `console.clear()`.
 - The **layout** button switches between showing the editor beside or below
   the console.
 - **Full screen** shows the console using the whole screen.  If the browser
@@ -62,6 +65,7 @@ If the editor already has code in it you are asked before it is replaced.
   code that hasn't been run yet comes back.  Hidden blocks aren't in the
   history.
 - The **&#8943;** menu has:
+  - **Run all blocks**, which runs all of the remaining blocks.
   - **Text size**, which is remembered for every console on the same site.
   - **Open**, which loads a JavaScript (or TypeScript) file as the code that the console starts
     with (its hidden blocks are hidden and Reset goes back to it).
@@ -228,6 +232,22 @@ The About window lists the versions that each version of YourJS Box uses.
 `timeLog()`, `timeEnd()`, `trace()`, `group()`, `groupCollapsed()`,
 `groupEnd()` and `clear()` are all shown in the console.
 
+Like the browser's console, the first argument can use format specifiers:
+`%s` (string), `%d` or `%i` (integer), `%f` (number), `%o` and `%O` (a value
+that can be expanded), `%c` (CSS styles for the text after it) and `%%` (a
+percent sign).  For example:
+
+```js
+console.log('%cHello%c, %s!', 'color: white; background: #1a73e8; padding: 2px 6px; border-radius: 4px', '', 'world');
+```
+
+Like the browser, `%c` only allows CSS for things like colors, fonts, borders,
+margins and padding, and never anything that loads a URL.
+
+A message that is the same as the one logged right before it is shown once with
+a count instead of being repeated.  Messages that include objects are always
+shown again since the objects may have changed.
+
 ### Loading
 
 Like `<img loading="lazy">`, a console isn't loaded until it is about to be
@@ -345,15 +365,7 @@ The options are kept in the URL so the page can be reloaded or shared as is.
 
 Ideas for future versions, roughly from easiest to hardest:
 
-- **Format specifiers:** support `%s`, `%d`, `%i`, `%f`, `%o`, `%O` and `%c`
-  (CSS styles) in `console.log()` and the other logging functions.
-- **Repeated messages:** show identical messages logged in a row once with a
-  count, like the browser's console.
-- **Run all:** run every remaining block with <kbd>Ctrl</kbd> /
-  <kbd>&#8984;</kbd> + <kbd>Shift</kbd> + <kbd>Enter</kbd> or from the
-  **&#8943;** menu.
 - **`data-autorun`:** run every visible block when the page loads.
-- **Clear shortcut:** clear the console with <kbd>Ctrl</kbd> + <kbd>L</kbd>.
 - **Autocomplete:** turn on Ace's keyword and snippet completion in the editor.
 - **`data-remember`:** save the editor's code and history in the browser so
   that they are still there after a reload.

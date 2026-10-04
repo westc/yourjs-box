@@ -620,6 +620,12 @@ body {
   cursor: not-allowed;
   opacity: 0.4;
 }
+.menu-shortcut {
+  color: var(--muted-text);
+  font-size: 11px;
+  margin-left: auto;
+  padding-left: 16px;
+}
 .menu-icon {
   color: var(--muted-text);
   display: inline-flex;
@@ -889,6 +895,30 @@ body {
   position: absolute;
   top: 4px;
 }
+/* Shown instead of the icon when the same message was logged more than once
+   in a row. */
+.console-row > .row-icon.repeat-count {
+  background-color: var(--null);
+  border-radius: 7px;
+  box-sizing: border-box;
+  color: var(--console-bg);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  height: 14px;
+  left: calc(3px + var(--depth, 0) * 16px);
+  line-height: 14px;
+  min-width: 16px;
+  padding: 0 4px;
+  text-align: center;
+  top: 3px;
+}
+.log-warn > .row-icon.repeat-count {
+  background-color: var(--warn-icon);
+}
+.log-error > .row-icon.repeat-count,
+.log-assert > .row-icon.repeat-count {
+  background-color: var(--error-icon);
+}
 .log-warn,
 .log-error {
   margin-top: -1px;
@@ -1037,6 +1067,10 @@ body {
 }
 .row-content > .js-value + .js-value {
   margin-left: 1ch;
+}
+/* Pieces of a message with format specifiers (eg. "%c") aren't separated. */
+.row-content > .js-value + .js-value.is-joined {
+  margin-left: 0;
 }
 .js-value-header.expandable {
   cursor: default;

@@ -34,7 +34,8 @@
             </div>
           </div>
           <div v-if="display.type === 'log' &amp;&amp; !isInCollapsedGroup(display)" :class="['console-row', 'log-' + display.key, display.groupId ? 'group-header' : '']" :style="{'--depth': display.groupIds.length}" :title="display.name" @click="onLogRowClick(display, $event)">
-            <span v-if="display.key === 'error' || display.key === 'assert'" class="row-icon"><icon name="consoleError"></icon></span>
+            <span v-if="display.count > 1" class="row-icon repeat-count">{{ display.count }}</span>
+            <span v-else-if="display.key === 'error' || display.key === 'assert'" class="row-icon"><icon name="consoleError"></icon></span>
             <span v-else-if="display.key === 'warn'" class="row-icon"><icon name="consoleWarning"></icon></span>
             <span v-else-if="display.key === 'result'" class="row-icon"><icon name="result"></icon></span>
             <span v-else-if="display.groupId" :class="['row-icon', 'arrow', 'expandable', display.isCollapsed ? '' : 'expanded']"></span>
@@ -53,6 +54,8 @@
               <js-value
                 v-for="(description, index) in display.descriptions"
                 :description="description"
+                :class="description.isJoined ? 'is-joined' : ''"
+                :style="description.style"
                 :key-path="[]"
                 :path="[display.logId, index]">
               </js-value>
@@ -61,7 +64,8 @@
           </div>
           <div v-if="display.type === 'notice'" class="console-row notice">{{ display.message }}</div>
           <div v-if="display.type === 'error'" class="console-row log-error">
-            <span class="row-icon"><icon name="consoleError"></icon></span>
+            <span v-if="display.count > 1" class="row-icon repeat-count">{{ display.count }}</span>
+            <span v-else class="row-icon"><icon name="consoleError"></icon></span>
             <div class="row-content">{{ display.message }}</div>
           </div>
         </template>
@@ -96,6 +100,10 @@
     </div>
   </div>
   <div v-if="isMenuOpen" class="more-menu" role="menu" aria-label="More" ref="moreMenu" @keydown="onMenuKeyDown">
+    <button class="menu-item" role="menuitem" :disabled="!canRunCode" @click="closeMenu(); runAll()">
+      <span class="menu-icon"><icon name="runAll"></icon></span>Run all blocks<span class="menu-shortcut">{{ modKey === 'Ctrl' ? 'Ctrl+Shift+Enter' : '&#8679;&#8984;&#8629;' }}</span>
+    </button>
+    <div class="menu-separator"></div>
     <div class="menu-row" role="group" aria-label="Text size">
       <span class="menu-row-label">Text size</span>
       <button class="menu-item menu-step" role="menuitem" title="Smaller text" aria-label="Smaller text" :disabled="!canShrinkText" @click="changeTextScale(-1)">A&minus;</button>
@@ -206,6 +214,8 @@
         <h3>Keyboard shortcuts</h3>
         <dl class="about-details">
           <dt><kbd>{{ modKey }}</kbd> + <kbd>Enter</kbd></dt><dd>Run the next block of code</dd>
+          <dt><kbd>{{ modKey }}</kbd> + <kbd>Shift</kbd> + <kbd>Enter</kbd></dt><dd>Run all of the remaining blocks</dd>
+          <dt><kbd>Ctrl</kbd> + <kbd>L</kbd></dt><dd>Clear the console</dd>
           <dt><kbd>&uarr;</kbd> / <kbd>&darr;</kbd></dt><dd>Go through the code that was run (at the very start or end of the editor)</dd>
           <dt><kbd>{{ modKey === 'Ctrl' ? 'Alt' : '&#8997;' }}</kbd> + <kbd>H</kbd></dt><dd>Show the history</dd>
           <dt><kbd>Esc</kbd></dt><dd>Close this window, the menu or full screen</dd>

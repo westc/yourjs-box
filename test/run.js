@@ -422,10 +422,109 @@ test('Reset stops an infinite loop and restores the code', async t => {
 test('Clear and console.clear() empty the console', async t => {
   await t.open(`console.log(1)`);
   await t.run();
-  await t.click('#bottomNav button[title="Clear console"]');
+  await t.click('#bottomNav button[title^="Clear console"]');
   assert.deepEqual(await t.messages(), []);
   await t.runCode(`console.log(1); console.clear(); console.log(2)`);
   assert.deepEqual(await t.messages(), ['notice: Console was cleared', 'log: 2']);
+});
+
+test('Ctrl+L clears the console', async t => {
+  await t.open(`console.log(1)`);
+  await t.run();
+  await t.viewer.click('#editor .ace_content');
+  await t.page.keyboard.press('Control+L');
+  assert.deepEqual(await t.messages(), []);
+  // The editor didn't do anything with the key.
+  assert.equal(await t.editorCode(), '');
+});
+
+test('format specifiers work like the browser\'s console', async t => {
+  await t.open(String.raw`
+    console.log('%s is %d years and %f%% done', 'Ada', 36.7, '1.5px', 'extra');
+    console.log('%o and %O and %s', 'quoted', {a: 1}, [1, 2]);
+    console.log('%cBig%c normal', 'color: red; font-size: 20px; background: url(https://example.com/x.png) blue', '');
+    console.warn('%i%%', 99.9);
+    console.log('100% sure', '%s');
+    console.log('%s and %d', 'only one');
+    console.log({}, '%s', 'not formatted');
+  `);
+  await t.run();
+  // The text of each message as it looks:  pieces of the format string are
+  // joined and the other values are separated by a space.
+  const shownText = () => t.inViewer(() => [...document.querySelectorAll('.console-row:not(.code-row)')].map(row => {
+    const type = row.className.match(/\blog-(\w+)/)[1];
+    const values = [...row.querySelectorAll('.row-content > .js-value')];
+    return `${type}: ` + values.map((v, i) => (i && !v.classList.contains('is-joined') ? ' ' : '') + v.textContent).join('');
+  }));
+  assert.deepEqual(await shownText(), [
+    'log: Ada is 36 years and 1.5% done extra',
+    "log: 'quoted' and {a: 1} and (2) [1, 2]",
+    'log: Big normal',
+    'warn: 99%',
+    'log: 100% sure %s',
+    'log: only one and %d',
+    'log: {} %s not formatted',
+  ]);
+  const styles = await t.inViewer(() => [...document.querySelectorAll('.console-row:not(.code-row)')[2].querySelectorAll('.row-content > .js-value')].map(v => v.style.cssText));
+  assert.match(styles[0], /color: red/);
+  assert.match(styles[0], /font-size: 20px/);
+  assert.match(styles[0], /background-color: blue/);
+  assert.doesNotMatch(styles[0], /url/);
+  assert.equal(styles[1], '');
+  // Values inserted with %O can still be expanded.
+  await t.expand('{a: 1}');
+  assert.deepEqual(await t.inViewer(() => [...document.querySelectorAll('.expansion .entry-key')].map(k => k.textContent)), ['a', '[[Prototype]]']);
+});
+
+test('repeated messages are shown once with a count', async t => {
+  await t.open(String.raw`
+    for (let i = 0; i < 3; i++) console.log('same', 1);
+    console.log('same', 2);
+    for (let i = 0; i < 2; i++) console.warn('careful');
+    for (let i = 0; i < 2; i++) console.log({a: 1});
+    for (let i = 0; i < 2; i++) setTimeout(() => { throw new Error('boom'); });
+  `);
+  await t.run();
+  await t.page.waitForTimeout(200);
+  const rows = await t.inViewer(() => [...document.querySelectorAll('.console-row:not(.code-row)')].map(row => [
+    row.querySelector('.repeat-count')?.textContent ?? '',
+    [...row.querySelectorAll('.row-content > .js-value')].map(v => v.textContent).join(' ') || row.querySelector('.row-content').textContent.trim().split('\n')[0],
+  ]));
+  assert.deepEqual(rows, [
+    ['3', 'same 1'],
+    ['', 'same 2'],
+    ['2', 'careful'],
+    // Objects might have changed in between so they aren't combined.
+    ['', '{a: 1}'],
+    ['', '{a: 1}'],
+    ['2', 'Uncaught Error: boom'],
+  ]);
+});
+
+test('Run all runs the remaining blocks in order', async t => {
+  await t.open(String.raw`
+    // One \\
+    console.log(1);
+    // HIDE \\
+    console.log('hidden');
+    // Two \\
+    await new Promise(resolve => setTimeout(resolve, 200));
+    console.log(2);
+    // Three \\
+    console.log(3);
+  `, { hidePrefix: 'HIDE', blockType: 'module' });
+  await t.menu('Run all');
+  await t.viewer.waitForFunction(() => document.querySelectorAll('.console-row:not(.code-row)').length >= 4, null, { timeout: 5000 });
+  assert.deepEqual(await t.headers(), ['One', 'Hidden code', 'Two', 'Three']);
+  assert.deepEqual(await t.messages(), ['log: 1', 'log: hidden', 'log: 2', 'log: 3']);
+  assert.equal(await t.editorCode(), '');
+
+  // The keyboard shortcut does the same.
+  await t.setEditorCode(String.raw`// Four \\` + `\nconsole.log(4);\n` + String.raw`// Five \\` + `\nconsole.log(5);`);
+  await t.viewer.click('#editor .ace_content');
+  await t.page.keyboard.press('Control+Shift+Enter');
+  await t.viewer.waitForFunction(() => document.querySelectorAll('.console-row:not(.code-row)').length >= 6, null, { timeout: 5000 });
+  assert.deepEqual((await t.messages()).slice(4), ['log: 4', 'log: 5']);
 });
 
 test('Copy to editor asks before replacing code', async t => {
@@ -448,7 +547,7 @@ test('Copy as HTML includes code that ran and the data attributes', async t => {
     console.log(2);
   `, { theme: 'dark' });
   await t.run();
-  await t.click('#bottomNav button[title="Clear console"]');
+  await t.click('#bottomNav button[title^="Clear console"]');
   await t.click('#bottomNav .logo-button');
   await t.inViewer(() => [...document.querySelectorAll('.tab')].find(tab => tab.textContent === 'Copy as HTML').click());
   await t.viewer.waitForFunction(() => document.querySelector('.export-preview .ace_editor'));

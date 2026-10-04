@@ -79,7 +79,7 @@ function createRunner(send, options) {
     else if (key === 'assert') {
       if (args[0]) return;
       const rest = args.slice(1);
-      addLog('assert', !rest.length
+      addFormattedLog('assert', !rest.length
         ? ['Assertion failed: console.assert']
         : 'string' === typeof rest[0]
           ? ['Assertion failed: ' + rest[0], ...rest.slice(1)]
@@ -109,22 +109,109 @@ function createRunner(send, options) {
     else if (key === 'trace') {
       // Removes the first line ("Error") and this runner's own lines.
       const stack = cleanStack(new Error().stack ?? '').split('\n').slice(1).join('\n');
-      addLog('trace', args.length ? args : ['console.trace'], {stack});
+      addFormattedLog('trace', args.length ? args : ['console.trace'], {stack});
     }
     else if (key === 'group' || key === 'groupCollapsed') {
       const groupId = `${++groupCount}`;
-      addLog(key, args.length ? args : ['console.group'], {groupId, isCollapsed: key === 'groupCollapsed'});
+      addFormattedLog(key, args.length ? args : ['console.group'], {groupId, isCollapsed: key === 'groupCollapsed'});
       groupIds.push(groupId);
     }
     else if (key === 'groupEnd') {
       groupIds.pop();
     }
-    else {
+    else if (key === 'table' || key === 'dir' || key === 'dirxml') {
       const table = key === 'table' ? parseTable(args[0], args[1]) : null;
 
       // console.table() only shows the data that was tabulated.
       addLog(key, table ? args.slice(0, 1) : args, {table});
     }
+    else {
+      addFormattedLog(key, args);
+    }
+  }
+
+  /**
+   * Like addLog() but if the first argument is a string, the format
+   * specifiers in it (eg. "%s" or "%c") are replaced like the browser's
+   * console does.
+   * @param {string} key
+   * @param {any[]} args
+   * @param {Object=} extra
+   */
+  function addFormattedLog(key, args, extra) {
+    const {values, formats} = formatArgs(args);
+    addLog(key, values, extra, 0, formats);
+  }
+
+  /**
+   * Applies the format specifiers in the first argument (if it is a string).
+   * The format string is split into pieces of text and values so that values
+   * inserted with %o (for example) can still be expanded.
+   * @param {any[]} args
+   * @returns {{values: any[], formats: {depth?: number, style?: string, isJoined?: boolean}[]}}
+   *   The values to show and how to show each one:  `depth` is used to
+   *   summarize the value, `style` is CSS from %c and `isJoined` means that no
+   *   space separates the value from the one before it.
+   */
+  function formatArgs(args) {
+    const [format, ...rest] = args;
+    if ('string' !== typeof format || !format.includes('%')) return {values: args, formats: []};
+
+    const values = [];
+    const formats = [];
+    let text = '';
+    let style = '';
+    const addValue = (value, depth) => {
+      if (text) {
+        values.push(text);
+        formats.push({style, isJoined: values.length > 1});
+        text = '';
+      }
+      if (depth != null) {
+        values.push(value);
+        formats.push({depth, style, isJoined: values.length > 1});
+      }
+    };
+    const pattern = /%([sdifoOc%])/g;
+    let lastIndex = 0;
+    for (let match; (match = pattern.exec(format));) {
+      const specifier = match[1];
+      text += format.slice(lastIndex, match.index);
+      lastIndex = pattern.lastIndex;
+      if (specifier === '%') {
+        text += '%';
+        continue;
+      }
+      // Like the browser, a specifier without a value is left as is.
+      if (!rest.length) {
+        text += match[0];
+        continue;
+      }
+      const value = rest.shift();
+      if (specifier === 'c') {
+        addValue();
+        style = `${value}`;
+      }
+      else if (specifier === 'd' || specifier === 'i') {
+        text += 'symbol' === typeof value ? 'NaN' : parseInt(value, 10);
+      }
+      else if (specifier === 'f') {
+        text += 'symbol' === typeof value ? 'NaN' : parseFloat(value);
+      }
+      else if (specifier === 's' && (value === null || ('object' !== typeof value && 'function' !== typeof value))) {
+        text += 'bigint' === typeof value ? `${value}n` : String(value);
+      }
+      else {
+        // Objects (and anything for %o or %O) are shown as values that can be
+        // expanded.  Like the browser, %o shows strings in quotes.
+        addValue(value, specifier === 'o' && 'string' === typeof value ? 1 : 0);
+      }
+    }
+    text += format.slice(lastIndex);
+    addValue();
+
+    // The rest of the arguments are shown as usual.
+    return {values: [...values, ...rest], formats};
   }
 
   /**
@@ -137,11 +224,13 @@ function createRunner(send, options) {
    * @param {number=} depth
    *   Optional, defaults to `0`.  The depth used to summarize the args (see
    *   summarize()).
+   * @param {ReturnType<formatArgs>['formats']=} formats
+   *   Optional.  How to show each arg (see formatArgs()).
    */
-  function addLog(key, args, extra, depth = 0) {
+  function addLog(key, args, extra, depth = 0, formats = []) {
     // Keep track of the args so that they can be expanded later.
     const logId = `${++logCount}`;
-    logArgsById[logId] = args.map(value => ({...summarize(value, depth), value}));
+    logArgsById[logId] = args.map((value, index) => ({...summarize(value, formats[index]?.depth ?? depth), value}));
 
     send({
       target: 'viewer',
@@ -149,7 +238,10 @@ function createRunner(send, options) {
       args: [{
         logId,
         key,
-        descriptions: logArgsById[logId].map(without(['value'])),
+        descriptions: logArgsById[logId].map((arg, index) => {
+          const {style, isJoined} = formats[index] ?? {};
+          return {...without(['value'], arg), ...(style ? {style} : {}), ...(isJoined ? {isJoined} : {})};
+        }),
         groupIds: groupIds.slice(),
         ...extra,
       }]

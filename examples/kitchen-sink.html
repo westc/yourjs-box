@@ -275,7 +275,7 @@
       needs (the others go back to their defaults when it is chosen).
     -->
     <script type="text/x-example" id="logging" data-title="Logging &amp; value types"
-            data-description="Every kind of value, shown like the browser's console.  Click the arrows to expand objects.">
+            data-description="Every kind of value, shown like the browser's console, plus format specifiers and repeated messages.  Click the arrows to expand objects.">
       // Every console method \\
       console.log('log', 1, 'two');
       console.info('info');
@@ -301,6 +301,15 @@
       class Team extends Array {}
       console.log(new Person('Ada'), Team.from(['Ada', 'Grace']));
       console.log(Person, Object.create(null));
+
+      // Format specifiers \\
+      console.log('%s is %d years old and %f%% done', 'Ada', 36.9, 99.5);
+      console.log('An object: %o', {a: 1});
+      console.log('%cStyled%c and %cbadges', 'color: #e8710a; font-weight: bold; font-size: 16px', '', 'color: white; background: #1a73e8; padding: 1px 6px; border-radius: 4px');
+
+      // Repeated messages are counted \\
+      for (let i = 0; i < 5; i++) console.log('Same message');
+      for (let i = 0; i < 3; i++) console.warn('Same warning');
     </script>
 
     <script type="text/x-example" id="table" data-title="console.table()"
