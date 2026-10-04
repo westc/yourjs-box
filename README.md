@@ -5,7 +5,8 @@ Step-by-step code blocks, DevTools-style output, and code that runs in a Web
 Worker or the page itself.  TypeScript works too.
 
 **[Live demo](https://westc.github.io/yourjs-box/)** &middot;
-[Examples](https://westc.github.io/yourjs-box/examples/)
+[Examples](https://westc.github.io/yourjs-box/examples/) &middot;
+[Changelog](CHANGELOG.md)
 
 ![YourJS Box running code one block at a time, expanding an object, showing a table and an error](demo.gif)
 
@@ -339,6 +340,8 @@ Install the development dependencies by running `npm install`.
   based browser).  An internet connection is needed because the console loads
   its libraries from CDNs.  Pass part of a test's name to run only matching
   tests (eg. `node test/run.js module`).
+- Before releasing, move the notes under **Unreleased** in
+  [CHANGELOG.md](CHANGELOG.md) into a section for the new version.
 - `npm run release -- <patch|minor|major>` releases a new version:  it checks
   that you're on an up to date, clean `main`, runs the tests, runs
   `npm version`, pushes `main` and then the tag (separately, because GitHub
