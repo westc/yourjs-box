@@ -321,6 +321,38 @@ choosing an example and every option, including which build is loaded
 (`dist/yourjs-box.full.js`, `dist/yourjs-box.js` or `dist/yourjs-box.min.js`).
 The options are kept in the URL so the page can be reloaded or shared as is.
 
+## Roadmap
+
+Ideas for future versions, roughly from easiest to hardest:
+
+- **Format specifiers:** support `%s`, `%d`, `%i`, `%f`, `%o`, `%O` and `%c`
+  (CSS styles) in `console.log()` and the other logging functions.
+- **Repeated messages:** show identical messages logged in a row once with a
+  count, like the browser's console.
+- **Run all:** run every remaining block with <kbd>Ctrl</kbd> /
+  <kbd>&#8984;</kbd> + <kbd>Shift</kbd> + <kbd>Enter</kbd> or from the
+  **&#8943;** menu.
+- **`data-autorun`:** run every visible block when the page loads.
+- **Clear shortcut:** clear the console with <kbd>Ctrl</kbd> + <kbd>L</kbd>.
+- **Autocomplete:** turn on Ace's keyword and snippet completion in the editor.
+- **`data-remember`:** save the editor's code and history in the browser so
+  that they are still there after a reload.
+- **Copy output:** copy everything in the console as text from the **&#8943;**
+  menu.
+- **Clickable error locations:** clicking `snippet-2.js:3:7` in an error
+  highlights that line in the code that ran.
+- **More JavaScript API:** `box.run()`, `box.runAll()`, `box.reset()`,
+  `box.setCode()` and events (eg. `box.on('log', ...)`) so that a page can
+  control the console.
+- **Output filter:** search the output and show only errors, warnings or logs.
+- **Exercises:** hidden blocks that check the code above them and show which
+  checks passed (eg. "`sum(2, 3)` should be `5`").
+- **`@timeout`:** an annotation in a block's header that runs the block
+  automatically once nothing has been logged for the given number of seconds.
+- **Long output:** keep the console fast when thousands of messages are logged.
+- **Accessibility:** announce new output to screen readers and make every value
+  and menu reachable with the keyboard.
+
 ## License
 
 Released under the [MIT License](LICENSE).  You're free to use, modify and
