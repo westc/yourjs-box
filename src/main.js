@@ -501,7 +501,7 @@
    * The options of YourJSBox.create() which are the same as the data
    * attributes of a script tag.
    */
-  const CONSOLE_OPTION_NAMES = ['blockType', 'dividerOrient', 'hidePrefix', 'importsUrl', 'language', 'librariesUrl', 'loading', 'runner', 'showResults', 'theme'];
+  const CONSOLE_OPTION_NAMES = ['blockType', 'dividerOrient', 'hideEmptyOutput', 'hidePrefix', 'importsUrl', 'language', 'librariesUrl', 'loading', 'rulers', 'runner', 'showResults', 'theme', 'wordWrap'];
 
   /**
    * The JavaScript API for creating consoles (available as window.YourJSBox).
@@ -535,6 +535,9 @@
      * @param {string=} options.librariesUrl
      * @param {string=} options.importsUrl
      * @param {string=} options.loading
+     * @param {(string|number|number[])=} options.rulers
+     * @param {(boolean|string)=} options.wordWrap
+     * @param {(boolean|string)=} options.hideEmptyOutput
      *   The same as the data attributes of a script tag.
      * @returns {{element: HTMLIFrameElement, destroy: () => void}}
      */

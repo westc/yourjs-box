@@ -66,6 +66,16 @@ body {
   grid-template-columns: 1fr;
   grid-template-rows: 1fr var(--divider-size) calc(var(--editor-pct) - var(--divider-size) / 2);
 }
+/* Until there is something in the output, only the editor is shown (see
+   data-hide-empty-output). */
+#main.is-output-hidden {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+#main.is-output-hidden > #displays,
+#main.is-output-hidden > .divider {
+  display: none;
+}
 
 /* The divider between the console and the editor */
 .divider {

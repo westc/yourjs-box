@@ -12,7 +12,7 @@
     },
     {
       "label": "Dev server",
-      "detail": "Builds, rebuilds on changes and serves http://localhost:3000/examples/ with live reload.",
+      "detail": "Builds, rebuilds on changes and serves http://localhost:3000/ with live reload.",
       "type": "npm",
       "script": "dev",
       "isBackground": true,

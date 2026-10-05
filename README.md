@@ -5,7 +5,7 @@ Step-by-step code blocks, DevTools-style output, and code that runs in a Web
 Worker or the page itself.  TypeScript works too.
 
 **[Live demo](https://westc.github.io/yourjs-box/)** &middot;
-[Examples](https://westc.github.io/yourjs-box/examples/) &middot;
+[Examples](https://westc.github.io/yourjs-box/#examples) &middot;
 [Changelog](CHANGELOG.md)
 
 ![YourJS Box running code one block at a time, expanding an object, showing a table and an error](demo.gif)
@@ -112,9 +112,12 @@ objects and arrays) for a menu with:
 | `data-libraries-url` | Where to load Vue, Ace, Prism, Acorn and Babel from.  See "Self-Hosting the Libraries" below. |
 | `data-runner` | `"worker"` (default) runs the code in a Web Worker.  `"window"` runs it directly in the page.  See below. |
 | `data-divider-orient` | `"vertical"` puts the editor beside the output and `"horizontal"` puts it below.  If not specified the editor is beside the output unless the console is narrower than 600px. |
+| `data-hide-empty-output` | `"true"` (default) only shows the editor until there is something in the output (eg. once code is run).  The output then stays (even after Clear) until the console is reset.  `"false"` always shows the output. |
 | `data-hide-prefix` | Any block whose header starts with this prefix is hidden. See below. |
 | `data-loading` | `"lazy"` (default) waits to load the console until it is about to be scrolled into view (or, if it is hidden, shown).  `"eager"` loads it right away.  See "Loading" below. |
+| `data-rulers` | The columns where lines are shown in the editor, eg. `"80, 120"`.  Defaults to `"80"` and `""` shows none. |
 | `data-theme` | `"light"` or `"dark"`.  Defaults to following the system's color scheme like the browser's dev tools. |
+| `data-word-wrap` | `"true"` wraps long lines in the editor instead of scrolling sideways. |
 
 ### Results
 
@@ -304,7 +307,7 @@ functions).  The options are:
 | `placement` | Where the console goes:  `"fill"` (default) replaces the target's contents, `"append"` and `"prepend"` add it inside of the target, `"replace"` replaces the target itself and `"before"` and `"after"` add it next to the target. |
 | `height` | The CSS height of the console (a number is treated as pixels).  Defaults to `"100%"` so the console fills its container.  It is never less than 150px. |
 | `code` | The code that the console starts with. |
-| `runner`, `blockType`, `language`, `showResults`, `hidePrefix`, `dividerOrient`, `theme`, `importsUrl`, `librariesUrl`, `loading` | The same as the `data-*` attributes above. |
+| `runner`, `blockType`, `language`, `showResults`, `hidePrefix`, `hideEmptyOutput`, `dividerOrient`, `theme`, `wordWrap`, `rulers`, `importsUrl`, `librariesUrl`, `loading` | The same as the `data-*` attributes above.  `wordWrap`, `hideEmptyOutput` and `showResults` can be booleans and `rulers` can be an array (eg. `[80, 120]`). |
 
 `YourJSBox.from(elements, options)` turns existing elements (eg. the code blocks
 in a page made from Markdown) into consoles that start with their code:
@@ -354,9 +357,9 @@ between blocks.
 Install the development dependencies by running `npm install`.
 
 - `npm run dev` builds, rebuilds whenever one of the files in `src/` changes
-  and serves the examples at http://localhost:3000/examples/ (opening them in
-  your default browser) with the browser reloading automatically after each
-  rebuild.  Use `BROWSER=none npm run dev` to keep it from opening a browser.
+  and serves the landing page and examples at http://localhost:3000/ (opening
+  it in your default browser) with the browser reloading automatically after
+  each rebuild.  Use `BROWSER=none npm run dev` to keep it from opening a browser.
 - `npm run build` builds the files in `dist/` once.
 - `npm test` builds and then runs the browser tests in `test/run.js` using your
   installed copy of Google Chrome (set `CHROME_PATH` to use another Chromium

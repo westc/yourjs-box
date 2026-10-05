@@ -1186,6 +1186,61 @@ test('the history list shows earlier code and Alt+H opens it', async t => {
   assert.ok(await t.inViewer(() => !!document.querySelector('.history-panel')));
 });
 
+test('the output is hidden until there is something in it', async t => {
+  const isOutputShown = () => t.inViewer(() => getComputedStyle(document.querySelector("#displays")).display !== "none");
+  const step = label => console.log("  step:", label);
+  await t.open(`console.log(1)`);
+  assert.equal(await isOutputShown(), false, 'hidden at first');
+  await t.run();
+  assert.equal(await isOutputShown(), true, 'shown after running');
+  // Clearing doesn't hide it again but resetting does.
+  await t.click('#bottomNav button[title^="Clear console"]');
+  assert.equal(await isOutputShown(), true, 'still shown after Clear');
+  await t.inViewer(() => document.querySelector('#vueApp')._vnode.component.proxy.restart());
+  await t.page.waitForTimeout(100);
+  assert.equal(await isOutputShown(), false);
+
+  // data-hide-empty-output="false" always shows it.
+  await t.load(`1`, { hideEmptyOutput: 'false' });
+  assert.equal(await isOutputShown(), true, 'always shown');
+
+  // Hidden blocks that run right away show it.
+  await t.load(String.raw`
+    // HIDE \\
+    console.log('setup');
+    // Visible \\
+    1
+  `, { hidePrefix: 'HIDE' });
+  assert.equal(await isOutputShown(), true, 'shown for hidden blocks');
+});
+
+test('data-word-wrap and data-rulers set up the editor', async t => {
+  const editorInfo = () => t.inViewer(() => {
+    const editor = ace.edit(document.querySelector('#editor .ace_editor'));
+    const {characterWidth, $padding} = editor.renderer;
+    return {
+      wrap: editor.session.getUseWrapMode(),
+      // The columns of the rulers that are shown.
+      rulers: [...document.querySelectorAll('#editor .ace_print-margin')]
+        .filter(ruler => getComputedStyle(ruler).visibility !== 'hidden')
+        .map(ruler => Math.round((parseFloat(ruler.style.left) - $padding) / characterWidth)),
+    };
+  });
+  // Like Ace, there is a ruler at column 80 by default.
+  await t.open(`1`);
+  assert.deepEqual(await editorInfo(), {wrap: false, rulers: [80]});
+  await t.load(`1`, { wordWrap: 'true', rulers: '40, 100' });
+  assert.deepEqual(await editorInfo(), {wrap: true, rulers: [40, 100]});
+  await t.load(`1`, { rulers: '' });
+  assert.deepEqual(await editorInfo(), {wrap: false, rulers: []});
+
+  // YourJSBox.create() takes a boolean and an array.
+  await t.setPage('<!DOCTYPE html><html><head><script src="SRC"></script></head><body><div id="lesson" style="height: 320px"></div></body></html>');
+  await t.page.evaluate(() => YourJSBox.create({target: '#lesson', code: '1', wordWrap: true, rulers: [60, 120]}));
+  await t.useConsole('#lesson > iframe');
+  assert.deepEqual(await editorInfo(), {wrap: true, rulers: [60, 120]});
+});
+
 test('the toolbar buttons are in order', async t => {
   await t.open(`1`);
   const titles = await t.inViewer(() => [...document.querySelectorAll('#bottomNav .buttons button')].map(b => b.title.replace(/ \(.*\)$/, '')));

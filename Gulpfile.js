@@ -148,8 +148,8 @@ gulp.task('watch', function () {
 gulp.task('serve', function (done) {
   browserSync.init({
     server: { baseDir: './' },
-    startPath: '/examples/',
-    files: [`${dirDest}/*.js`, 'examples/**/*.html'],
+    startPath: '/',
+    files: [`${dirDest}/*.js`, 'index.html', 'examples/**/*.html'],
     listen: 'localhost',
     notify: false,
     // Opens the examples in the default browser unless BROWSER=none is set

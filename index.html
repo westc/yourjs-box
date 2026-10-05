@@ -362,6 +362,37 @@
         margin: 0;
       }
 
+      /* Examples */
+      .examples {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      }
+      a.example {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        color: inherit;
+        display: block;
+        padding: 20px;
+        transition: border-color 0.15s, transform 0.15s;
+      }
+      a.example:hover {
+        border-color: var(--accent);
+        text-decoration: none;
+        transform: translateY(-2px);
+      }
+      a.example h3 {
+        color: var(--accent);
+        font-size: 16px;
+        margin: 0 0 6px;
+      }
+      a.example p {
+        color: var(--muted);
+        font-size: 14.5px;
+        margin: 0;
+      }
+
       /* Usage */
       pre.code-block {
         background-color: var(--code-bg);
@@ -473,7 +504,7 @@
           <a class="optional" href="#demo">Demo</a>
           <a class="optional" href="#features">Features</a>
           <a href="#usage">Usage</a>
-          <a href="examples/">Examples</a>
+          <a href="#examples">Examples</a>
           <a href="https://github.com/westc/yourjs-box">GitHub</a>
         </nav>
       </div>
@@ -490,7 +521,7 @@
         <div class="actions">
           <a class="button primary" href="#demo">Try it now</a>
           <a class="button" href="#usage">Get started</a>
-          <a class="button" href="examples/">See examples</a>
+          <a class="button" href="#examples">See examples</a>
         </div>
         <div class="snippet">
           <code id="install-snippet">&lt;script src="https://cdn.jsdelivr.net/npm/yourjs-box@1/dist/yourjs-box.min.js"&gt;&lt;/script&gt;</code>
@@ -507,7 +538,7 @@
               console.info('Press Run (or Ctrl/\u2318+Enter) to step through the tour.');
 
               // Welcome!  Press Run to run each block of code one at a time. \\
-              console.log('Hello from yourjs-box!');
+              console.log('Hello from YourJS Box!');
               console.info('Each block runs on its own so you can step through a lesson.');
 
               // Objects can be expanded just like in the browser's dev tools \\
@@ -681,6 +712,10 @@
                   <td><code>"vertical"</code> puts the editor beside the output and <code>"horizontal"</code> puts it below.  By default it&rsquo;s beside the output unless the console is narrower than 600px.</td>
                 </tr>
                 <tr>
+                  <td><code>data-hide-empty-output</code></td>
+                  <td><code>"true"</code> (default) only shows the editor until there&rsquo;s something in the output.  <code>"false"</code> always shows the output.</td>
+                </tr>
+                <tr>
                   <td><code>data-hide-prefix</code></td>
                   <td>Blocks whose header starts with this prefix are hidden but still run (eg. <code>// SETUP: Helpers \\</code>).</td>
                 </tr>
@@ -689,8 +724,16 @@
                   <td><code>"lazy"</code> (default) loads the console when it&rsquo;s about to be scrolled into view.  <code>"eager"</code> loads it right away.</td>
                 </tr>
                 <tr>
+                  <td><code>data-rulers</code></td>
+                  <td>The columns where lines are shown in the editor, eg. <code>"80, 120"</code>.  Defaults to <code>"80"</code> and <code>""</code> shows none.</td>
+                </tr>
+                <tr>
                   <td><code>data-theme</code></td>
                   <td><code>"light"</code> or <code>"dark"</code>.  Follows the system&rsquo;s theme by default.</td>
+                </tr>
+                <tr>
+                  <td><code>data-word-wrap</code></td>
+                  <td><code>"true"</code> wraps long lines in the editor instead of scrolling sideways.</td>
                 </tr>
               </tbody>
             </table>
@@ -722,13 +765,42 @@ YourJSBox.from(<span class="s">'pre &gt; code.language-js'</span>);</code></pre>
           </p>
         </div>
       </section>
+
+      <section id="examples">
+        <div class="container">
+          <h2>Examples</h2>
+          <p class="section-lead">See YourJS Box in different kinds of pages.</p>
+          <div class="examples">
+            <a class="example" href="examples/kitchen-sink.html">
+              <h3>Kitchen sink &rarr;</h3>
+              <p>Try every example with every option, from the theme and layout to which build is loaded, and copy the embed code.</p>
+            </a>
+            <a class="example" href="examples/from.html">
+              <h3>Code blocks to consoles &rarr;</h3>
+              <p>A blog-style page whose Markdown code blocks become consoles with <code>YourJSBox.from()</code>.</p>
+            </a>
+            <a class="example" href="examples/api.html">
+              <h3>JavaScript API &rarr;</h3>
+              <p>Consoles made with <code>YourJSBox.create()</code> using each placement.</p>
+            </a>
+            <a class="example" href="examples/example.html">
+              <h3>Full page &rarr;</h3>
+              <p>A single console that fills the whole page.</p>
+            </a>
+            <a class="example" href="examples/embed.html?dividerOrient=vertical">
+              <h3>Embed &rarr;</h3>
+              <p>An empty console whose <code>data-*</code> attributes come from the query string.</p>
+            </a>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer>
       <div class="container">
         <span>&copy; 2023-present Chris West &middot; Released under the <a href="https://github.com/westc/yourjs-box/blob/main/LICENSE">MIT License</a></span>
         <nav>
-          <a href="examples/">Examples</a>
+          <a href="#examples">Examples</a>
           <a href="https://github.com/westc/yourjs-box">GitHub</a>
           <a href="https://www.npmjs.com/package/yourjs-box">npm</a>
         </nav>

@@ -15,9 +15,19 @@ project uses [Semantic Versioning](https://semver.org/).
   CSS selector, an element or a list of elements, reads options from each
   element's `data-*` attributes and turns on TypeScript for `language-ts`
   code blocks.
+- `data-word-wrap="true"` (or the `wordWrap` option) wraps long lines in the
+  editor.
+- `data-rulers` (or the `rulers` option) shows lines at one or more columns in
+  the editor, eg. `"80, 120"`.  It defaults to `"80"` (like before) and `""`
+  shows none.
+- An **Examples** section on the landing page.  The old examples page now
+  goes there.
 
 ### Changed
 
+- Only the editor is shown until there is something in the output (eg. once
+  code is run).  `data-hide-empty-output="false"` (or the `hideEmptyOutput`
+  option) always shows the output like before.
 - Consoles load Ace's minified build, which sends about 50 KB less.
 - The loading screen no longer waits for the Prism stylesheets to load.
 

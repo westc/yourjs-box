@@ -162,7 +162,7 @@
       <div class="version" id="version">Loading&hellip;</div>
       <div class="links">
         <a href="../">Home</a>
-        <a href="./">All examples</a>
+        <a href="../#examples">All examples</a>
         <a href="https://github.com/westc/yourjs-box#readme">Docs</a>
       </div>
 
@@ -218,6 +218,18 @@
             <option value="vertical">Editor beside</option>
             <option value="horizontal">Editor below</option>
           </select>
+        </label>
+        <label class="field">
+          <span>Hide empty output</span>
+          <input type="checkbox" name="hideEmptyOutput" value="on">
+        </label>
+        <label class="field">
+          <span>Word wrap</span>
+          <input type="checkbox" name="wordWrap" value="on">
+        </label>
+        <label class="field">
+          <span>Rulers</span>
+          <input type="text" name="rulers" placeholder="None">
         </label>
 
         <h2>Loading</h2>
@@ -508,6 +520,9 @@
           results: 'on',
           theme: 'system',
           layout: 'auto',
+          hideEmptyOutput: 'on',
+          wordWrap: 'off',
+          rulers: '80',
           build: 'full',
           loading: 'lazy',
           imports: 'esm',
@@ -564,6 +579,9 @@
           if (state.results !== 'on') attributes.showResults = 'false';
           if (state.theme !== 'system') attributes.theme = state.theme;
           if (state.layout !== 'auto') attributes.dividerOrient = state.layout;
+          if (state.hideEmptyOutput !== 'on') attributes.hideEmptyOutput = 'false';
+          if (state.wordWrap === 'on') attributes.wordWrap = 'true';
+          if (state.rulers !== DEFAULTS.rulers) attributes.rulers = state.rulers;
           if (state.loading !== 'lazy') attributes.loading = state.loading;
           if (state.imports in IMPORTS_URLS) attributes.importsUrl = IMPORTS_URLS[state.imports];
           if (state.libraries in LIBRARIES_URLS) attributes.librariesUrl = LIBRARIES_URLS[state.libraries];

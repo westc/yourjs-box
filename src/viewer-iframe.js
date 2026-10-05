@@ -127,6 +127,12 @@ function init(jsCode, dataset, meta) {
           prefersDark: darkSchemeQuery.matches,
           runCount: 0,
           jsCode: visibleCode,
+          wordWrap: dataset.wordWrap === 'true',
+          rulers: parseRulers(dataset.rulers),
+          // Unless data-hide-empty-output="false" is given, only the editor is
+          // shown until there is something in the output.
+          hideEmptyOutput: dataset.hideEmptyOutput !== 'false',
+          hasShownOutput: false,
           // If the orientation wasn't specified it follows the width of the
           // console until the user chooses one.
           isDividerOrientAuto: !/^(horizontal|vertical)$/.test(dataset.dividerOrient),
@@ -355,10 +361,14 @@ function init(jsCode, dataset, meta) {
         canRunCode() {
           return this.jsCode.trim();
         },
+        isOutputHidden() {
+          return this.hideEmptyOutput && !this.hasShownOutput && !this.displays.length;
+        },
         mainElemClassNames() {
           return [
             this.dividerOrient === 'vertical' ? 'col-orient' : 'row-orient',
-            this.isMovingDivider ? 'is-moving-divider' : ''
+            this.isMovingDivider ? 'is-moving-divider' : '',
+            this.isOutputHidden ? 'is-output-hidden' : '',
           ].join(' ');
         },
         mainElemStyles() {
@@ -598,6 +608,7 @@ function init(jsCode, dataset, meta) {
           this.runCount = 0;
           this.runningCount = 0;
           this.isRunningAll = false;
+          this.hasShownOutput = false;
           this.runHistory = [];
           this.stopNavigatingHistory();
           messageParent({target: 'runner', func: 'reset', args: []});
@@ -778,6 +789,7 @@ function init(jsCode, dataset, meta) {
             hiddenGroups: this.hiddenGroups,
             runCount: this.runCount,
             runningCount: this.runningCount,
+            hasShownOutput: this.hasShownOutput,
             dividerOrient: this.dividerOrient,
             isDividerOrientAuto: this.isDividerOrientAuto,
             dividerPct: this.dividerPct,
@@ -1174,9 +1186,13 @@ function init(jsCode, dataset, meta) {
           },
           immediate: true,
         },
-        // Like the browser's console, keep showing the newest output unless the
-        // user has scrolled up to look at older output.
-        'displays.length'() {
+        'displays.length'(length) {
+          // Once something is in the output it stays shown (even after Clear)
+          // until the console is reset.
+          if (length) this.hasShownOutput = true;
+
+          // Like the browser's console, keep showing the newest output unless
+          // the user has scrolled up to look at older output.
           if (this.isDisplaysScrolledToBottom) {
             this.$nextTick(() => {
               const scroller = this.$refs.displaysScroller;
@@ -1234,8 +1250,11 @@ function getAceComponentProps() {
       'language',
       'modelValue',
       'readOnly',
+      // The columns (eg. [80, 120]) where lines are shown in the editor.
+      'rulers',
       'theme',
       'width',
+      'wordWrap',
     ],
     computed: {
       infoNotes() {
@@ -1279,6 +1298,12 @@ function getAceComponentProps() {
       fontSize(newValue) {
         if (newValue) this.editor.setFontSize(newValue);
       },
+      wordWrap(newValue) {
+        this.editor.session.setUseWrapMode(!!newValue);
+      },
+      rulers() {
+        this.updateRulers();
+      },
       modelValue(newValue) {
         if (newValue !== this.editor.getValue()) {
           // -1 puts the cursor at the start instead of selecting everything.
@@ -1297,6 +1322,18 @@ function getAceComponentProps() {
 
       // Read-only editors don't need syntax checking (eg. hints in the gutter).
       if (this.fontSize) editor.setFontSize(this.fontSize);
+
+      editor.session.setUseWrapMode(!!this.wordWrap);
+
+      // Ace only has one ruler (its print margin) so when rulers are given
+      // they are drawn instead, using the print margin's class so that each
+      // theme colors them.
+      if (this.rulers) {
+        editor.setShowPrintMargin(false);
+        this.rulersLayer = Object.assign(document.createElement('div'), {className: 'ace_layer ace_print-margin-layer'});
+        editor.renderer.content.prepend(this.rulersLayer);
+        editor.renderer.on('afterRender', () => this.updateRulers());
+      }
 
       if (this.readOnly) {
         editor.setReadOnly(true);
@@ -1375,6 +1412,24 @@ function getAceComponentProps() {
           || (evt.shiftKey && (evt.key ?? '').length > 1);
         if (isCombo) this.$emit('keyCombo', evt);
       });
+    },
+    methods: {
+      /**
+       * Puts a line at each ruler's column (which depends on the font size).
+       */
+      updateRulers() {
+        const {rulersLayer, editor} = this;
+        if (!rulersLayer) return;
+        const {characterWidth, $padding: padding} = editor.renderer;
+        const columns = Array.from(this.rulers ?? []);
+        while (rulersLayer.children.length > columns.length) rulersLayer.lastChild.remove();
+        while (rulersLayer.children.length < columns.length) {
+          rulersLayer.append(Object.assign(document.createElement('div'), {className: 'ace_print-margin'}));
+        }
+        columns.forEach((column, index) => {
+          rulersLayer.children[index].style.left = `${Math.round(characterWidth * column + padding)}px`;
+        });
+      },
     },
     template: '<div ref="editor" :style="style"></div>',
   };
@@ -2235,6 +2290,20 @@ function onPopOutFailed() {
  */
 function clearDisplays() {
   mountedApp.displays = [{type: 'notice', message: 'Console was cleared'}];
+}
+
+/**
+ * Turns data-rulers (eg. "80, 120") into the columns for the rulers.  Like
+ * Ace's print margin, there is a ruler at column 80 by default and "" (or
+ * "none") turns them off.
+ * @param {string=} rulers
+ * @returns {number[]}
+ */
+function parseRulers(rulers) {
+  return `${rulers ?? '80'}`
+    .split(/[\s,]+/)
+    .map(Number)
+    .filter(column => Number.isInteger(column) && column > 0);
 }
 
 /**
