@@ -4,6 +4,7 @@
   "description": "A simple way to embed a JavaScript console on your website.",
   "unpkg": "dist/yourjs-box.min.js",
   "jsdelivr": "dist/yourjs-box.min.js",
+  "types": "dist/yourjs-box.d.ts",
   "files": [
     "dist"
   ],

@@ -238,6 +238,19 @@ test('built files only contain ASCII characters', async () => {
   }
 });
 
+test('the types and the README list every option', async () => {
+  const optionNames = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/main.js'), 'utf8')
+    .match(/CONSOLE_OPTION_NAMES = (\[[^\]]*\])/)[1].replace(/'/g, '"')).sort();
+  const types = fs.readFileSync(path.join(ROOT, 'dist/yourjs-box.d.ts'), 'utf8');
+  const consoleOptions = types.match(/interface ConsoleOptions \{([^]*?)\n  \}/)[1];
+  assert.deepEqual([...consoleOptions.matchAll(/^    (\w+)\?:/gm)].map(match => match[1]).sort(), optionNames);
+  const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
+  for (const name of optionNames) {
+    const attribute = 'data-' + name.replace(/[A-Z]/g, c => '-' + c.toLowerCase());
+    assert.ok(readme.includes(`| \`${attribute}\` | \`${name}\` |`), `README's Options table is missing ${attribute}`);
+  }
+});
+
 test('logs values with browser-style previews', async t => {
   await t.open(String.raw`
     console.log('text', 42, null, {a: 1, nested: {b: 2}}, [1, 'two'], new Map([['k', 'v']]));

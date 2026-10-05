@@ -6,6 +6,16 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- TypeScript types for the `YourJSBox` global (`dist/yourjs-box.d.ts`), which
+  also give autocomplete in VS Code.
+
+### Changed
+
+- The README lists every option (with its attribute, API option and default)
+  in one Options table.
+
 ## [1.10.0] - 2026-10-04
 
 ### Added

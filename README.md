@@ -101,23 +101,28 @@ objects and arrays) for a menu with:
 - **Refresh** (for objects, arrays, etc.), which shows the value as it is now
   if the code has changed it.  Anything that was expanded stays expanded.
 
-### Attributes
+### Options
 
-| Attribute | Description |
-| --- | --- |
-| `data-block-type` | `"classic"` (default) runs each block like a regular `<script>` so top-level declarations are shared between blocks.  `"module"` runs each block like a `<script type="module">`.  See below. |
-| `data-language` | `"javascript"` (default) or `"typescript"`.  See "TypeScript" below. |
-| `data-show-results` | `"false"` stops the value of the last expression in each block from being shown. |
-| `data-imports-url` | Where packages imported by name are loaded from.  See "Importing Packages" below. |
-| `data-libraries-url` | Where to load Vue, Ace, Prism, Acorn and Babel from.  See "Self-Hosting the Libraries" below. |
-| `data-runner` | `"worker"` (default) runs the code in a Web Worker.  `"window"` runs it directly in the page.  See below. |
-| `data-divider-orient` | `"vertical"` puts the editor beside the output and `"horizontal"` puts it below.  If not specified the editor is beside the output unless the console is narrower than 600px. |
-| `data-hide-empty-output` | `"true"` (default) only shows the editor until there is something in the output (eg. once code is run).  The output then stays (even after Clear) until the console is reset.  `"false"` always shows the output. |
-| `data-hide-prefix` | Any block whose header starts with this prefix is hidden. See below. |
-| `data-loading` | `"lazy"` (default) waits to load the console until it is about to be scrolled into view (or, if it is hidden, shown).  `"eager"` loads it right away.  See "Loading" below. |
-| `data-rulers` | The columns where lines are shown in the editor, eg. `"80, 120"`.  Defaults to `"80"` and `""` shows none. |
-| `data-theme` | `"light"` or `"dark"`.  Defaults to following the system's color scheme like the browser's dev tools. |
-| `data-word-wrap` | `"true"` wraps long lines in the editor instead of scrolling sideways. |
+Each option can be set with a `data-*` attribute on the script tag or, with
+the [JavaScript API](#javascript-api), as an option of `YourJSBox.create()` or
+`YourJSBox.from()`.  Attribute values are always strings, while the API also
+takes booleans for the true/false options and an array for `rulers`.
+
+| Attribute | API option | Default | Description |
+| --- | --- | --- | --- |
+| `data-runner` | `runner` | `"worker"` | `"worker"` runs the code in a Web Worker.  `"window"` runs it directly in the page.  See "Where Code Runs" below. |
+| `data-block-type` | `blockType` | `"classic"` | `"classic"` runs each block like a regular `<script>` so top-level declarations are shared between blocks.  `"module"` runs each block like a `<script type="module">`.  See "Module Blocks" below. |
+| `data-language` | `language` | `"javascript"` | `"javascript"` or `"typescript"`.  See "TypeScript" below. |
+| `data-show-results` | `showResults` | `"true"` | `"false"` stops the value of the last expression in each block from being shown.  See "Results" below. |
+| `data-hide-prefix` | `hidePrefix` | None | Any block whose header starts with this prefix is hidden but still runs.  See "Hidden Code" below. |
+| `data-hide-empty-output` | `hideEmptyOutput` | `"true"` | `"true"` only shows the editor until there is something in the output (eg. once code is run).  The output then stays (even after Clear) until the console is reset.  `"false"` always shows the output. |
+| `data-divider-orient` | `dividerOrient` | Automatic | `"vertical"` puts the editor beside the output and `"horizontal"` puts it below.  If not given, the editor is beside the output unless the console is narrower than 600px. |
+| `data-theme` | `theme` | The system's | `"light"` or `"dark"`.  If not given, it follows the system's color scheme like the browser's dev tools. |
+| `data-word-wrap` | `wordWrap` | `"false"` | `"true"` wraps long lines in the editor instead of scrolling sideways. |
+| `data-rulers` | `rulers` | `"80"` | The columns where lines are shown in the editor, eg. `"80, 120"` (or `[80, 120]` with the API).  `""` shows none. |
+| `data-loading` | `loading` | `"lazy"` | `"lazy"` waits to load the console until it is about to be scrolled into view (or, if it is hidden, shown).  `"eager"` loads it right away.  See "Loading" below. |
+| `data-imports-url` | `importsUrl` | esm.sh | Where packages imported by name are loaded from.  `""` turns this off.  See "Importing Packages" below. |
+| `data-libraries-url` | `librariesUrl` | unpkg | Where to load Vue, Ace, Prism, Acorn and Babel from.  See "Self-Hosting the Libraries" below. |
 
 ### Results
 
@@ -299,7 +304,7 @@ box.destroy();
 `YourJSBox.create(options)` returns `{element, destroy}` where `element` is the
 console's IFRAME and `destroy()` removes it, stops its code and closes its
 pop-out window (in window mode it also restores the page's `console`
-functions).  The options are:
+functions).  Its own options are:
 
 | Option | Description |
 | --- | --- |
@@ -307,7 +312,8 @@ functions).  The options are:
 | `placement` | Where the console goes:  `"fill"` (default) replaces the target's contents, `"append"` and `"prepend"` add it inside of the target, `"replace"` replaces the target itself and `"before"` and `"after"` add it next to the target. |
 | `height` | The CSS height of the console (a number is treated as pixels).  Defaults to `"100%"` so the console fills its container.  It is never less than 150px. |
 | `code` | The code that the console starts with. |
-| `runner`, `blockType`, `language`, `showResults`, `hidePrefix`, `hideEmptyOutput`, `dividerOrient`, `theme`, `wordWrap`, `rulers`, `importsUrl`, `librariesUrl`, `loading` | The same as the `data-*` attributes above.  `wordWrap`, `hideEmptyOutput` and `showResults` can be booleans and `rulers` can be an array (eg. `[80, 120]`). |
+
+It also takes every option in [Options](#options) (eg. `theme` or `wordWrap`).
 
 `YourJSBox.from(elements, options)` turns existing elements (eg. the code blocks
 in a page made from Markdown) into consoles that start with their code:
@@ -333,6 +339,15 @@ in a page made from Markdown) into consoles that start with their code:
   the element back.
 
 `YourJSBox.version` is the version of YourJS Box that was loaded.
+
+The package includes TypeScript types for `YourJSBox` (`dist/yourjs-box.d.ts`),
+which also give you autocomplete in VS Code.  Install the package (eg.
+`npm install --save-dev yourjs-box`, even if the script itself comes from a
+CDN) and add this line to the top of a TypeScript or JavaScript file:
+
+```js
+/// <reference types="yourjs-box" />
+```
 
 ### Where Code Runs
 

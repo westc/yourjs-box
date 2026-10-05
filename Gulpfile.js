@@ -131,14 +131,19 @@ function minifyJS() {
     .pipe(gulp.dest(dirDest));
 }
 
-const build = gulp.series(definePlaceholderValues, buildMiniJS, buildJS, minifyJS);
+// Copies the TypeScript types for the YourJSBox global.
+function copyTypes() {
+  return gulp.src('src/yourjs-box.d.ts').pipe(gulp.dest(dirDest));
+}
+
+const build = gulp.series(definePlaceholderValues, buildMiniJS, buildJS, minifyJS, copyTypes);
 
 gulp.task('build', build);
 
 // Watch for changes and rebuild.
 gulp.task('watch', function () {
   return gulp.watch(
-    [cssIframeSrc, htmlIframeSrc, jsSrc, jsViewerIframeSrc, jsRunnerSrc],
+    [cssIframeSrc, htmlIframeSrc, jsSrc, jsViewerIframeSrc, jsRunnerSrc, 'src/yourjs-box.d.ts'],
     build
   );
 });
