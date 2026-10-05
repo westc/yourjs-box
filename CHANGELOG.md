@@ -6,6 +6,25 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-10-04
+
+### Added
+
+- `YourJSBox.from()` turns existing elements (eg. the code blocks in a page
+  made from Markdown) into consoles that start with their code.  It takes a
+  CSS selector, an element or a list of elements, reads options from each
+  element's `data-*` attributes and turns on TypeScript for `language-ts`
+  code blocks.
+
+### Changed
+
+- Consoles load Ace's minified build, which sends about 50 KB less.
+- The loading screen no longer waits for the Prism stylesheets to load.
+
+### Fixed
+
+- The README called it "JS Box" in one place.
+
 ## [1.9.0] - 2026-10-04
 
 ### Added
@@ -183,7 +202,8 @@ The first release as `yourjs-box`.
 - The editor beside the console, or below it when the console is narrower
   than 600px or with `data-divider-orient="horizontal"`.
 
-[Unreleased]: https://github.com/westc/yourjs-box/compare/v1.9.0...HEAD
+[Unreleased]: https://github.com/westc/yourjs-box/compare/v1.10.0...HEAD
+[1.10.0]: https://github.com/westc/yourjs-box/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/westc/yourjs-box/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/westc/yourjs-box/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/westc/yourjs-box/compare/v1.6.0...v1.7.0

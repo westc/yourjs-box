@@ -700,6 +700,8 @@
             Put the script in your page&rsquo;s <code>&lt;head&gt;</code> and use
             <code>YourJSBox.create()</code>, which works great with React, Vue and
             other frameworks.  Try it on the <a href="examples/api.html">API example</a>.
+            Already have code blocks (eg. from Markdown)?  <code>YourJSBox.from()</code>
+            turns them into consoles, as in <a href="examples/from.html">this example</a>.
           </p>
 <pre class="code-block"><code><span class="t">&lt;script</span> <span class="a">src</span>=<span class="s">"https://cdn.jsdelivr.net/npm/yourjs-box@1/dist/yourjs-box.min.js"</span><span class="t">&gt;&lt;/script&gt;</span>
 
@@ -710,7 +712,10 @@ const box = YourJSBox.create({
   theme: <span class="s">'dark'</span>,
 });
 
-box.destroy();  <span class="c">// removes the console</span></code></pre>
+box.destroy();  <span class="c">// removes the console</span>
+
+<span class="c">// Turns every JavaScript code block into a console</span>
+YourJSBox.from(<span class="s">'pre &gt; code.language-js'</span>);</code></pre>
           <p class="demo-hint">
             See the <a href="https://github.com/westc/yourjs-box#readme">README</a> for all of the details
             or the <a href="examples/kitchen-sink.html">kitchen sink</a> for every feature in action.

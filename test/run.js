@@ -589,7 +589,7 @@ test('data-libraries-url can point to files on the same site', async t => {
   // Ace's mode and Prism's language are loaded from next to the main files.
   await t.viewer.waitForFunction(() => ace.edit(document.querySelector('#editor .ace_editor')).session.getMode().$id === 'ace/mode/javascript');
   const vendorFiles = t.requestedUrls.filter(url => url.includes('/vendor/')).map(url => url.replace(/^.*\/vendor\//, ''));
-  for (const file of ['vue/dist/vue.global.prod.js', 'ace-builds/src-noconflict/mode-javascript.js', 'prismjs/components/prism-javascript.min.js', 'acorn/dist/acorn.js']) {
+  for (const file of ['vue/dist/vue.global.prod.js', 'ace-builds/src-min-noconflict/mode-javascript.js', 'prismjs/components/prism-javascript.min.js', 'acorn/dist/acorn.js']) {
     assert.ok(vendorFiles.includes(file), `${file} was not loaded from /vendor/`);
   }
   assert.equal(t.requestedUrls.filter(url => /unpkg|jsdelivr/.test(url)).length, 0);
@@ -779,6 +779,87 @@ test('YourJSBox.create() explains bad targets and placements', async t => {
     'TypeError: YourJSBox.create(): no element matches the target "#missing".',
     'TypeError: YourJSBox.create(): target must be an element or a CSS selector.',
     'TypeError: YourJSBox.create(): placement must be one of fill, append, prepend, replace, before, after.',
+  ]);
+});
+
+test('YourJSBox.from() turns code blocks into consoles', async t => {
+  await t.newPage();
+  await t.setPage(`<!DOCTYPE html><html><head><script src="SRC"></script></head><body>
+    <p>Intro</p>
+    <pre><code class="language-js">console.log(&quot;one&quot;);
+6 * 7</code></pre>
+    <pre class="language-ts"><code>const n: number = 5;
+n * 2</code></pre>
+    <pre><code class="language-js" data-theme="dark" data-height="420"><span class="token">"thr"</span> + "ee"</code></pre>
+    <p>Outro</p>
+  </body></html>`);
+  const info = await t.page.evaluate(() => {
+    window.boxes = YourJSBox.from('pre > code', {loading: 'eager'});
+    return {
+      count: boxes.length,
+      tags: [...document.body.children].map(e => e.tagName),
+      heights: boxes.map(box => box.element.getBoundingClientRect().height),
+    };
+  });
+  // The PRE elements were replaced.
+  assert.deepEqual(info, {count: 3, tags: ['P', 'IFRAME', 'IFRAME', 'IFRAME', 'P'], heights: [250, 250, 420]});
+
+  await t.useConsole('iframe:nth-of-type(1)');
+  await t.run();
+  assert.deepEqual(await t.messages(), ['log: one', 'result: 42']);
+
+  // A language-ts class turns on TypeScript.
+  await t.useConsole('iframe:nth-of-type(2)');
+  await t.run();
+  assert.deepEqual(await t.messages(), ['result: 10']);
+
+  // The data attributes of a code block are options and highlighting is ignored.
+  await t.useConsole('iframe:nth-of-type(3)');
+  assert.equal(await t.inViewer(() => document.documentElement.dataset.theme), 'dark');
+  await t.run();
+  assert.deepEqual(await t.messages(), ["result: 'three'"]);
+
+  // Destroying a console puts its code block back.
+  const tags = await t.page.evaluate(() => {
+    boxes[1].destroy();
+    return [...document.body.children].map(e => e.tagName);
+  });
+  assert.deepEqual(tags, ['P', 'IFRAME', 'PRE', 'IFRAME', 'P']);
+});
+
+test('YourJSBox.from() takes an element or a list and explains bad input', async t => {
+  await t.newPage();
+  await t.setPage(`<!DOCTYPE html><html><head><script src="SRC"></script></head><body>
+    <div id="a">1 + 1</div><div id="b">2 + 2</div><div id="c">3 + 3</div><div id="d">4 + 4</div>
+  </body></html>`);
+  const results = await t.page.evaluate(() => {
+    const countOf = fn => {
+      try {
+        return fn().length;
+      }
+      catch (e) {
+        return `${e.name}: ${e.message}`;
+      }
+    };
+    return [
+      countOf(() => YourJSBox.from(document.querySelector('#a'))),
+      countOf(() => YourJSBox.from([document.querySelector('#b')])),
+      countOf(() => YourJSBox.from(document.querySelectorAll('#c, #d'), {placement: 'after'})),
+      countOf(() => YourJSBox.from('.missing')),
+      countOf(() => YourJSBox.from(42)),
+      countOf(() => YourJSBox.from(['#a'])),
+      [...document.body.children].map(e => e.id || e.tagName),
+    ];
+  });
+  assert.deepEqual(results, [
+    1,
+    1,
+    2,
+    0,
+    'TypeError: YourJSBox.from(): elements must be a CSS selector, an element or a list of elements.',
+    'TypeError: YourJSBox.from(): every item in the list must be an element.',
+    // #a and #b were replaced and the consoles for #c and #d went after them.
+    ['IFRAME', 'IFRAME', 'c', 'IFRAME', 'd', 'IFRAME'],
   ]);
 });
 

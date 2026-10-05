@@ -306,7 +306,30 @@ functions).  The options are:
 | `code` | The code that the console starts with. |
 | `runner`, `blockType`, `language`, `showResults`, `hidePrefix`, `dividerOrient`, `theme`, `importsUrl`, `librariesUrl`, `loading` | The same as the `data-*` attributes above. |
 
-`YourJSBox.version` is the version of JS Box that was loaded.
+`YourJSBox.from(elements, options)` turns existing elements (eg. the code blocks
+in a page made from Markdown) into consoles that start with their code:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/yourjs-box@1/dist/yourjs-box.min.js"></script>
+<script>YourJSBox.from('pre > code.language-js');</script>
+```
+
+- `elements` is a CSS selector, an element or a list of elements (eg. an array
+  or a `NodeList`).
+- Each element's text is the console's code, so code that was already
+  highlighted (eg. by Prism or highlight.js) works too.  A `<code>` that is the
+  only thing in a `<pre>` is treated as the `<pre>`.
+- `options` are the same as for `create()` (except `target` and `code`) and
+  apply to every console.  `placement` defaults to `"replace"` and `height`
+  defaults to a height that fits the code (from 250px to 600px).
+- The `data-*` attributes of each element (or its `<pre>`) override the
+  options for that console (eg. `data-theme="dark"` or `data-height="400"`)
+  and a `language-ts` or `language-typescript` class turns on TypeScript.
+- It returns an array with `{element, destroy}` for each console, in the same
+  order as the elements.  Destroying a console that replaced its element puts
+  the element back.
+
+`YourJSBox.version` is the version of YourJS Box that was loaded.
 
 ### Where Code Runs
 
@@ -368,14 +391,6 @@ The options are kept in the URL so the page can be reloaded or shared as is.
 
 Ideas for future versions, roughly from easiest to hardest:
 
-- **Minified Ace:** load Ace's minified build (`src-min-noconflict`) instead
-  of the unminified one (`src-noconflict`).  This sends about 50 KB less (127
-  KB instead of 176 KB compressed), which is about 15% of what each console
-  loads.
-- **Non-blocking stylesheets:** the Prism stylesheets come from the CDN in the
-  viewer's `<head>`, so nothing (not even the loading screen) shows until they
-  arrive.  Loading them after the loading screen would show it right away on
-  slow connections.
 - **Smaller Acorn:** Acorn's package only has an unminified build (about 60 KB
   compressed).  A minified copy is about 35 KB (jsDelivr makes one
   automatically, but unpkg and self-hosted copies don't), so Acorn could be

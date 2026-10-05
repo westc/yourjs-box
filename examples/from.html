@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>YourJSBox.from() Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="../dist/yourjs-box.full.js"></script>
+    <style>
+      body {
+        font-family: Georgia, serif;
+        font-size: 18px;
+        line-height: 1.6;
+        margin: 0 auto;
+        max-width: 760px;
+        padding: 1em;
+      }
+      h1, h2, .note {
+        font-family: system-ui, sans-serif;
+      }
+      pre {
+        background: #f4f4f4;
+        border-radius: 6px;
+        font-size: 14px;
+        overflow: auto;
+        padding: 12px;
+      }
+      .note {
+        background: #fff8d6;
+        border-radius: 6px;
+        font-size: 15px;
+        padding: 10px 14px;
+      }
+      iframe {
+        margin: 1em 0;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="note">
+      <a href="./">&larr; All examples</a> &middot;
+      This page is written like a blog post made from Markdown.  The script at
+      the bottom calls <code>YourJSBox.from('pre &gt; code')</code>, which turns
+      each code block into a console that starts with its code.
+      <button id="toggle">Show the code blocks again</button>
+    </p>
+
+    <h1>Getting to know arrays</h1>
+    <p>Arrays hold lists of values.  Run each block to see what it does.</p>
+
+    <pre><code class="language-js">// Make an array \\
+const fruits = ['apple', 'banana', 'cherry'];
+fruits
+
+// Add to the end \\
+fruits.push('date');
+fruits.length</code></pre>
+
+    <h2>Transforming arrays</h2>
+    <p><code>map()</code> makes a new array and <code>filter()</code> keeps only some of the values.</p>
+
+    <pre><code class="language-js">// map() \\
+[1, 2, 3].map(n => n * 10)
+
+// filter() \\
+[1, 2, 3, 4, 5, 6].filter(n => n % 2 === 0)
+
+// Both at once \\
+console.table(
+  ['ada', 'grace', 'alan'].map((name, index) => ({index, name: name.toUpperCase()}))
+);</code></pre>
+
+    <h2>With TypeScript</h2>
+    <p>A code block with a <code>language-ts</code> class becomes a TypeScript console.</p>
+
+    <pre><code class="language-ts">type Person = {name: string; born: number};
+const people: Person[] = [{name: 'Ada', born: 1815}, {name: 'Grace', born: 1906}];
+people.map(person => `${person.name} was born in ${person.born}`)</code></pre>
+
+    <h2>Options for one block</h2>
+    <p>The <code>data-*</code> attributes of a code block set its options, like this dark one.</p>
+
+    <pre><code class="language-js" data-theme="dark">console.log('%cDark mode', 'font-weight: bold');
+new Map([['light', false], ['dark', true]])</code></pre>
+
+    <script>
+      let boxes = YourJSBox.from('pre > code');
+      document.querySelector('#toggle').addEventListener('click', evt => {
+        if (boxes.length) {
+          // Destroying the consoles puts the code blocks back.
+          boxes.forEach(box => box.destroy());
+          boxes = [];
+          evt.target.textContent = 'Turn them into consoles';
+        }
+        else {
+          boxes = YourJSBox.from('pre > code');
+          evt.target.textContent = 'Show the code blocks again';
+        }
+      });
+    </script>
+  </body>
+</html>

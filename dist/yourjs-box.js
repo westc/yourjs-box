@@ -364,7 +364,7 @@
         // load other files (eg. language modes) from next to these files.
         jsUrls: [
           libraryUrl('vue', 'dist/vue.global.prod.js'),
-          libraryUrl('ace-builds', 'src-noconflict/ace.js'),
+          libraryUrl('ace-builds', 'src-min-noconflict/ace.js'),
           libraryUrl('prismjs', 'components/prism-core.min.js'),
           libraryUrl('prismjs', 'plugins/autoloader/prism-autoloader.min.js'),
           libraryUrl('prismjs', 'plugins/match-braces/prism-match-braces.min.js'),
@@ -374,8 +374,10 @@
           // Removes the types from TypeScript code before it is run.
           ...language === 'typescript' ? [libraryUrl('@babel/standalone', 'babel.min.js')] : [],
         ],
-        cssUrls: [
-          'data:text/css,' + encodeURIComponent(VIEWER_IFRAME_CSS),
+        cssUrls: ['data:text/css,' + encodeURIComponent(VIEWER_IFRAME_CSS)],
+        // These come from the CDN so they are loaded after the loading screen
+        // (instead of in the head) so that it can be shown while they load.
+        bodyCssUrls: [
           libraryUrl('prism-themes', 'themes/prism-vsc-dark-plus.min.css'),
           libraryUrl('prismjs', 'plugins/match-braces/prism-match-braces.min.css'),
         ],
@@ -564,6 +566,75 @@
         insert: element => PLACEMENTS[placement](targetElement, element),
       });
     },
+
+    /**
+     * Creates a console from each of the elements (eg. code blocks) using the
+     * element's text as the code that the console starts with.  A `<code>`
+     * that is the only thing in a `<pre>` (eg. a Markdown code block) is
+     * treated as the `<pre>`.
+     * @param {string|Element|ArrayLike<Element>|Iterable<Element>} elements
+     *   A CSS selector for the elements, an element or a list of elements (eg.
+     *   an array or a NodeList).
+     * @param {Object=} options
+     *   Optional.  The same options as create() (except `target` and `code`)
+     *   for every console.  `placement` defaults to `"replace"` and `height`
+     *   defaults to a height that fits the code (from 250px to 600px).  The
+     *   `data-*` attributes of each element (eg. `data-theme="dark"`) override
+     *   these options, and a `language-ts` or `language-typescript` class
+     *   turns on TypeScript.
+     * @returns {ReturnType<YourJSBox['create']>[]}
+     *   The consoles in the same order as the elements.  Destroying a console
+     *   that replaced its element puts the element back.
+     */
+    from(elements, options) {
+      options = Object(options);
+      const list = 'string' === typeof elements
+        ? document.querySelectorAll(elements)
+        : elements?.nodeType === 1 ? [elements] : elements;
+      if (list == null || 'string' === typeof list || !(Symbol.iterator in Object(list) || 'number' === typeof list.length)) {
+        throw new TypeError('YourJSBox.from(): elements must be a CSS selector, an element or a list of elements.');
+      }
+
+      return Array.from(list, source => {
+        if (source?.nodeType !== 1) {
+          throw new TypeError('YourJSBox.from(): every item in the list must be an element.');
+        }
+        const pre = source.parentElement;
+        const target = source.localName === 'code' && pre?.localName === 'pre' && pre.children.length === 1
+          ? pre
+          : source;
+        const code = source.textContent;
+
+        // The options for every console, then what the element says.
+        const elementOptions = {};
+        if (/(^|\s)lang(uage)?-(ts|typescript)(\s|$)/i.test(`${target.className} ${source.className}`)) {
+          elementOptions.language = 'typescript';
+        }
+        for (const name of [...CONSOLE_OPTION_NAMES, 'placement', 'height']) {
+          const value = source.dataset[name] ?? target.dataset[name];
+          // Like the option, a height that is just a number is in pixels.
+          if (value != null) elementOptions[name] = name === 'height' && /^\d+(\.\d+)?$/.test(value) ? +value : value;
+        }
+        const lineCount = code.trim().split('\n').length;
+        const box = YourJSBox.create({
+          height: Math.min(600, Math.max(250, 200 + lineCount * 18)),
+          placement: 'replace',
+          ...options,
+          ...elementOptions,
+          target,
+          code,
+        });
+
+        if ((elementOptions.placement ?? options.placement ?? 'replace') !== 'replace') return box;
+        return {
+          element: box.element,
+          destroy() {
+            if (box.element.isConnected) box.element.replaceWith(target);
+            box.destroy();
+          },
+        };
+      });
+    },
   });
 
   // NOTE:  This solution was intentionally written without using newer JS
@@ -609,6 +680,9 @@
      *   parent level.
      * @param {string[]=} options.jsUrls
      * @param {string[]=} options.cssUrls
+     * @param {string[]=} options.bodyCssUrls
+     *   Stylesheets that are loaded after `options.body` (so that it can be
+     *   shown while they load).
      * @param {string=} options.head
      * @param {string=} options.body
      * @param {(CSSStyleDeclaration|string)=} options.style
@@ -685,6 +759,9 @@
         '</head>',
         '<body>',
         options.body || '',
+        (options.bodyCssUrls || []).map(function(cssUrl) {
+          return '<link href="' + cssUrl + '" rel="stylesheet">';
+        }).join('\n'),
         // The scripts are loaded after the body so that the body can be shown
         // while they load.
         (options.jsUrls || []).map(function(jsUrl) {
