@@ -17,7 +17,7 @@
     "record-demo": "node scripts/record-demo.js",
     "og-image": "node scripts/make-og-image.js",
     "purge-cdn": "node scripts/purge-cdn.js",
-    "version": "npm run build && git add dist",
+    "version": "npm run build && node scripts/update-changelog.js && git add dist CHANGELOG.md",
     "prepublishOnly": "npm run build"
   },
   "repository": {

@@ -381,14 +381,16 @@ Install the development dependencies by running `npm install`.
   based browser).  An internet connection is needed because the console loads
   its libraries from CDNs.  Pass part of a test's name to run only matching
   tests (eg. `node test/run.js module`).
-- Before releasing, move the notes under **Unreleased** in
-  [CHANGELOG.md](CHANGELOG.md) into a section for the new version.
+- As you make changes, add notes for them under **Unreleased** in
+  [CHANGELOG.md](CHANGELOG.md).
 - `npm run release -- <patch|minor|major>` releases a new version:  it checks
-  that you're on an up to date, clean `main`, runs the tests, runs
-  `npm version`, pushes `main` and then the tag (separately, because GitHub
-  Pages doesn't always deploy when they are pushed together), publishes to npm
-  and, once npm lists the new version, purges jsDelivr's cache.  Add
-  `--dry-run` to see what it would do or `--skip-tests` to skip the tests.
+  that you're on an up to date, clean `main` and that CHANGELOG.md has notes
+  under **Unreleased**, runs the tests, runs `npm version` (which also moves
+  those notes into a dated section for the new version), pushes `main` and then
+  the tag (separately, because GitHub Pages doesn't always deploy when they are
+  pushed together), publishes to npm and, once npm lists the new version,
+  purges jsDelivr's cache.  Add `--dry-run` to see what it would do or
+  `--skip-tests` to skip the tests.
 - `npm run record-demo` records `demo.gif` (shown at the top of this README)
   from the built files.  It needs [ffmpeg](https://ffmpeg.org/).
 - `npm run og-image` makes `og-image.png` (the picture shown when the landing

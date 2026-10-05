@@ -5,7 +5,9 @@
  *
  * 1. Checks that you're on an up to date, clean main branch.
  * 2. Runs the tests (unless --skip-tests is given).
- * 3. Runs `npm version`, which rebuilds dist, commits and tags.
+ * 3. Runs `npm version`, which rebuilds dist, moves the notes under
+ *    "Unreleased" in CHANGELOG.md into a section for the new version (see
+ *    update-changelog.js), commits and tags.
  * 4. Pushes main and then the tag separately (GitHub Pages doesn't always
  *    deploy when a branch and a tag are pushed together).
  * 5. Publishes to npm (which asks for your 2FA).
@@ -19,6 +21,7 @@ const {spawnSync} = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const {purgeCdn} = require('./purge-cdn.js');
+const changelog = require('./update-changelog.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const RELEASE_TYPES = ['patch', 'minor', 'major'];
@@ -80,6 +83,17 @@ const readPackage = () => JSON.parse(fs.readFileSync(path.join(ROOT, 'package.js
 
   const {name, version: oldVersion} = readPackage();
   console.log(`Releasing a ${releaseType} version of ${name} (currently ${oldVersion})${isDryRun ? ' as a dry run' : ''}.`);
+
+  // The new version needs notes in the changelog (unless it already has a
+  // section for it).
+  const nextVersion = changelog.getNextVersion(oldVersion, releaseType);
+  const changelogText = fs.readFileSync(changelog.CHANGELOG_PATH, 'utf8');
+  if (!changelog.hasVersion(changelogText, nextVersion)) {
+    if (!changelog.getUnreleasedNotes(changelogText)) {
+      fail(`Add notes for ${nextVersion} under "## [Unreleased]" in CHANGELOG.md (and commit them) first.`);
+    }
+    console.log(`The notes under "Unreleased" in CHANGELOG.md will become ${nextVersion}.`);
+  }
 
   // 2. Tests
   if (!skipTests) {

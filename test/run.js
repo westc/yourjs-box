@@ -251,6 +251,31 @@ test('the types and the README list every option', async () => {
   }
 });
 
+test('releasing moves the Unreleased notes in the changelog into the new version', async () => {
+  const {getUnreleasedNotes, hasVersion, getNextVersion, releaseChangelog} = require('../scripts/update-changelog');
+  const before = [
+    '# Changelog', '', '## [Unreleased]', '', '### Added', '', '- Something new.', '',
+    '## [1.2.0] - 2026-01-01', '', '- Older.', '',
+    '[Unreleased]: https://github.com/westc/yourjs-box/compare/v1.2.0...HEAD',
+    '[1.2.0]: https://github.com/westc/yourjs-box/compare/v1.1.0...v1.2.0', '',
+  ].join('\n');
+  assert.equal(getUnreleasedNotes(before), '### Added\n\n- Something new.');
+  assert.deepEqual(['patch', 'minor', 'major'].map(type => getNextVersion('1.2.0', type)), ['1.2.1', '1.3.0', '2.0.0']);
+
+  const after = releaseChangelog(before, '1.3.0', '2026-02-03');
+  assert.equal(after, [
+    '# Changelog', '', '## [Unreleased]', '', '## [1.3.0] - 2026-02-03', '', '### Added', '', '- Something new.', '',
+    '## [1.2.0] - 2026-01-01', '', '- Older.', '',
+    '[Unreleased]: https://github.com/westc/yourjs-box/compare/v1.3.0...HEAD',
+    '[1.3.0]: https://github.com/westc/yourjs-box/compare/v1.2.0...v1.3.0',
+    '[1.2.0]: https://github.com/westc/yourjs-box/compare/v1.1.0...v1.2.0', '',
+  ].join('\n'));
+  assert.ok(hasVersion(after, '1.3.0'));
+  // A version that already has a section is left alone, and a release needs notes.
+  assert.equal(releaseChangelog(after, '1.3.0', '2026-02-04'), after);
+  assert.throws(() => releaseChangelog(after, '1.3.1', '2026-02-04'), /nothing under "## \[Unreleased\]" for 1\.3\.1/);
+});
+
 test('logs values with browser-style previews', async t => {
   await t.open(String.raw`
     console.log('text', 42, null, {a: 1, nested: {b: 2}}, [1, 'two'], new Map([['k', 'v']]));
