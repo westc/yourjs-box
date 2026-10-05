@@ -6,6 +6,8 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-10-04
+
 ### Added
 
 - TypeScript types for the `YourJSBox` global (`dist/yourjs-box.d.ts`), which
@@ -222,7 +224,8 @@ The first release as `yourjs-box`.
 - The editor beside the console, or below it when the console is narrower
   than 600px or with `data-divider-orient="horizontal"`.
 
-[Unreleased]: https://github.com/westc/yourjs-box/compare/v1.10.0...HEAD
+[Unreleased]: https://github.com/westc/yourjs-box/compare/v1.11.0...HEAD
+[1.11.0]: https://github.com/westc/yourjs-box/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/westc/yourjs-box/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/westc/yourjs-box/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/westc/yourjs-box/compare/v1.7.0...v1.8.0
