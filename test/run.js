@@ -274,6 +274,14 @@ test('releasing moves the Unreleased notes in the changelog into the new version
   // A version that already has a section is left alone, and a release needs notes.
   assert.equal(releaseChangelog(after, '1.3.0', '2026-02-04'), after);
   assert.throws(() => releaseChangelog(after, '1.3.1', '2026-02-04'), /nothing under "## \[Unreleased\]" for 1\.3\.1/);
+
+  // Like npm, a prerelease becomes its release when that is enough.
+  assert.deepEqual(['patch', 'minor', 'major'].map(type => getNextVersion('1.3.0-beta.1', type)), ['1.3.0', '1.3.0', '2.0.0']);
+  assert.deepEqual(['patch', 'minor', 'major'].map(type => getNextVersion('2.0.0-rc.0', type)), ['2.0.0', '2.0.0', '2.0.0']);
+
+  // The compare link must be found (even with Windows line endings).
+  assert.throws(() => releaseChangelog(before.replace(/^\[Unreleased\]:.*$/m, ''), '1.3.0', '2026-02-03'), /no "\[Unreleased\]: .*" link/);
+  assert.equal(releaseChangelog(before.replace(/\n/g, '\r\n'), '1.3.0', '2026-02-03'), after.replace(/\n/g, '\r\n'));
 });
 
 test('logs values with browser-style previews', async t => {
@@ -901,6 +909,34 @@ test('YourJSBox.from() takes an element or a list and explains bad input', async
   ]);
 });
 
+test('YourJSBox.from() handles live lists and checks every element first', async t => {
+  await t.newPage();
+  await t.setPage(`<!DOCTYPE html><html><head><script src="SRC"></script></head><body>
+    <pre>1</pre><pre>2</pre><pre>3</pre><pre>4</pre>
+    <div id="a">5</div><div id="b" data-placement="inside">6</div>
+  </body></html>`);
+  const results = await t.page.evaluate(() => {
+    // A live list changes as its elements are replaced.
+    const count = YourJSBox.from(document.getElementsByTagName('pre')).length;
+    const tags = [...document.body.children].map(e => e.id || e.tagName);
+    let error;
+    try {
+      YourJSBox.from('#a, #b');
+    }
+    catch (e) {
+      error = `${e.name}: ${e.message}`;
+    }
+    return {count, tags, error, after: [...document.body.children].map(e => e.id || e.tagName)};
+  });
+  assert.deepEqual(results, {
+    count: 4,
+    tags: ['IFRAME', 'IFRAME', 'IFRAME', 'IFRAME', 'a', 'b'],
+    error: 'TypeError: YourJSBox.from(): placement must be one of fill, append, prepend, replace, before, after.',
+    // #b's bad placement stopped #a from becoming a console too.
+    after: ['IFRAME', 'IFRAME', 'IFRAME', 'IFRAME', 'a', 'b'],
+  });
+});
+
 test('destroy() removes the console and restores the page\'s console in window mode', async t => {
   await t.newPage();
   await t.setPage('<!DOCTYPE html><html><head><script src="SRC"></script></head><body><div id="lesson" style="height: 300px"></div></body></html>');
@@ -1237,6 +1273,16 @@ test('the output is hidden until there is something in it', async t => {
   await t.inViewer(() => document.querySelector('#vueApp')._vnode.component.proxy.restart());
   await t.page.waitForTimeout(100);
   assert.equal(await isOutputShown(), false);
+
+  // A reset that shows the same output (from a hidden block) and then Clear.
+  await t.load(String.raw`
+    // HIDE \\
+    console.log('setup');
+  `, { hidePrefix: 'HIDE' });
+  await t.inViewer(() => document.querySelector('#vueApp')._vnode.component.proxy.restart());
+  await t.page.waitForTimeout(300);
+  await t.click('#bottomNav button[title^="Clear console"]');
+  assert.equal(await isOutputShown(), true, 'still shown after Reset and Clear');
 
   // data-hide-empty-output="false" always shows it.
   await t.load(`1`, { hideEmptyOutput: 'false' });

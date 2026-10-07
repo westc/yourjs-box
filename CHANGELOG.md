@@ -6,6 +6,18 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- `YourJSBox.from()` turned only every other element of a live list (eg. from
+  `getElementsByTagName()`) into a console.
+- `YourJSBox.from()` left some consoles behind when a later element had a bad
+  option.  Now every element is checked before any console is made.
+- After a reset, Clear could hide the output of a console with hidden blocks.
+- Messages from the runner for names like `__proto__` caused an error instead
+  of being ignored.
+- The editor's rulers are only moved when the text size changes instead of
+  every time the editor is drawn.
+
 ## [1.11.0] - 2026-10-04
 
 ### Added

@@ -104,8 +104,9 @@
    */
   function relayMessage(data, targets) {
     const {target, func, args} = Object(data);
-    const targetObj = targets[target];
-    if (targetObj && RELAYABLE_FUNCS[target].includes(func) && Array.isArray(args)) {
+    // Own properties only so that names like "__proto__" are never used.
+    const targetObj = Object.hasOwn(targets, target) ? targets[target] : null;
+    if (targetObj && Object.hasOwn(RELAYABLE_FUNCS, target) && RELAYABLE_FUNCS[target].includes(func) && Array.isArray(args)) {
       targetObj.apply(func, args);
     }
     else {
@@ -597,7 +598,11 @@
         throw new TypeError('YourJSBox.from(): elements must be a CSS selector, an element or a list of elements.');
       }
 
-      return Array.from(list, source => {
+      // The list is copied first because a live list (eg. from
+      // getElementsByTagName()) changes as its elements are replaced.  Every
+      // element is checked before any console is made so that a bad element
+      // doesn't leave some consoles behind.
+      const consoles = Array.from(list).map(source => {
         if (source?.nodeType !== 1) {
           throw new TypeError('YourJSBox.from(): every item in the list must be an element.');
         }
@@ -618,16 +623,24 @@
           if (value != null) elementOptions[name] = name === 'height' && /^\d+(\.\d+)?$/.test(value) ? +value : value;
         }
         const lineCount = code.trim().split('\n').length;
-        const box = YourJSBox.create({
+        const createOptions = {
           height: Math.min(600, Math.max(250, 200 + lineCount * 18)),
           placement: 'replace',
           ...options,
           ...elementOptions,
           target,
           code,
-        });
+        };
+        if (!Object.hasOwn(PLACEMENTS, createOptions.placement)) {
+          throw new TypeError(`YourJSBox.from(): placement must be one of ${Object.keys(PLACEMENTS).join(', ')}.`);
+        }
+        return createOptions;
+      });
 
-        if ((elementOptions.placement ?? options.placement ?? 'replace') !== 'replace') return box;
+      return consoles.map(createOptions => {
+        const box = YourJSBox.create(createOptions);
+        if (createOptions.placement !== 'replace') return box;
+        const {target} = createOptions;
         return {
           element: box.element,
           destroy() {

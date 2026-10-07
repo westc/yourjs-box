@@ -39,15 +39,22 @@ function hasVersion(changelog, version) {
 
 /**
  * The version that `npm version <releaseType>` will change `version` to.
+ * Like npm, releasing a prerelease (eg. "1.2.0-beta.1") drops the prerelease
+ * part when that is enough (eg. a minor release makes it "1.2.0").
  * @param {string} version
  * @param {"patch"|"minor"|"major"} releaseType
  * @returns {string}
  */
 function getNextVersion(version, releaseType) {
-  const [major, minor, patch] = version.split('-')[0].split('.').map(Number);
-  if (releaseType === 'major') return `${major + 1}.0.0`;
-  if (releaseType === 'minor') return `${major}.${minor + 1}.0`;
-  return `${major}.${minor}.${patch + 1}`;
+  const [release, prerelease] = version.split(/-(.*)/);
+  const [major, minor, patch] = release.split('.').map(Number);
+  if (releaseType === 'major') {
+    return prerelease && !minor && !patch ? `${major}.0.0` : `${major + 1}.0.0`;
+  }
+  if (releaseType === 'minor') {
+    return prerelease && !patch ? `${major}.${minor}.0` : `${major}.${minor + 1}.0`;
+  }
+  return prerelease ? release : `${major}.${minor}.${patch + 1}`;
 }
 
 /**
@@ -65,18 +72,21 @@ function releaseChangelog(changelog, version, date) {
     throw new Error(`CHANGELOG.md has nothing under "${UNRELEASED_HEADING}" for ${version}.`);
   }
 
-  changelog = changelog.replace(UNRELEASED_HEADING, `${UNRELEASED_HEADING}\n\n## [${version}] - ${date}`);
-
   // [Unreleased]: .../compare/v1.0.0...HEAD  becomes
   // [Unreleased]: .../compare/v1.1.0...HEAD
   // [1.1.0]: .../compare/v1.0.0...v1.1.0
-  return changelog.replace(
-    /^\[Unreleased\]: (.+\/compare\/)(v\d+\.\d+\.\d+)\.\.\.HEAD$/m,
-    (match, compareUrl, previousTag) => [
+  const UNRELEASED_LINK = /^\[Unreleased\]: (.+\/compare\/)(v[^\s.]+\.[^\s.]+\.\S+?)\.\.\.HEAD\r?$/m;
+  if (!UNRELEASED_LINK.test(changelog)) {
+    throw new Error('CHANGELOG.md has no "[Unreleased]: .../compare/v<version>...HEAD" link to update.');
+  }
+  // Uses the same line endings as the rest of the file.
+  const eol = changelog.includes('\r\n') ? '\r\n' : '\n';
+  return changelog
+    .replace(UNRELEASED_HEADING, `${UNRELEASED_HEADING}${eol}${eol}## [${version}] - ${date}`)
+    .replace(UNRELEASED_LINK, (match, compareUrl, previousTag) => [
       `[Unreleased]: ${compareUrl}v${version}...HEAD`,
       `[${version}]: ${compareUrl}${previousTag}...v${version}`,
-    ].join('\n')
-  );
+    ].join(eol) + (match.endsWith('\r') ? '\r' : ''));
 }
 
 /**

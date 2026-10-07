@@ -589,8 +589,9 @@
         }
 
         function showEmbedCode(attributes) {
+          const escapeAttribute = value => value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
           const lines = Object.entries(attributes).map(([name, value]) =>
-            `        data-${name.replace(/[A-Z]/g, c => '-' + c.toLowerCase())}="${value}"`
+            `        data-${name.replace(/[A-Z]/g, c => '-' + c.toLowerCase())}="${escapeAttribute(value)}"`
           );
           document.querySelector('#embed-code').textContent = [
             '<script src="https://cdn.jsdelivr.net/npm/yourjs-box@1/dist/yourjs-box.min.js"',

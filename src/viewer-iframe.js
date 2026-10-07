@@ -581,6 +581,8 @@ function init(jsCode, dataset, meta) {
           });
         },
         clearConsole() {
+          // Clearing never hides the output (see data-hide-empty-output).
+          if (this.displays.length) this.hasShownOutput = true;
           this.displays = [];
           messageParent({target: 'runner', func: 'clearLogs', args: []});
         },
@@ -1332,7 +1334,9 @@ function getAceComponentProps() {
         editor.setShowPrintMargin(false);
         this.rulersLayer = Object.assign(document.createElement('div'), {className: 'ace_layer ace_print-margin-layer'});
         editor.renderer.content.prepend(this.rulersLayer);
-        editor.renderer.on('afterRender', () => this.updateRulers());
+        // The rulers only move when the size of the characters changes.
+        editor.renderer.on('changeCharacterSize', () => this.updateRulers());
+        editor.renderer.once('afterRender', () => this.updateRulers());
       }
 
       if (this.readOnly) {

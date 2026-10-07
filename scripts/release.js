@@ -92,6 +92,14 @@ const readPackage = () => JSON.parse(fs.readFileSync(path.join(ROOT, 'package.js
     if (!changelog.getUnreleasedNotes(changelogText)) {
       fail(`Add notes for ${nextVersion} under "## [Unreleased]" in CHANGELOG.md (and commit them) first.`);
     }
+    // Finds problems (eg. a missing compare link) now instead of during
+    // `npm version`, which would leave the version changed.
+    try {
+      changelog.releaseChangelog(changelogText, nextVersion, changelog.getToday());
+    }
+    catch (e) {
+      fail(e.message);
+    }
     console.log(`The notes under "Unreleased" in CHANGELOG.md will become ${nextVersion}.`);
   }
 
@@ -108,8 +116,9 @@ const readPackage = () => JSON.parse(fs.readFileSync(path.join(ROOT, 'package.js
   run('npm', ['version', releaseType], {changesSomething: true});
   const version = isDryRun ? `(next ${releaseType} version)` : readPackage().version;
 
-  // 4. Push main and then the tag
-  run('git', ['push'], {changesSomething: true});
+  // 4. Push main and then the tag (main without tags, even if git is set up
+  // to push tags along with branches).
+  run('git', ['push', '--no-follow-tags', 'origin', 'main'], {changesSomething: true});
   run('git', ['push', '--follow-tags'], {changesSomething: true});
 
   // 5. Publish
