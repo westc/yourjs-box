@@ -6,6 +6,8 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.11.1] - 2026-10-06
+
 ### Fixed
 
 - `YourJSBox.from()` turned only every other element of a live list (eg. from
@@ -236,7 +238,8 @@ The first release as `yourjs-box`.
 - The editor beside the console, or below it when the console is narrower
   than 600px or with `data-divider-orient="horizontal"`.
 
-[Unreleased]: https://github.com/westc/yourjs-box/compare/v1.11.0...HEAD
+[Unreleased]: https://github.com/westc/yourjs-box/compare/v1.11.1...HEAD
+[1.11.1]: https://github.com/westc/yourjs-box/compare/v1.11.0...v1.11.1
 [1.11.0]: https://github.com/westc/yourjs-box/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/westc/yourjs-box/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/westc/yourjs-box/compare/v1.8.0...v1.9.0
